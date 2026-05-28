@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { Bitcoin, Menu } from "lucide-react";
+import { useEffect, useId, useState } from "react";
+import { Bitcoin, Menu, X } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 
 const navItems = [
@@ -10,10 +13,27 @@ const navItems = [
 ];
 
 export function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const mobileMenuId = useId();
+  const MobileMenuIcon = isMenuOpen ? X : Menu;
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
+
+  const closeMenu = () => setIsMenuOpen(false);
+
   return (
     <header className="sticky top-0 z-30 border-b border-[rgba(240,163,111,0.16)] bg-[#090806]/90 backdrop-blur-xl">
       <div className="container flex h-20 items-center justify-between gap-4">
-        <Link href="/" aria-label="Denominated home">
+        <Link href="/" aria-label="Denominated home" onClick={closeMenu}>
           <BrandMark />
         </Link>
         <nav className="hidden items-center gap-8 text-sm text-[#d9ccbd] md:flex">
@@ -39,12 +59,42 @@ export function Navbar() {
             Run a Scenario
           </Link>
           <button
-            aria-label="Open navigation"
+            aria-controls={mobileMenuId}
+            aria-expanded={isMenuOpen}
+            aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
             className="outline-button rounded-md p-2 md:hidden"
+            type="button"
+            onClick={() => setIsMenuOpen((current) => !current)}
           >
-            <Menu size={20} />
+            <MobileMenuIcon size={20} />
           </button>
         </div>
+      </div>
+      <div
+        id={mobileMenuId}
+        className={`container md:hidden ${
+          isMenuOpen ? "block" : "hidden"
+        }`}
+      >
+        <nav className="mb-4 rounded-lg border border-[rgba(240,163,111,0.24)] bg-[#120d09]/95 p-3 shadow-2xl">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              className="block rounded-md px-4 py-3 text-sm text-[#d9ccbd] transition hover:bg-white/5 hover:text-[#f0a36f]"
+              href={item.href}
+              onClick={closeMenu}
+            >
+              {item.label}
+            </Link>
+          ))}
+          <Link
+            className="copper-button mt-2 block rounded-md px-4 py-3 text-center text-sm font-semibold"
+            href="/calculator"
+            onClick={closeMenu}
+          >
+            Run a Scenario
+          </Link>
+        </nav>
       </div>
     </header>
   );

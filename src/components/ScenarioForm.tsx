@@ -1,6 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { formatUSD } from "@/lib/calculations";
+import {
+  normalizeNumericInputDraft,
+  parseNumericInputDraft,
+} from "@/lib/numeric-input";
 import type { ScenarioInput } from "@/lib/types";
 import type { BTCPriceLoadState } from "./CalculatorExperience";
 
@@ -12,6 +17,21 @@ type ScenarioFormProps = {
   onChange: (value: ScenarioInput) => void;
 };
 
+type NumericField = Extract<
+  keyof ScenarioInput,
+  | "currentItemPriceUSD"
+  | "currentBTCPriceUSD"
+  | "years"
+  | "itemInflationRate"
+  | "btcGrowthRate"
+>;
+
+const fieldMinimums: Partial<Record<NumericField, number>> = {
+  currentItemPriceUSD: 0,
+  currentBTCPriceUSD: 1,
+  years: 0,
+};
+
 export function ScenarioForm({
   value,
   btcPriceStatus,
@@ -19,13 +39,55 @@ export function ScenarioForm({
   onBTCPriceManualChange,
   onChange,
 }: ScenarioFormProps) {
+  const [activeNumericField, setActiveNumericField] =
+    useState<NumericField | null>(null);
+  const [numericDrafts, setNumericDrafts] = useState<
+    Partial<Record<NumericField, string>>
+  >({});
+
   const update = <K extends keyof ScenarioInput>(
     key: K,
     nextValue: ScenarioInput[K],
   ) => onChange({ ...value, [key]: nextValue });
 
-  const numberUpdate = (key: keyof ScenarioInput, nextValue: string) =>
-    update(key, Number(nextValue) as never);
+  const numberUpdate = (key: NumericField, nextValue: string) => {
+    setNumericDrafts((current) => ({ ...current, [key]: nextValue }));
+
+    const parsed = parseNumericInputDraft(nextValue);
+    if (parsed === null) return;
+
+    const minimum = fieldMinimums[key];
+    update(
+      key,
+      (minimum === undefined ? parsed : Math.max(minimum, parsed)) as never,
+    );
+  };
+
+  const normalizeNumber = (key: NumericField) => {
+    const normalized = normalizeNumericInputDraft({
+      draft: numericDrafts[key] ?? String(value[key]),
+      fallback: value[key],
+      min: fieldMinimums[key],
+    });
+
+    update(key, normalized as never);
+    setNumericDrafts((current) => {
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+    setActiveNumericField(null);
+  };
+
+  const getNumberValue = (key: NumericField) =>
+    activeNumericField === key
+      ? (numericDrafts[key] ?? String(value[key]))
+      : String(value[key]);
+
+  const startNumberEdit = (key: NumericField) => {
+    setActiveNumericField(key);
+    setNumericDrafts((current) => ({ ...current, [key]: String(value[key]) }));
+  };
 
   return (
     <section className="panel rounded-lg p-5 sm:p-7">
@@ -50,25 +112,29 @@ export function ScenarioForm({
               Current item price in USD
               <input
                 className="field mt-2"
-                min="0"
-                type="number"
-                value={value.currentItemPriceUSD}
+                inputMode="decimal"
+                type="text"
+                value={getNumberValue("currentItemPriceUSD")}
+                onBlur={() => normalizeNumber("currentItemPriceUSD")}
                 onChange={(event) =>
                   numberUpdate("currentItemPriceUSD", event.target.value)
                 }
+                onFocus={() => startNumberEdit("currentItemPriceUSD")}
               />
             </label>
             <label className="text-sm text-[#d9ccbd]">
               Current Bitcoin price in USD
               <input
                 className="field mt-2"
-                min="1"
-                type="number"
-                value={value.currentBTCPriceUSD}
+                inputMode="decimal"
+                type="text"
+                value={getNumberValue("currentBTCPriceUSD")}
+                onBlur={() => normalizeNumber("currentBTCPriceUSD")}
                 onChange={(event) => {
                   onBTCPriceManualChange();
                   numberUpdate("currentBTCPriceUSD", event.target.value);
                 }}
+                onFocus={() => startNumberEdit("currentBTCPriceUSD")}
               />
               <BTCPriceStatusNote
                 btcPriceStatus={btcPriceStatus}
@@ -85,32 +151,40 @@ export function ScenarioForm({
               Time horizon in years
               <input
                 className="field mt-2"
-                min="0"
-                type="number"
-                value={value.years}
+                inputMode="numeric"
+                type="text"
+                value={getNumberValue("years")}
+                onBlur={() => normalizeNumber("years")}
                 onChange={(event) => numberUpdate("years", event.target.value)}
+                onFocus={() => startNumberEdit("years")}
               />
             </label>
             <label className="text-sm text-[#d9ccbd]">
               Annual item inflation rate
               <input
                 className="field mt-2"
-                type="number"
-                value={value.itemInflationRate}
+                inputMode="decimal"
+                type="text"
+                value={getNumberValue("itemInflationRate")}
+                onBlur={() => normalizeNumber("itemInflationRate")}
                 onChange={(event) =>
                   numberUpdate("itemInflationRate", event.target.value)
                 }
+                onFocus={() => startNumberEdit("itemInflationRate")}
               />
             </label>
             <label className="text-sm text-[#d9ccbd]">
               Annual BTC growth assumption
               <input
                 className="field mt-2"
-                type="number"
-                value={value.btcGrowthRate}
+                inputMode="decimal"
+                type="text"
+                value={getNumberValue("btcGrowthRate")}
+                onBlur={() => normalizeNumber("btcGrowthRate")}
                 onChange={(event) =>
                   numberUpdate("btcGrowthRate", event.target.value)
                 }
+                onFocus={() => startNumberEdit("btcGrowthRate")}
               />
             </label>
             <div className="rounded-md border border-[rgba(239,230,218,0.18)] p-4 text-sm leading-5 text-[#b9ab9a]">
