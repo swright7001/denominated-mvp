@@ -1,11 +1,28 @@
 import Link from "next/link";
 import { ArrowRight, BadgeDollarSign, ShieldCheck, TrendingUp, Users } from "lucide-react";
+import { BTCPriceStatus } from "@/components/BTCPriceStatus";
 import { Layout } from "@/components/Layout";
 import { PresetScenarioGrid } from "@/components/PresetScenarioGrid";
 import { DISCLAIMER } from "@/components/Footer";
-import { scenarios } from "@/lib/scenarios";
+import { getBTCPrice } from "@/lib/btc-price";
+import { calculateScenario, formatBTC, formatUSD } from "@/lib/calculations";
+import { applyBTCPriceToScenario, applyBTCPriceToScenarios } from "@/lib/live-scenarios";
+import { defaultScenario, scenarios } from "@/lib/scenarios";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const btcPrice = await getBTCPrice();
+  const heroScenario = applyBTCPriceToScenario(
+    defaultScenario,
+    btcPrice.priceUSD,
+  );
+  const heroResult = calculateScenario(heroScenario);
+  const pricedScenarios = applyBTCPriceToScenarios(
+    scenarios,
+    btcPrice.priceUSD,
+  );
+
   return (
     <Layout>
       <section className="container grid gap-10 py-12 md:grid-cols-[1fr_0.82fr] md:items-center md:py-20">
@@ -53,13 +70,21 @@ export default function Home() {
           <div className="grid gap-6 border-y border-[rgba(239,230,218,0.12)] py-6 sm:grid-cols-2">
             <div>
               <p className="eyebrow">Today</p>
-              <p className="metric mt-2 text-4xl text-[#f0a36f]">0.5125 BTC</p>
-              <p className="mt-1 text-sm text-[#b9ab9a]">$41,000</p>
+              <p className="metric mt-2 text-4xl text-[#f0a36f]">
+                {formatBTC(heroResult.currentItemCostBTC)} BTC
+              </p>
+              <p className="mt-1 text-sm text-[#b9ab9a]">
+                {formatUSD(heroScenario.currentItemPriceUSD)}
+              </p>
             </div>
             <div>
               <p className="eyebrow">In 5 years</p>
-              <p className="metric mt-2 text-4xl text-[#f0a36f]">0.32 BTC</p>
-              <p className="mt-1 text-sm text-[#b9ab9a]">$49,884</p>
+              <p className="metric mt-2 text-4xl text-[#f0a36f]">
+                {formatBTC(heroResult.futureItemCostBTC)} BTC
+              </p>
+              <p className="mt-1 text-sm text-[#b9ab9a]">
+                {formatUSD(heroResult.futureItemPriceUSD)}
+              </p>
             </div>
           </div>
           <div className="mt-6 h-36 rounded-md border border-[rgba(240,163,111,0.18)] bg-[linear-gradient(160deg,rgba(199,119,66,0.2),transparent)] p-5">
@@ -77,6 +102,7 @@ export default function Home() {
           <p className="mt-5 rounded-md border border-[rgba(240,163,111,0.18)] bg-[#2a1810]/45 p-4 text-sm text-[#f0c19f]">
             More expensive in dollars. Cheaper in Bitcoin.
           </p>
+          <BTCPriceStatus btcPrice={btcPrice} className="mt-4" />
         </div>
       </section>
 
@@ -88,7 +114,7 @@ export default function Home() {
             Explore common expenses through a purchasing-power lens.
           </p>
         </div>
-        <PresetScenarioGrid scenarios={scenarios} limit={6} />
+        <PresetScenarioGrid scenarios={pricedScenarios} limit={6} />
       </section>
 
       <section className="container grid gap-6 py-12 md:grid-cols-3">

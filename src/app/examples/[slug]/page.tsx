@@ -4,9 +4,12 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { AssumptionsPanel } from "@/components/AssumptionsPanel";
 import { BTCComparisonChart } from "@/components/BTCComparisonChart";
+import { BTCPriceStatus } from "@/components/BTCPriceStatus";
 import { Layout } from "@/components/Layout";
 import { ShareableResultCard } from "@/components/ShareableResultCard";
+import { getBTCPrice } from "@/lib/btc-price";
 import { calculateScenario, formatBTC, formatUSD } from "@/lib/calculations";
+import { applyBTCPriceToScenario } from "@/lib/live-scenarios";
 import { getScenario, scenarios } from "@/lib/scenarios";
 import { absoluteUrl } from "@/lib/site";
 
@@ -17,6 +20,8 @@ type ScenarioDetailPageProps = {
 export function generateStaticParams() {
   return scenarios.map((scenario) => ({ slug: scenario.slug }));
 }
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -60,7 +65,9 @@ export default async function ScenarioDetailPage({
 
   if (!scenario) notFound();
 
-  const result = calculateScenario(scenario);
+  const btcPrice = await getBTCPrice();
+  const liveScenario = applyBTCPriceToScenario(scenario, btcPrice.priceUSD);
+  const result = calculateScenario(liveScenario);
   const direction =
     result.btcCostChangePercent < 0 ? "cheaper" : "more expensive";
 
@@ -74,33 +81,34 @@ export default async function ScenarioDetailPage({
           >
             <ArrowLeft size={18} /> Back to all
           </Link>
-          <p className="eyebrow">{scenario.category}</p>
+          <p className="eyebrow">{liveScenario.category}</p>
           <h1 className="mt-3 text-4xl font-medium text-[#efe6da] md:text-6xl">
-            {scenario.itemName}
+            {liveScenario.itemName}
           </h1>
           <p className="mt-3 text-lg text-[#b9ab9a]">
-            {scenario.shortDescription}
+            {liveScenario.shortDescription}
           </p>
+          <BTCPriceStatus btcPrice={btcPrice} className="mt-6" />
 
           <div className="my-8 grid gap-5 border-y border-[rgba(239,230,218,0.12)] py-8 sm:grid-cols-2">
             <div>
               <p className="eyebrow">Today</p>
               <p className="mt-4 text-3xl text-[#efe6da]">
-                {formatUSD(scenario.currentItemPriceUSD)}
-                {scenario.purchaseType === "monthly" && " / month"} ={" "}
+                {formatUSD(liveScenario.currentItemPriceUSD)}
+                {liveScenario.purchaseType === "monthly" && " / month"} ={" "}
                 <span className="copper-text">
                   {formatBTC(result.currentItemCostBTC)} BTC
                 </span>
               </p>
               <p className="mt-2 text-[#b9ab9a]">
-                At {formatUSD(scenario.currentBTCPriceUSD)} BTC
+                At {formatUSD(liveScenario.currentBTCPriceUSD)} BTC
               </p>
             </div>
             <div>
               <p className="eyebrow">Future</p>
               <p className="mt-4 text-3xl text-[#efe6da]">
                 {formatUSD(result.futureItemPriceUSD)}
-                {scenario.purchaseType === "monthly" && " / month"} ={" "}
+                {liveScenario.purchaseType === "monthly" && " / month"} ={" "}
                 <span className="copper-text">
                   {formatBTC(result.futureItemCostBTC)} BTC
                 </span>
@@ -121,7 +129,7 @@ export default async function ScenarioDetailPage({
               in Bitcoin terms.
             </p>
             <p className="mt-4 leading-7 text-[#b9ab9a]">
-              Today, {scenario.itemName} costs{" "}
+              Today, {liveScenario.itemName} costs{" "}
               {formatBTC(result.currentItemCostBTC)} BTC. If the item rises to{" "}
               {formatUSD(result.futureItemPriceUSD)} and Bitcoin reaches{" "}
               {formatUSD(result.futureBTCPriceUSD)}, the same expense costs{" "}
@@ -130,8 +138,8 @@ export default async function ScenarioDetailPage({
           </div>
         </article>
         <aside className="space-y-6">
-          <AssumptionsPanel scenario={scenario} />
-          <ShareableResultCard scenario={scenario} result={result} />
+          <AssumptionsPanel scenario={liveScenario} />
+          <ShareableResultCard scenario={liveScenario} result={result} />
         </aside>
       </section>
       <section className="container pb-12">

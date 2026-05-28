@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { BTCPriceStatus } from "@/components/BTCPriceStatus";
 import { Layout } from "@/components/Layout";
 import { PresetScenarioGrid } from "@/components/PresetScenarioGrid";
+import { getBTCPrice } from "@/lib/btc-price";
+import { applyBTCPriceToScenarios } from "@/lib/live-scenarios";
 import { scenarios } from "@/lib/scenarios";
 import { absoluteUrl } from "@/lib/site";
 
@@ -19,7 +22,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ExamplesPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ExamplesPage() {
+  const btcPrice = await getBTCPrice();
+  const pricedScenarios = applyBTCPriceToScenarios(
+    scenarios,
+    btcPrice.priceUSD,
+  );
+
   return (
     <Layout>
       <section className="container py-12">
@@ -38,7 +49,8 @@ export default function ExamplesPage() {
             United States
           </div>
         </div>
-        <PresetScenarioGrid scenarios={scenarios} />
+        <BTCPriceStatus btcPrice={btcPrice} className="mb-6" />
+        <PresetScenarioGrid scenarios={pricedScenarios} />
       </section>
     </Layout>
   );
