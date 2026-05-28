@@ -27,10 +27,10 @@ export default async function Home() {
     <Layout>
       <section className="container grid gap-10 py-12 md:grid-cols-[1fr_0.82fr] md:items-center md:py-20">
         <div>
-          <h1 className="max-w-3xl text-5xl font-medium leading-[1.05] text-[#efe6da] md:text-7xl">
+          <h1 className="max-w-3xl text-4xl font-medium leading-[1.08] text-[#efe6da] sm:text-5xl md:text-7xl">
             See What Life Costs in Bitcoin Terms
           </h1>
-          <p className="mt-6 max-w-2xl text-xl leading-8 text-[#b9ab9a]">
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-[#b9ab9a] sm:text-xl">
             Compare everyday expenses in dollars and Bitcoin so you can
             understand purchasing power over time.
           </p>

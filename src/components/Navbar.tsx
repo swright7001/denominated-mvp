@@ -32,8 +32,13 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-[rgba(240,163,111,0.16)] bg-[#090806]/90 backdrop-blur-xl">
-      <div className="container flex h-20 items-center justify-between gap-4">
-        <Link href="/" aria-label="Denominated home" onClick={closeMenu}>
+      <div className="container flex h-20 items-center justify-between gap-2 sm:gap-4">
+        <Link
+          className="min-w-0"
+          href="/"
+          aria-label="Denominated home"
+          onClick={closeMenu}
+        >
           <BrandMark />
         </Link>
         <nav className="hidden items-center gap-8 text-sm text-[#d9ccbd] md:flex">
@@ -47,7 +52,7 @@ export function Navbar() {
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <div className="hidden items-center gap-2 rounded-md border border-[rgba(240,163,111,0.32)] px-4 py-2 text-sm text-[#efe6da] sm:flex">
             <Bitcoin size={16} className="text-[#f0a36f]" />
             BTC
