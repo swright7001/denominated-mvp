@@ -16,6 +16,7 @@ export type Scenario = ScenarioInput & {
   category: string;
   icon: string;
   image?: string;
+  imageAlternates?: string[];
 };
 
 export type ScenarioResult = {
