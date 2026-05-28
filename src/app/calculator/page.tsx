@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { CalculatorExperience } from "@/components/CalculatorExperience";
 import { Layout } from "@/components/Layout";
+import { defaultScenario } from "@/lib/scenarios";
+import { parseScenarioSearchParams } from "@/lib/share-url";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -18,10 +20,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CalculatorPage() {
+type CalculatorPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function CalculatorPage({
+  searchParams,
+}: CalculatorPageProps) {
+  const sharedScenario = parseScenarioSearchParams(
+    await searchParams,
+    defaultScenario,
+  );
+
   return (
     <Layout>
-      <CalculatorExperience />
+      <CalculatorExperience
+        initialScenario={sharedScenario ?? defaultScenario}
+        hasSharedScenario={sharedScenario !== null}
+      />
     </Layout>
   );
 }

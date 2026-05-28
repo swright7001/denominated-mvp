@@ -1,5 +1,10 @@
 import { ScenarioInput } from "./types";
 
+type ScenarioSearchParams =
+  | string
+  | URLSearchParams
+  | Record<string, string | string[] | undefined>;
+
 const purchaseTypes = new Set<ScenarioInput["purchaseType"]>([
   "one-time",
   "monthly",
@@ -25,10 +30,10 @@ export function scenarioToShareUrl(scenario: ScenarioInput, origin: string) {
 }
 
 export function parseScenarioSearchParams(
-  search: string,
+  search: ScenarioSearchParams,
   fallback: ScenarioInput,
 ): ScenarioInput | null {
-  const params = new URLSearchParams(search);
+  const params = toURLSearchParams(search);
   const hasScenarioParam = [
     "item",
     "price",
@@ -58,6 +63,26 @@ export function parseScenarioSearchParams(
         ? (purchaseType as ScenarioInput["purchaseType"])
         : fallback.purchaseType,
   };
+}
+
+function toURLSearchParams(search: ScenarioSearchParams) {
+  if (typeof search === "string" || search instanceof URLSearchParams) {
+    return new URLSearchParams(search);
+  }
+
+  const params = new URLSearchParams();
+  Object.entries(search).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((item) => params.append(key, item));
+      return;
+    }
+
+    if (value !== undefined) {
+      params.set(key, value);
+    }
+  });
+
+  return params;
 }
 
 function cleanText(value: string | null) {

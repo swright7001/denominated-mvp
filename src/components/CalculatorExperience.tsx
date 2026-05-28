@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { calculateScenario } from "@/lib/calculations";
 import { defaultScenario } from "@/lib/scenarios";
-import { parseScenarioSearchParams } from "@/lib/share-url";
 import type { BTCPriceResult } from "@/lib/btc-price";
 import type { ScenarioInput } from "@/lib/types";
 import { AssumptionsPanel } from "./AssumptionsPanel";
@@ -15,14 +14,20 @@ import { ResultCards } from "./ResultCards";
 import { ScenarioForm } from "./ScenarioForm";
 import { ShareableResultCard } from "./ShareableResultCard";
 
-export function CalculatorExperience() {
-  const [scenario, setScenario] = useState<ScenarioInput>(() => {
-    return getSharedScenarioFromLocation() ?? defaultScenario;
-  });
+type CalculatorExperienceProps = {
+  initialScenario?: ScenarioInput;
+  hasSharedScenario?: boolean;
+};
+
+export function CalculatorExperience({
+  initialScenario = defaultScenario,
+  hasSharedScenario = false,
+}: CalculatorExperienceProps) {
+  const [scenario, setScenario] = useState<ScenarioInput>(initialScenario);
   const [btcPriceStatus, setBtcPriceStatus] = useState<BTCPriceLoadState>({
     status: "loading",
   });
-  const btcPriceWasEdited = useRef(getSharedScenarioFromLocation() !== null);
+  const btcPriceWasEdited = useRef(hasSharedScenario);
   const result = useMemo(() => calculateScenario(scenario), [scenario]);
 
   useEffect(() => {
@@ -120,8 +125,3 @@ export type BTCPriceLoadState =
   | { status: "loading" }
   | { status: "ready"; data: BTCPriceResult }
   | { status: "error"; message: string };
-
-function getSharedScenarioFromLocation() {
-  if (typeof window === "undefined") return null;
-  return parseScenarioSearchParams(window.location.search, defaultScenario);
-}
