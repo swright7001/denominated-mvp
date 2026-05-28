@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { calculateScenario } from "@/lib/calculations";
 import { defaultScenario } from "@/lib/scenarios";
-import { ScenarioInput } from "@/lib/types";
+import type { BTCPriceResult } from "@/lib/btc-price";
+import type { ScenarioInput } from "@/lib/types";
 import { AssumptionsPanel } from "./AssumptionsPanel";
 import { BTCComparisonChart } from "./BTCComparisonChart";
 import { CopyTweetButton } from "./CopyTweetButton";
@@ -14,7 +15,51 @@ import { ShareableResultCard } from "./ShareableResultCard";
 
 export function CalculatorExperience() {
   const [scenario, setScenario] = useState<ScenarioInput>(defaultScenario);
+  const [btcPriceStatus, setBtcPriceStatus] = useState<BTCPriceLoadState>({
+    status: "loading",
+  });
+  const btcPriceWasEdited = useRef(false);
   const result = useMemo(() => calculateScenario(scenario), [scenario]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadBTCPrice() {
+      try {
+        const response = await fetch("/api/prices/bitcoin", {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Live BTC price request failed");
+        }
+
+        const data = (await response.json()) as BTCPriceResult;
+        setBtcPriceStatus({ status: "ready", data });
+
+        if (!btcPriceWasEdited.current) {
+          setScenario((current) => ({
+            ...current,
+            currentBTCPriceUSD: Math.round(data.priceUSD),
+          }));
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        setBtcPriceStatus({
+          status: "error",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Live BTC price request failed",
+        });
+      }
+    }
+
+    loadBTCPrice();
+
+    return () => controller.abort();
+  }, []);
 
   return (
     <div className="container py-10">
@@ -30,7 +75,14 @@ export function CalculatorExperience() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
-        <ScenarioForm value={scenario} onChange={setScenario} />
+        <ScenarioForm
+          value={scenario}
+          btcPriceStatus={btcPriceStatus}
+          onBTCPriceManualChange={() => {
+            btcPriceWasEdited.current = true;
+          }}
+          onChange={setScenario}
+        />
         <div className="space-y-6">
           <ResultCards scenario={scenario} result={result} />
           <BTCComparisonChart result={result} />
@@ -56,3 +108,8 @@ export function CalculatorExperience() {
     </div>
   );
 }
+
+export type BTCPriceLoadState =
+  | { status: "loading" }
+  | { status: "ready"; data: BTCPriceResult }
+  | { status: "error"; message: string };

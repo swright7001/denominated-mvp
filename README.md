@@ -11,7 +11,8 @@ Core message: **More expensive in dollars. Cheaper in Bitcoin.**
 - Tailwind CSS
 - Recharts
 - Vercel-ready structure
-- Placeholder API layer for future Convex, Clerk, Resend, and Stripe work
+- Server-side BTC/USD price route backed by CoinGecko
+- Placeholder API layer for future consumer price, auth, email, and Stripe work
 
 ## Local Setup
 
@@ -33,11 +34,24 @@ npm run lint
 ## MVP Notes
 
 - Uses local state only.
+- Fetches BTC/USD spot price server-side from CoinGecko when available.
 - Requires no login.
-- Implements no real external APIs.
+- Implements no client-side third-party API calls.
 - Implements no payments.
 - Includes placeholder future API functions in `src/lib/api.ts`.
 - Uses the provided Denominated logo and UI references from `public/brand`.
+
+## Live BTC Price Data
+
+The calculator calls `/api/prices/bitcoin`, a Next.js route handler that fetches
+Bitcoin's USD spot price from CoinGecko's `/simple/price` endpoint with
+`include_last_updated_at=true`.
+
+- Provider: CoinGecko
+- Server cache: 60 seconds
+- Stale threshold: 5 minutes after CoinGecko's reported `last_updated_at`
+- Fallback: `$80,000`, still editable in the calculator
+- Optional server-only env var: `COINGECKO_API_KEY`
 
 ## Disclaimer
 
