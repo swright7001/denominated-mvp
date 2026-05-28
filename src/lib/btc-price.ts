@@ -4,7 +4,12 @@ const COINGECKO_SIMPLE_PRICE_URL =
 export const BTC_PRICE_FALLBACK_USD = 80000;
 export const BTC_PRICE_REVALIDATE_SECONDS = 60;
 export const BTC_PRICE_STALE_AFTER_SECONDS = 5 * 60;
+export const BTC_PRICE_STALE_WHILE_REVALIDATE_SECONDS = 4 * 60;
 export const BTC_PRICE_FETCH_TIMEOUT_MS = 4500;
+export const BTC_PRICE_BROWSER_CACHE_CONTROL =
+  "public, max-age=0, must-revalidate";
+export const BTC_PRICE_CDN_CACHE_CONTROL = `public, s-maxage=${BTC_PRICE_REVALIDATE_SECONDS}, stale-while-revalidate=${BTC_PRICE_STALE_WHILE_REVALIDATE_SECONDS}`;
+export const BTC_PRICE_VERCEL_CDN_CACHE_CONTROL = `public, max-age=${BTC_PRICE_REVALIDATE_SECONDS}, stale-while-revalidate=${BTC_PRICE_STALE_WHILE_REVALIDATE_SECONDS}`;
 
 export type BTCPriceResult = {
   status: "live" | "fallback";
@@ -26,8 +31,17 @@ type CoinGeckoSimplePriceResponse = {
   };
 };
 
-export async function getBTCPrice(): Promise<BTCPriceResult> {
-  const fetchedAt = new Date();
+type BTCPriceFetch = typeof fetch;
+
+type GetBTCPriceOptions = {
+  fetcher?: BTCPriceFetch;
+  fetchedAt?: Date;
+};
+
+export async function getBTCPrice({
+  fetcher = fetch,
+  fetchedAt = new Date(),
+}: GetBTCPriceOptions = {}): Promise<BTCPriceResult> {
   const requestUrl = new URL(COINGECKO_SIMPLE_PRICE_URL);
   requestUrl.searchParams.set("ids", "bitcoin");
   requestUrl.searchParams.set("vs_currencies", "usd");
@@ -42,7 +56,7 @@ export async function getBTCPrice(): Promise<BTCPriceResult> {
   );
 
   try {
-    const response = await fetch(requestUrl, {
+    const response = await fetcher(requestUrl, {
       headers,
       signal: controller.signal,
       next: {
@@ -109,6 +123,21 @@ export function buildFallbackBTCPrice(
     staleAfterSeconds: BTC_PRICE_STALE_AFTER_SECONDS,
     sourceUrl: COINGECKO_SIMPLE_PRICE_URL,
     error,
+  };
+}
+
+export function buildBTCPriceLogEvent(price: BTCPriceResult) {
+  return {
+    event: "btc_price_lookup",
+    provider: price.provider,
+    status: price.status,
+    stale: price.stale,
+    priceUSD: price.priceUSD,
+    fetchedAt: price.fetchedAt,
+    lastUpdatedAt: price.lastUpdatedAt,
+    staleAfterSeconds: price.staleAfterSeconds,
+    sourceUrl: price.sourceUrl,
+    error: price.error,
   };
 }
 

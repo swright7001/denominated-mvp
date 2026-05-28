@@ -27,6 +27,8 @@ export function CalculatorExperience({
   const [btcPriceStatus, setBtcPriceStatus] = useState<BTCPriceLoadState>({
     status: "loading",
   });
+  const [btcPriceWasManuallyEdited, setBtcPriceWasManuallyEdited] =
+    useState(hasSharedScenario);
   const btcPriceWasEdited = useRef(hasSharedScenario);
   const result = useMemo(() => calculateScenario(scenario), [scenario]);
 
@@ -46,7 +48,7 @@ export function CalculatorExperience({
         const data = (await response.json()) as BTCPriceResult;
         setBtcPriceStatus({ status: "ready", data });
 
-        if (!btcPriceWasEdited.current) {
+        if (!btcPriceWasEdited.current && data.status !== "fallback") {
           setScenario((current) => ({
             ...current,
             currentBTCPriceUSD: Math.round(data.priceUSD),
@@ -87,8 +89,10 @@ export function CalculatorExperience({
         <ScenarioForm
           value={scenario}
           btcPriceStatus={btcPriceStatus}
+          btcPriceWasManuallyEdited={btcPriceWasManuallyEdited}
           onBTCPriceManualChange={() => {
             btcPriceWasEdited.current = true;
+            setBtcPriceWasManuallyEdited(true);
           }}
           onChange={setScenario}
         />

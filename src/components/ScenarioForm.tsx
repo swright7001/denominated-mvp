@@ -7,6 +7,7 @@ import type { BTCPriceLoadState } from "./CalculatorExperience";
 type ScenarioFormProps = {
   value: ScenarioInput;
   btcPriceStatus: BTCPriceLoadState;
+  btcPriceWasManuallyEdited: boolean;
   onBTCPriceManualChange: () => void;
   onChange: (value: ScenarioInput) => void;
 };
@@ -14,6 +15,7 @@ type ScenarioFormProps = {
 export function ScenarioForm({
   value,
   btcPriceStatus,
+  btcPriceWasManuallyEdited,
   onBTCPriceManualChange,
   onChange,
 }: ScenarioFormProps) {
@@ -68,7 +70,10 @@ export function ScenarioForm({
                   numberUpdate("currentBTCPriceUSD", event.target.value);
                 }}
               />
-              <BTCPriceStatusNote btcPriceStatus={btcPriceStatus} />
+              <BTCPriceStatusNote
+                btcPriceStatus={btcPriceStatus}
+                btcPriceWasManuallyEdited={btcPriceWasManuallyEdited}
+              />
             </label>
           </div>
         </div>
@@ -149,9 +154,19 @@ export function ScenarioForm({
 
 function BTCPriceStatusNote({
   btcPriceStatus,
+  btcPriceWasManuallyEdited,
 }: {
   btcPriceStatus: BTCPriceLoadState;
+  btcPriceWasManuallyEdited: boolean;
 }) {
+  if (btcPriceWasManuallyEdited) {
+    return (
+      <span className="mt-2 block text-xs leading-5 text-[#f0a36f]">
+        Manual BTC price active. Live updates will not replace this value.
+      </span>
+    );
+  }
+
   if (btcPriceStatus.status === "loading") {
     return (
       <span className="mt-2 block text-xs leading-5 text-[#b9ab9a]">
@@ -163,7 +178,7 @@ function BTCPriceStatusNote({
   if (btcPriceStatus.status === "error") {
     return (
       <span className="mt-2 block text-xs leading-5 text-[#f0a36f]">
-        Live price unavailable. The manual value is still editable.
+        Live price unavailable. Your current BTC value is still editable.
       </span>
     );
   }
@@ -179,8 +194,8 @@ function BTCPriceStatusNote({
   if (data.status === "fallback") {
     return (
       <span className="mt-2 block text-xs leading-5 text-[#f0a36f]">
-        CoinGecko is unavailable. Using editable fallback value{" "}
-        {formatUSD(data.fallbackPriceUSD)}.
+        CoinGecko is unavailable. Keeping your current editable BTC value;{" "}
+        {formatUSD(data.fallbackPriceUSD)} remains the fallback reference.
       </span>
     );
   }
