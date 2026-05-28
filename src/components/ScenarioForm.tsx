@@ -1,13 +1,22 @@
 "use client";
 
-import { ScenarioInput } from "@/lib/types";
+import { formatUSD } from "@/lib/calculations";
+import type { ScenarioInput } from "@/lib/types";
+import type { BTCPriceLoadState } from "./CalculatorExperience";
 
 type ScenarioFormProps = {
   value: ScenarioInput;
+  btcPriceStatus: BTCPriceLoadState;
+  onBTCPriceManualChange: () => void;
   onChange: (value: ScenarioInput) => void;
 };
 
-export function ScenarioForm({ value, onChange }: ScenarioFormProps) {
+export function ScenarioForm({
+  value,
+  btcPriceStatus,
+  onBTCPriceManualChange,
+  onChange,
+}: ScenarioFormProps) {
   const update = <K extends keyof ScenarioInput>(
     key: K,
     nextValue: ScenarioInput[K],
@@ -54,10 +63,12 @@ export function ScenarioForm({ value, onChange }: ScenarioFormProps) {
                 min="1"
                 type="number"
                 value={value.currentBTCPriceUSD}
-                onChange={(event) =>
-                  numberUpdate("currentBTCPriceUSD", event.target.value)
-                }
+                onChange={(event) => {
+                  onBTCPriceManualChange();
+                  numberUpdate("currentBTCPriceUSD", event.target.value);
+                }}
               />
+              <BTCPriceStatusNote btcPriceStatus={btcPriceStatus} />
             </label>
           </div>
         </div>
@@ -98,8 +109,8 @@ export function ScenarioForm({ value, onChange }: ScenarioFormProps) {
               />
             </label>
             <div className="rounded-md border border-[rgba(239,230,218,0.18)] p-4 text-sm leading-5 text-[#b9ab9a]">
-              These assumptions project future prices locally. No live APIs are
-              used in this MVP.
+              BTC spot price is fetched server-side when available. Item prices
+              and future assumptions remain editable local inputs.
             </div>
           </div>
         </div>
@@ -133,5 +144,51 @@ export function ScenarioForm({ value, onChange }: ScenarioFormProps) {
         </div>
       </div>
     </section>
+  );
+}
+
+function BTCPriceStatusNote({
+  btcPriceStatus,
+}: {
+  btcPriceStatus: BTCPriceLoadState;
+}) {
+  if (btcPriceStatus.status === "loading") {
+    return (
+      <span className="mt-2 block text-xs leading-5 text-[#b9ab9a]">
+        Loading live BTC price...
+      </span>
+    );
+  }
+
+  if (btcPriceStatus.status === "error") {
+    return (
+      <span className="mt-2 block text-xs leading-5 text-[#f0a36f]">
+        Live price unavailable. The manual value is still editable.
+      </span>
+    );
+  }
+
+  const { data } = btcPriceStatus;
+  const updatedAt = data.lastUpdatedAt
+    ? new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(data.lastUpdatedAt))
+    : "update time unavailable";
+
+  if (data.status === "fallback") {
+    return (
+      <span className="mt-2 block text-xs leading-5 text-[#f0a36f]">
+        CoinGecko is unavailable. Using editable fallback value{" "}
+        {formatUSD(data.fallbackPriceUSD)}.
+      </span>
+    );
+  }
+
+  return (
+    <span className="mt-2 block text-xs leading-5 text-[#b9ab9a]">
+      CoinGecko live price loaded
+      {data.stale ? " but may be stale" : ""}: updated {updatedAt}.
+    </span>
   );
 }

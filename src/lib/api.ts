@@ -1,10 +1,10 @@
 import { ScenarioInput } from "./types";
+export { getBTCPrice } from "./btc-price";
 
 const notImplemented = async () => {
   throw new Error("Placeholder only. External APIs are not implemented in the MVP.");
 };
 
-export const getBTCPrice = notImplemented;
 export const getVehiclePrice = notImplemented;
 export const getHousingPrice = notImplemented;
 export const getElderCarePrice = notImplemented;
