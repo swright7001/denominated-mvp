@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { calculateScenario } from "@/lib/calculations";
 import { defaultScenario } from "@/lib/scenarios";
+import { parseScenarioSearchParams } from "@/lib/share-url";
 import type { BTCPriceResult } from "@/lib/btc-price";
 import type { ScenarioInput } from "@/lib/types";
 import { AssumptionsPanel } from "./AssumptionsPanel";
 import { BTCComparisonChart } from "./BTCComparisonChart";
+import { CopyScenarioLinkButton } from "./CopyScenarioLinkButton";
 import { CopyTweetButton } from "./CopyTweetButton";
 import { OpportunityCostCard } from "./OpportunityCostCard";
 import { ResultCards } from "./ResultCards";
@@ -14,11 +16,13 @@ import { ScenarioForm } from "./ScenarioForm";
 import { ShareableResultCard } from "./ShareableResultCard";
 
 export function CalculatorExperience() {
-  const [scenario, setScenario] = useState<ScenarioInput>(defaultScenario);
+  const [scenario, setScenario] = useState<ScenarioInput>(() => {
+    return getSharedScenarioFromLocation() ?? defaultScenario;
+  });
   const [btcPriceStatus, setBtcPriceStatus] = useState<BTCPriceLoadState>({
     status: "loading",
   });
-  const btcPriceWasEdited = useRef(false);
+  const btcPriceWasEdited = useRef(getSharedScenarioFromLocation() !== null);
   const result = useMemo(() => calculateScenario(scenario), [scenario]);
 
   useEffect(() => {
@@ -98,7 +102,10 @@ export function CalculatorExperience() {
                   Spread the message in a format that is easy to screenshot and
                   plain enough for everyday people.
                 </p>
-                <CopyTweetButton scenario={scenario} result={result} />
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  <CopyTweetButton scenario={scenario} result={result} />
+                  <CopyScenarioLinkButton scenario={scenario} />
+                </div>
               </div>
               <ShareableResultCard scenario={scenario} result={result} />
             </div>
@@ -113,3 +120,8 @@ export type BTCPriceLoadState =
   | { status: "loading" }
   | { status: "ready"; data: BTCPriceResult }
   | { status: "error"; message: string };
+
+function getSharedScenarioFromLocation() {
+  if (typeof window === "undefined") return null;
+  return parseScenarioSearchParams(window.location.search, defaultScenario);
+}

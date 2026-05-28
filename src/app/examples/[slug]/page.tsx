@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -7,6 +8,7 @@ import { Layout } from "@/components/Layout";
 import { ShareableResultCard } from "@/components/ShareableResultCard";
 import { calculateScenario, formatBTC, formatUSD } from "@/lib/calculations";
 import { getScenario, scenarios } from "@/lib/scenarios";
+import { absoluteUrl } from "@/lib/site";
 
 type ScenarioDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -14,6 +16,40 @@ type ScenarioDetailPageProps = {
 
 export function generateStaticParams() {
   return scenarios.map((scenario) => ({ slug: scenario.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: ScenarioDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const scenario = getScenario(slug);
+
+  if (!scenario) {
+    return {
+      title: "Scenario Not Found",
+    };
+  }
+
+  const title = `${scenario.itemName} in Bitcoin Terms`;
+  const description = `See how ${scenario.itemName.toLowerCase()} changes when measured in dollars and Bitcoin purchasing power over time.`;
+  const path = `/examples/${scenario.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: path,
+    },
+    openGraph: {
+      title: `${title} | Denominated`,
+      description,
+      url: absoluteUrl(path),
+    },
+    twitter: {
+      title: `${title} | Denominated`,
+      description,
+    },
+  };
 }
 
 export default async function ScenarioDetailPage({

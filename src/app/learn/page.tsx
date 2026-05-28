@@ -1,5 +1,22 @@
+import type { Metadata } from "next";
 import { Layout } from "@/components/Layout";
 import { DISCLAIMER } from "@/components/Footer";
+import { absoluteUrl } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Learn Purchasing Power",
+  description:
+    "Learn nominal value, purchasing power, opportunity cost, and why assumptions are not predictions.",
+  alternates: {
+    canonical: "/learn",
+  },
+  openGraph: {
+    title: "Learn Purchasing Power | Denominated",
+    description:
+      "Plain-English explanations of purchasing power, opportunity cost, and Bitcoin as a benchmark.",
+    url: absoluteUrl("/learn"),
+  },
+};
 
 const lessons = [
   {

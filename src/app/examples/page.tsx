@@ -1,6 +1,23 @@
+import type { Metadata } from "next";
 import { Layout } from "@/components/Layout";
 import { PresetScenarioGrid } from "@/components/PresetScenarioGrid";
 import { scenarios } from "@/lib/scenarios";
+import { absoluteUrl } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Popular Purchasing-Power Examples",
+  description:
+    "Explore preset Denominated scenarios for cars, housing, rent, elder care, childcare, tuition, travel, and more.",
+  alternates: {
+    canonical: "/examples",
+  },
+  openGraph: {
+    title: "Popular Purchasing-Power Examples | Denominated",
+    description:
+      "Explore real-life expenses measured in dollars and Bitcoin terms.",
+    url: absoluteUrl("/examples"),
+  },
+};
 
 export default function ExamplesPage() {
   return (
