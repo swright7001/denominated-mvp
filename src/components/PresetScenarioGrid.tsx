@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   BriefcaseBusiness,
   Building2,
@@ -51,32 +52,54 @@ export function PresetScenarioGrid({
           <Link
             key={scenario.slug}
             href={`/examples/${scenario.slug}`}
-            className="panel group rounded-lg p-5 transition hover:-translate-y-1 hover:border-[rgba(240,163,111,0.55)]"
+            className="panel group overflow-hidden rounded-lg transition hover:-translate-y-1 hover:border-[rgba(240,163,111,0.55)]"
           >
-            <div className="mb-10 flex items-start justify-between">
-              <div className="grid h-12 w-12 place-items-center rounded-full border border-[rgba(240,163,111,0.32)] text-[#f0a36f]">
-                <Icon size={23} />
+            <div
+              className={
+                scenario.image
+                  ? "relative min-h-36 p-5"
+                  : "relative mb-10 flex items-start justify-between p-5 pb-0"
+              }
+            >
+              {scenario.image && (
+                <Image
+                  src={scenario.image}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover opacity-[0.82] transition duration-300 group-hover:scale-[1.03]"
+                />
+              )}
+              {scenario.image && (
+                <div className="absolute inset-0 bg-gradient-to-b from-[#080807]/10 via-[#080807]/30 to-[#12100e]" />
+              )}
+              <div className="relative z-10 flex items-start justify-between">
+                <div className="grid h-12 w-12 place-items-center rounded-full border border-[rgba(240,163,111,0.32)] bg-[#100d0b]/70 text-[#f0a36f] backdrop-blur">
+                  <Icon size={23} />
+                </div>
+                <span className="rounded-full border border-[rgba(240,163,111,0.24)] bg-[#100d0b]/65 px-3 py-1 text-xs text-[#b9ab9a] backdrop-blur">
+                  {scenario.category}
+                </span>
               </div>
-              <span className="rounded-full border border-[rgba(240,163,111,0.24)] px-3 py-1 text-xs text-[#b9ab9a]">
-                {scenario.category}
-              </span>
             </div>
-            <h3 className="text-2xl text-[#efe6da]">{scenario.itemName}</h3>
-            <p className="mt-1 text-sm text-[#b9ab9a]">
-              {scenario.shortDescription}
-            </p>
-            <div className="mt-5 flex items-end justify-between gap-3">
-              <div>
-                <p className="text-sm text-[#f0a36f]">
-                  {formatUSD(scenario.currentItemPriceUSD)} today
-                </p>
-                <p className="mt-1 text-xl text-[#efe6da]">
-                  {formatBTC(result.currentItemCostBTC)} BTC
-                </p>
+            <div className="p-5 pt-4">
+              <h3 className="text-2xl text-[#efe6da]">{scenario.itemName}</h3>
+              <p className="mt-1 text-sm text-[#b9ab9a]">
+                {scenario.shortDescription}
+              </p>
+              <div className="mt-5 flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-sm text-[#f0a36f]">
+                    {formatUSD(scenario.currentItemPriceUSD)} today
+                  </p>
+                  <p className="mt-1 text-xl text-[#efe6da]">
+                    {formatBTC(result.currentItemCostBTC)} BTC
+                  </p>
+                </div>
+                <span className="grid h-9 w-9 place-items-center rounded-full border border-[rgba(240,163,111,0.36)] text-[#f0a36f] transition group-hover:bg-[#2a1810]">
+                  →
+                </span>
               </div>
-              <span className="grid h-9 w-9 place-items-center rounded-full border border-[rgba(240,163,111,0.36)] text-[#f0a36f] transition group-hover:bg-[#2a1810]">
-                →
-              </span>
             </div>
           </Link>
         );

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -89,6 +90,20 @@ export default async function ScenarioDetailPage({
             {liveScenario.shortDescription}
           </p>
           <BTCPriceStatus btcPrice={btcPrice} className="mt-6" />
+
+          {liveScenario.image && (
+            <div className="relative mt-8 aspect-[16/7] overflow-hidden rounded-lg border border-[rgba(240,163,111,0.24)] bg-[#12100e]">
+              <Image
+                src={liveScenario.image}
+                alt=""
+                fill
+                priority
+                sizes="(min-width: 1024px) 760px, 100vw"
+                className="object-cover opacity-85"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#080807]/35 via-transparent to-[#080807]/25" />
+            </div>
+          )}
 
           <div className="my-8 grid gap-5 border-y border-[rgba(239,230,218,0.12)] py-8 sm:grid-cols-2">
             <div>
