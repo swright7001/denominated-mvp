@@ -13,8 +13,8 @@ export function ShareableResultCard({
     result.btcCostChangePercent < 0 ? "cheaper" : "more expensive";
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[rgba(240,163,111,0.28)] bg-[#0b0907]">
-      <div className="relative min-h-[230px] p-5">
+    <div className="min-w-0 overflow-hidden rounded-lg border border-[rgba(240,163,111,0.28)] bg-[#0b0907]">
+      <div className="relative min-h-[230px] p-4 sm:p-5">
         <Image
           src="/brand/logo.png"
           alt="Denominated branded background"
@@ -23,8 +23,8 @@ export function ShareableResultCard({
           className="object-cover opacity-18"
         />
         <div className="relative z-10">
-          <div className="mb-8 flex items-center gap-3">
-            <div className="relative h-10 w-10 overflow-hidden rounded-md">
+          <div className="mb-8 flex min-w-0 items-center gap-3">
+            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md">
               <Image
                 src="/brand/logo.png"
                 alt="Denominated logo"
@@ -33,14 +33,16 @@ export function ShareableResultCard({
                 className="brand-logo-crop scale-[2.8]"
               />
             </div>
-            <div>
-              <p className="font-semibold text-[#efe6da]">Denominated</p>
-              <p className="text-xs text-[#f0a36f]">
+            <div className="min-w-0">
+              <p className="truncate font-semibold text-[#efe6da]">
+                Denominated
+              </p>
+              <p className="text-xs break-words text-[#f0a36f]">
                 Measure life in purchasing power.
               </p>
             </div>
           </div>
-          <p className="max-w-md text-xl leading-8 text-[#efe6da]">
+          <p className="max-w-full text-lg leading-8 break-words text-[#efe6da] sm:text-xl">
             {scenario.itemName} could move from{" "}
             <span className="copper-text">
               {formatBTC(result.currentItemCostBTC)} BTC
@@ -51,7 +53,7 @@ export function ShareableResultCard({
             </span>{" "}
             in {scenario.years} years.
           </p>
-          <p className="mt-5 text-lg text-[#f0a36f]">
+          <p className="mt-5 text-base break-words text-[#f0a36f] sm:text-lg">
             {Math.abs(result.btcCostChangePercent).toFixed(1)}% {direction} in
             Bitcoin terms.
           </p>

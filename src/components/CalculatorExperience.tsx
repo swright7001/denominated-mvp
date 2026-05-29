@@ -85,7 +85,7 @@ export function CalculatorExperience({
         </p>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[420px_1fr]">
         <ScenarioForm
           value={scenario}
           btcPriceStatus={btcPriceStatus}
@@ -96,22 +96,22 @@ export function CalculatorExperience({
           }}
           onChange={setScenario}
         />
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <ResultCards scenario={scenario} result={result} />
           <BTCComparisonChart result={result} />
-          <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+          <div className="grid min-w-0 gap-6 lg:grid-cols-[1fr_1fr]">
             <OpportunityCostCard scenario={scenario} result={result} />
             <AssumptionsPanel scenario={scenario} />
           </div>
-          <section className="panel rounded-lg p-5 sm:p-7">
-            <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
-              <div>
+          <section className="panel min-w-0 overflow-hidden rounded-lg p-5 sm:p-7">
+            <div className="grid min-w-0 gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+              <div className="min-w-0">
                 <p className="eyebrow mb-3">Share your results</p>
-                <p className="mb-5 text-sm leading-6 text-[#b9ab9a]">
+                <p className="mb-5 max-w-full text-sm leading-6 break-words text-[#b9ab9a]">
                   Spread the message in a format that is easy to screenshot and
                   plain enough for everyday people.
                 </p>
-                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <div className="grid gap-3 sm:flex sm:flex-row sm:flex-wrap">
                   <CopyTweetButton scenario={scenario} result={result} />
                   <CopyScenarioLinkButton scenario={scenario} />
                 </div>
