@@ -26,11 +26,11 @@ export function ShareableResultCard({
           <div className="mb-8 flex min-w-0 items-center gap-3">
             <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md">
               <Image
-                src="/brand/logo.png"
+                src="/brand/logo-mark.png"
                 alt="Denominated logo"
                 fill
                 sizes="40px"
-                className="brand-logo-crop scale-[2.8]"
+                className="object-cover"
               />
             </div>
             <div className="min-w-0">

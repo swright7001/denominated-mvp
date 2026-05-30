@@ -128,8 +128,3 @@ input {
   border-color: rgba(240, 163, 111, 0.7);
   box-shadow: 0 0 0 3px rgba(199, 119, 66, 0.13);
 }
-
-.brand-logo-crop {
-  object-fit: cover;
-  object-position: center 39%;
-}
