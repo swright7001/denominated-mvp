@@ -1,9 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { ArrowRight, BookmarkPlus, RotateCcw, Trash2 } from "lucide-react";
-import { calculateScenario, formatBTC, formatUSD } from "@/lib/calculations";
+import type { BTCPriceResult } from "@/lib/btc-price";
+import { formatBTC, formatUSD } from "@/lib/calculations";
+import {
+  buildSavedScenarioImpactCopy,
+  calculateScenarioImpact,
+} from "@/lib/scenario-insights";
 import { scenarioToSearchParams } from "@/lib/share-url";
 import type { SavedScenario } from "@/lib/types";
 import {
@@ -11,9 +16,8 @@ import {
   removeSavedScenario,
   serializeSavedScenarios,
   WATCHLIST_STORAGE_KEY,
+  watchlistChangedEvent,
 } from "@/lib/watchlist";
-
-const watchlistChangedEvent = "denominated-watchlist-changed";
 const emptyWatchlist: SavedScenario[] = [];
 let cachedWatchlistRaw: string | null = null;
 let cachedWatchlistSnapshot: SavedScenario[] = emptyWatchlist;
@@ -24,6 +28,7 @@ export function WatchlistExperience() {
     getWatchlistSnapshot,
     getServerWatchlistSnapshot,
   );
+  const btcPrice = useWatchlistBTCPrice();
 
   function deleteSavedScenario(id: string) {
     const next = removeSavedScenario(savedScenarios, id);
@@ -65,6 +70,10 @@ export function WatchlistExperience() {
             <WatchlistCard
               key={savedScenario.id}
               savedScenario={savedScenario}
+              currentBTCPriceUSD={
+                btcPrice.data?.priceUSD ??
+                savedScenario.scenario.currentBTCPriceUSD
+              }
               onDelete={() => deleteSavedScenario(savedScenario.id)}
             />
           ))}
@@ -103,14 +112,16 @@ function getServerWatchlistSnapshot() {
 
 function WatchlistCard({
   savedScenario,
+  currentBTCPriceUSD,
   onDelete,
 }: {
   savedScenario: SavedScenario;
+  currentBTCPriceUSD: number;
   onDelete: () => void;
 }) {
-  const result = useMemo(
-    () => calculateScenario(savedScenario.scenario),
-    [savedScenario.scenario],
+  const impact = useMemo(
+    () => calculateScenarioImpact(savedScenario, currentBTCPriceUSD),
+    [currentBTCPriceUSD, savedScenario],
   );
   const calculatorHref = `/calculator?${scenarioToSearchParams(
     savedScenario.scenario,
@@ -152,7 +163,7 @@ function WatchlistCard({
         />
         <WatchlistMetric
           label="Current BTC cost"
-          value={`${formatBTC(result.currentItemCostBTC)} BTC`}
+          value={`${formatBTC(impact.currentBTCCost)} BTC`}
         />
         <WatchlistMetric
           label="Time horizon"
@@ -160,11 +171,29 @@ function WatchlistCard({
         />
         <WatchlistMetric
           label="BTC price used"
-          value={formatUSD(savedScenario.scenario.currentBTCPriceUSD)}
+          value={formatUSD(currentBTCPriceUSD)}
         />
       </dl>
 
       <div className="mt-5 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
+        <p className="text-sm leading-6 text-[#b9ab9a]">
+          {buildSavedScenarioImpactCopy(impact)}{" "}
+          <span className="text-[#efe6da]">
+            {formatBTC(Math.abs(impact.btcDifference))} BTC
+          </span>{" "}
+          absolute change,{" "}
+          <span className="text-[#efe6da]">
+            {Math.abs(impact.percentDifference).toFixed(1)}%
+          </span>{" "}
+          from the saved baseline.
+        </p>
+        <p className="mt-3 text-xs uppercase tracking-[0.14em] text-[#8f8172]">
+          Compared with {formatUSD(impact.priorBTCPriceUSD)} BTC on {savedDate};
+          current comparison uses {formatUSD(impact.currentBTCPriceUSD)} BTC.
+        </p>
+      </div>
+
+      <div className="mt-4 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
         <p className="text-sm leading-6 text-[#b9ab9a]">
           Assumes {savedScenario.scenario.itemInflationRate}% annual item
           inflation and {savedScenario.scenario.btcGrowthRate}% annual BTC
@@ -220,4 +249,36 @@ function WatchlistEmptyState() {
       </Link>
     </section>
   );
+}
+
+function useWatchlistBTCPrice() {
+  const [state, setState] = useState<{
+    status: "loading" | "ready" | "error";
+    data?: BTCPriceResult;
+  }>({ status: "loading" });
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadBTCPrice() {
+      try {
+        const response = await fetch("/api/prices/bitcoin", {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) throw new Error("Live BTC price request failed");
+
+        const data = (await response.json()) as BTCPriceResult;
+        setState({ status: "ready", data });
+      } catch {
+        if (!controller.signal.aborted) setState({ status: "error" });
+      }
+    }
+
+    loadBTCPrice();
+
+    return () => controller.abort();
+  }, []);
+
+  return state;
 }

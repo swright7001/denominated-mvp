@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  signupEmailKey,
+  signupPromptDismissedKey,
+  signupPromptShownKey,
+} from "@/lib/account";
 import { calculateScenario } from "@/lib/calculations";
 import { defaultScenario } from "@/lib/scenarios";
 import type { BTCPriceResult } from "@/lib/btc-price";
@@ -14,6 +19,7 @@ import { ResultCards } from "./ResultCards";
 import { SaveScenarioButton } from "./SaveScenarioButton";
 import { ScenarioForm } from "./ScenarioForm";
 import { ShareableResultCard } from "./ShareableResultCard";
+import { SignupPrompt } from "./SignupPrompt";
 
 type CalculatorExperienceProps = {
   initialScenario?: ScenarioInput;
@@ -30,6 +36,7 @@ export function CalculatorExperience({
   });
   const [btcPriceWasManuallyEdited, setBtcPriceWasManuallyEdited] =
     useState(hasSharedScenario);
+  const [isSoftSignupPromptOpen, setIsSoftSignupPromptOpen] = useState(false);
   const btcPriceWasEdited = useRef(hasSharedScenario);
   const result = useMemo(() => calculateScenario(scenario), [scenario]);
 
@@ -71,6 +78,23 @@ export function CalculatorExperience({
     loadBTCPrice();
 
     return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const hasSignupEmail = window.localStorage.getItem(signupEmailKey);
+    const hasDismissedPrompt = window.localStorage.getItem(
+      signupPromptDismissedKey,
+    );
+    const hasShownPrompt = window.localStorage.getItem(signupPromptShownKey);
+
+    if (hasSignupEmail || hasDismissedPrompt || hasShownPrompt) return;
+
+    const promptTimer = window.setTimeout(() => {
+      window.localStorage.setItem(signupPromptShownKey, "true");
+      setIsSoftSignupPromptOpen(true);
+    }, 1400);
+
+    return () => window.clearTimeout(promptTimer);
   }, []);
 
   return (
@@ -123,6 +147,11 @@ export function CalculatorExperience({
           </section>
         </div>
       </div>
+      <SignupPrompt
+        isOpen={isSoftSignupPromptOpen}
+        scenario={scenario}
+        onClose={() => setIsSoftSignupPromptOpen(false)}
+      />
     </div>
   );
 }

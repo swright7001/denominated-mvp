@@ -2,6 +2,7 @@ import { calculateScenario } from "./calculations";
 import type { SavedScenario, ScenarioInput } from "./types";
 
 export const WATCHLIST_STORAGE_KEY = "denominated.savedScenarios.v1";
+export const watchlistChangedEvent = "denominated-watchlist-changed";
 
 type SaveScenarioOptions = {
   id?: string;
