@@ -32,3 +32,11 @@ export type ScenarioResult = {
     btcCost: number;
   }>;
 };
+
+export type SavedScenario = {
+  id: string;
+  scenario: ScenarioInput;
+  savedAt: string;
+  baselineBTCPriceUSD: number;
+  baselineItemCostBTC: number;
+};

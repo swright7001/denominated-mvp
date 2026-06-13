@@ -11,6 +11,7 @@ import { CopyScenarioLinkButton } from "./CopyScenarioLinkButton";
 import { CopyTweetButton } from "./CopyTweetButton";
 import { OpportunityCostCard } from "./OpportunityCostCard";
 import { ResultCards } from "./ResultCards";
+import { SaveScenarioButton } from "./SaveScenarioButton";
 import { ScenarioForm } from "./ScenarioForm";
 import { ShareableResultCard } from "./ShareableResultCard";
 
@@ -112,6 +113,7 @@ export function CalculatorExperience({
                   plain enough for everyday people.
                 </p>
                 <div className="grid gap-3 sm:flex sm:flex-row sm:flex-wrap">
+                  <SaveScenarioButton scenario={scenario} />
                   <CopyTweetButton scenario={scenario} result={result} />
                   <CopyScenarioLinkButton scenario={scenario} />
                 </div>
