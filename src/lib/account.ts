@@ -2,6 +2,7 @@ export const signupEmailKey = "denominated.signupEmail.v1";
 export const signupPromptShownKey = "denominated.signupPromptShown.v1";
 export const signupPromptDismissedKey = "denominated.signupPromptDismissed.v1";
 export const emailPreferencesKey = "denominated.emailPreferences.v1";
+export const accountChangedEvent = "denominated-account-changed";
 
 export type EmailPreferences = {
   weeklyReport: boolean;
@@ -52,4 +53,34 @@ export function serializeEmailPreferences(preferences: EmailPreferences) {
 
 export function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+export function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
+
+export function getStoredAccountEmail(storage: Pick<Storage, "getItem">) {
+  const value = storage.getItem(signupEmailKey);
+
+  return value && isValidEmail(value) ? normalizeEmail(value) : "";
+}
+
+export function saveLocalAccountEmail(
+  storage: Pick<Storage, "setItem" | "removeItem">,
+  email: string,
+) {
+  const normalizedEmail = normalizeEmail(email);
+
+  if (!isValidEmail(normalizedEmail)) {
+    throw new Error("Enter a valid email address.");
+  }
+
+  storage.setItem(signupEmailKey, normalizedEmail);
+  storage.setItem(
+    emailPreferencesKey,
+    serializeEmailPreferences(defaultEmailPreferences),
+  );
+  storage.removeItem(signupPromptDismissedKey);
+
+  return normalizedEmail;
 }

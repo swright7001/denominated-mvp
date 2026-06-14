@@ -4,7 +4,9 @@ This is the implementation plan for `DEN-84`. It defines how Denominated should
 support Pro subscriptions and Lifetime purchases while keeping the calculator
 free.
 
-No checkout, billing settings, or payment processing is implemented in this MVP.
+Checkout plumbing now exists behind `/api/checkout/stripe`, but it is not live
+until Stripe environment variables and real account identity are configured.
+Billing settings and payment fulfillment are not implemented in this MVP.
 
 ## Product And Price Structure
 
@@ -219,19 +221,23 @@ Before production checkout:
 
 ## Implementation Boundaries
 
+Implemented as setup-safe plumbing:
+
+- `/api/checkout/stripe` validates plan ID and local account email.
+- `/plans` can start Pro monthly, Pro annual, or Lifetime checkout.
+- Missing Stripe env vars return a setup-required response instead of creating
+  a fake payment.
+
 Do implement later:
 
-- Server-side checkout creation.
 - Webhook signature verification.
 - Server-side billing state.
 - Entitlement resolution from real auth/payment state.
 - Billing success/cancel screens.
 - Billing support states.
 
-Do not implement in this planning issue:
+Still not implemented:
 
-- Stripe SDK installation.
-- Checkout API routes or Server Actions.
 - Billing portal.
 - B2B billing.
 - SMS billing.

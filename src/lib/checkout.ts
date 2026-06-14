@@ -1,0 +1,85 @@
+import type { PlanTier } from "./entitlements";
+
+export type CheckoutPlanId = "proMonthly" | "proAnnual" | "lifetime";
+
+export type CheckoutPlan = {
+  id: CheckoutPlanId;
+  label: string;
+  shortLabel: string;
+  mode: "subscription" | "payment";
+  tier: Extract<PlanTier, "pro" | "lifetime">;
+  priceEnvVar: string;
+  metadata: Record<string, string>;
+};
+
+export const checkoutPlans: Record<CheckoutPlanId, CheckoutPlan> = {
+  proMonthly: {
+    id: "proMonthly",
+    label: "Start Pro monthly",
+    shortLabel: "Pro monthly",
+    mode: "subscription",
+    tier: "pro",
+    priceEnvVar: "STRIPE_PRO_MONTHLY_PRICE_ID",
+    metadata: {
+      denominated_plan: "pro",
+      billing_interval: "month",
+      entitlement_tier: "pro",
+    },
+  },
+  proAnnual: {
+    id: "proAnnual",
+    label: "Start Pro annual",
+    shortLabel: "Pro annual",
+    mode: "subscription",
+    tier: "pro",
+    priceEnvVar: "STRIPE_PRO_ANNUAL_PRICE_ID",
+    metadata: {
+      denominated_plan: "pro",
+      billing_interval: "year",
+      entitlement_tier: "pro",
+    },
+  },
+  lifetime: {
+    id: "lifetime",
+    label: "Get Lifetime",
+    shortLabel: "Lifetime",
+    mode: "payment",
+    tier: "lifetime",
+    priceEnvVar: "STRIPE_LIFETIME_PRICE_ID",
+    metadata: {
+      denominated_plan: "lifetime",
+      billing_interval: "one_time",
+      entitlement_tier: "lifetime",
+    },
+  },
+};
+
+export function parseCheckoutPlanId(value: unknown): CheckoutPlanId | null {
+  if (
+    value === "proMonthly" ||
+    value === "proAnnual" ||
+    value === "lifetime"
+  ) {
+    return value;
+  }
+
+  return null;
+}
+
+export function getCheckoutPlan(id: CheckoutPlanId) {
+  return checkoutPlans[id];
+}
+
+export function getCheckoutPriceId(
+  plan: CheckoutPlan,
+  env: Record<string, string | undefined> = process.env,
+) {
+  return env[plan.priceEnvVar] ?? "";
+}
+
+export function getMissingCheckoutEnvVars(
+  plan: CheckoutPlan,
+  env: Record<string, string | undefined> = process.env,
+) {
+  return ["STRIPE_SECRET_KEY", plan.priceEnvVar].filter((key) => !env[key]);
+}

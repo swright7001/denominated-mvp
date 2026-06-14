@@ -19,6 +19,7 @@ export function Footer() {
           <Link href="/examples">Examples</Link>
           <Link href="/dashboard">Dashboard</Link>
           <Link href="/plans">Plans</Link>
+          <Link href="/account">Account</Link>
           <Link href="/learn">Learn</Link>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { ArrowRight, BookmarkPlus, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowRight, BookmarkPlus, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import type { BTCPriceResult } from "@/lib/btc-price";
 import { formatBTC, formatUSD } from "@/lib/calculations";
 import {
@@ -19,6 +19,7 @@ import { scenarioToSearchParams } from "@/lib/share-url";
 import type { SavedScenario } from "@/lib/types";
 import {
   parseSavedScenarios,
+  renameSavedScenario,
   removeSavedScenario,
   serializeSavedScenarios,
   WATCHLIST_STORAGE_KEY,
@@ -48,6 +49,15 @@ export function WatchlistExperience() {
 
   function deleteSavedScenario(id: string) {
     const next = removeSavedScenario(savedScenarios, id);
+    window.localStorage.setItem(
+      WATCHLIST_STORAGE_KEY,
+      serializeSavedScenarios(next),
+    );
+    window.dispatchEvent(new Event(watchlistChangedEvent));
+  }
+
+  function renameScenario(id: string, itemName: string) {
+    const next = renameSavedScenario(savedScenarios, id, itemName);
     window.localStorage.setItem(
       WATCHLIST_STORAGE_KEY,
       serializeSavedScenarios(next),
@@ -87,12 +97,15 @@ export function WatchlistExperience() {
               <WatchlistCard
                 key={savedScenario.id}
                 savedScenario={savedScenario}
-                currentBTCPriceUSD={
-                  btcPrice.data?.priceUSD ??
-                  savedScenario.scenario.currentBTCPriceUSD
-                }
-                onDelete={() => deleteSavedScenario(savedScenario.id)}
-              />
+              currentBTCPriceUSD={
+                btcPrice.data?.priceUSD ??
+                savedScenario.scenario.currentBTCPriceUSD
+              }
+              onDelete={() => deleteSavedScenario(savedScenario.id)}
+              onRename={(itemName) =>
+                renameScenario(savedScenario.id, itemName)
+              }
+            />
             ))}
           </div>
           {!hasProAccess ? (
@@ -151,11 +164,15 @@ function WatchlistCard({
   savedScenario,
   currentBTCPriceUSD,
   onDelete,
+  onRename,
 }: {
   savedScenario: SavedScenario;
   currentBTCPriceUSD: number;
   onDelete: () => void;
+  onRename: (itemName: string) => void;
 }) {
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [draftName, setDraftName] = useState(savedScenario.scenario.itemName);
   const impact = useMemo(
     () => calculateScenarioImpact(savedScenario, currentBTCPriceUSD),
     [currentBTCPriceUSD, savedScenario],
@@ -169,28 +186,68 @@ function WatchlistCard({
     year: "numeric",
   }).format(new Date(savedScenario.savedAt));
 
+  function submitRename() {
+    onRename(draftName);
+    setIsRenaming(false);
+  }
+
   return (
     <article className="panel min-w-0 overflow-hidden rounded-lg p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="eyebrow mb-3">Saved {savedDate}</p>
-          <h2 className="text-2xl font-medium text-[#efe6da]">
-            {savedScenario.scenario.itemName}
-          </h2>
+          {isRenaming ? (
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                className="field py-2"
+                value={draftName}
+                onChange={(event) => setDraftName(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") submitRename();
+                  if (event.key === "Escape") {
+                    setDraftName(savedScenario.scenario.itemName);
+                    setIsRenaming(false);
+                  }
+                }}
+                aria-label="Saved scenario name"
+              />
+              <button
+                type="button"
+                className="copper-button rounded-md px-3 py-2 text-sm font-semibold"
+                onClick={submitRename}
+              >
+                Save
+              </button>
+            </div>
+          ) : (
+            <h2 className="text-2xl font-medium text-[#efe6da]">
+              {savedScenario.scenario.itemName}
+            </h2>
+          )}
           <p className="mt-2 text-sm text-[#b9ab9a]">
             {savedScenario.scenario.purchaseType === "monthly"
               ? "Monthly expense"
               : "One-time purchase"}
           </p>
         </div>
-        <button
-          type="button"
-          className="outline-button grid h-10 w-10 shrink-0 place-items-center rounded-md text-[#f0a36f] transition hover:bg-[#2a1810]"
-          aria-label={`Delete ${savedScenario.scenario.itemName}`}
-          onClick={onDelete}
-        >
-          <Trash2 size={18} />
-        </button>
+        <div className="flex shrink-0 gap-2">
+          <button
+            type="button"
+            className="outline-button grid h-10 w-10 place-items-center rounded-md text-[#f0a36f] transition hover:bg-[#2a1810]"
+            aria-label={`Rename ${savedScenario.scenario.itemName}`}
+            onClick={() => setIsRenaming((current) => !current)}
+          >
+            <Pencil size={17} />
+          </button>
+          <button
+            type="button"
+            className="outline-button grid h-10 w-10 place-items-center rounded-md text-[#f0a36f] transition hover:bg-[#2a1810]"
+            aria-label={`Delete ${savedScenario.scenario.itemName}`}
+            onClick={onDelete}
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
       </div>
 
       <dl className="mt-6 grid gap-3 sm:grid-cols-2">

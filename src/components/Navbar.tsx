@@ -12,6 +12,7 @@ const navItems = [
   { href: "/watchlist", label: "Watchlist" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/plans", label: "Plans" },
+  { href: "/account", label: "Account" },
   { href: "/learn", label: "Learn" },
 ];
 

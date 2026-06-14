@@ -5,6 +5,7 @@ import {
   addSavedScenario,
   buildSavedScenario,
   parseSavedScenarios,
+  renameSavedScenario,
   removeSavedScenario,
   serializeSavedScenarios,
 } from "../src/lib/watchlist";
@@ -37,6 +38,27 @@ test("removeSavedScenario removes matching saved scenario", () => {
   const second = buildSavedScenario(defaultScenario, { id: "second" });
 
   assert.deepEqual(removeSavedScenario([first, second], "first"), [second]);
+});
+
+test("renameSavedScenario updates the saved item name only", () => {
+  const first = buildSavedScenario(defaultScenario, { id: "first" });
+  const second = buildSavedScenario(
+    { ...defaultScenario, itemName: "Original second" },
+    { id: "second" },
+  );
+  const renamed = renameSavedScenario([first, second], "second", "  New name ");
+
+  assert.equal(renamed[0].scenario.itemName, defaultScenario.itemName);
+  assert.equal(renamed[1].scenario.itemName, "New name");
+  assert.equal(renamed[1].baselineItemCostBTC, second.baselineItemCostBTC);
+});
+
+test("renameSavedScenario ignores blank names", () => {
+  const savedScenario = buildSavedScenario(defaultScenario, { id: "saved" });
+
+  assert.deepEqual(renameSavedScenario([savedScenario], "saved", "   "), [
+    savedScenario,
+  ]);
 });
 
 test("parseSavedScenarios only returns valid saved scenario records", () => {

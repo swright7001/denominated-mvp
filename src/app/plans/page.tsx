@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, Clock, Infinity, Lock, Sparkles } from "lucide-react";
+import { CheckoutButton } from "@/components/CheckoutButton";
 import { Layout } from "@/components/Layout";
 import { DISCLAIMER } from "@/components/Footer";
+import type { CheckoutPlanId } from "@/lib/checkout";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -32,6 +34,7 @@ const tiers = [
     cta: "Run a Scenario",
     href: "/calculator",
     featured: false,
+    checkoutPlanIds: [],
   },
   {
     name: "Free Account",
@@ -44,6 +47,7 @@ const tiers = [
     cta: "Save a Scenario",
     href: "/calculator",
     featured: false,
+    checkoutPlanIds: [],
   },
   {
     name: "Pro",
@@ -57,6 +61,7 @@ const tiers = [
     cta: "Preview Pro Tools",
     href: "/dashboard",
     featured: true,
+    checkoutPlanIds: ["proMonthly", "proAnnual"] satisfies CheckoutPlanId[],
   },
   {
     name: "Lifetime",
@@ -69,6 +74,7 @@ const tiers = [
     cta: "View Lifetime Fit",
     href: "#matrix",
     featured: false,
+    checkoutPlanIds: ["lifetime"] satisfies CheckoutPlanId[],
   },
 ];
 
@@ -260,16 +266,36 @@ export default function PlansPage() {
                     {tier.body}
                   </p>
 
-                  <Link
-                    className={`mt-auto rounded-md px-4 py-3 text-center text-sm font-semibold ${
-                      tier.featured
-                        ? "copper-button"
-                        : "outline-button text-[#f0a36f]"
-                    }`}
-                    href={tier.href}
-                  >
-                    {tier.cta}
-                  </Link>
+                  <div className="mt-auto space-y-3">
+                    {tier.checkoutPlanIds.length > 0 ? (
+                      tier.checkoutPlanIds.map((planId) => (
+                        <CheckoutButton
+                          key={planId}
+                          planId={planId}
+                          featured={tier.featured}
+                        />
+                      ))
+                    ) : (
+                      <Link
+                        className={`block rounded-md px-4 py-3 text-center text-sm font-semibold ${
+                          tier.featured
+                            ? "copper-button"
+                            : "outline-button text-[#f0a36f]"
+                        }`}
+                        href={tier.href}
+                      >
+                        {tier.cta}
+                      </Link>
+                    )}
+                    {tier.checkoutPlanIds.length > 0 ? (
+                      <Link
+                        className="block rounded-md border border-[rgba(240,163,111,0.24)] px-4 py-3 text-center text-sm text-[#d9ccbd]"
+                        href={tier.href}
+                      >
+                        {tier.cta}
+                      </Link>
+                    ) : null}
+                  </div>
                 </div>
               </article>
             );

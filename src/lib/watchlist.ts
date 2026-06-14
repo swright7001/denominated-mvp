@@ -39,6 +39,28 @@ export function removeSavedScenario(
   return savedScenarios.filter((savedScenario) => savedScenario.id !== id);
 }
 
+export function renameSavedScenario(
+  savedScenarios: SavedScenario[],
+  id: string,
+  itemName: string,
+) {
+  const trimmedItemName = itemName.trim();
+
+  if (!trimmedItemName) return savedScenarios;
+
+  return savedScenarios.map((savedScenario) =>
+    savedScenario.id === id
+      ? {
+          ...savedScenario,
+          scenario: {
+            ...savedScenario.scenario,
+            itemName: trimmedItemName,
+          },
+        }
+      : savedScenario,
+  );
+}
+
 export function parseSavedScenarios(value: string | null): SavedScenario[] {
   if (!value) return [];
 
