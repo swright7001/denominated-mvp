@@ -10,6 +10,7 @@ import {
   signupEmailKey,
   signupPromptDismissedKey,
 } from "@/lib/account";
+import { getProConversionCopy } from "@/lib/pro-copy";
 import type { ScenarioInput } from "@/lib/types";
 import {
   addSavedScenario,
@@ -35,6 +36,7 @@ export function SignupPrompt({
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [signedUp, setSignedUp] = useState(false);
+  const saveFirstScenarioCopy = getProConversionCopy("saveFirstScenario");
 
   if (!isOpen) return null;
 
@@ -127,18 +129,26 @@ export function SignupPrompt({
             <div className="mb-5 grid h-12 w-12 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
               <Mail size={22} />
             </div>
-            <p className="eyebrow mb-3">Save this scenario</p>
+            <p className="eyebrow mb-3">{saveFirstScenarioCopy.eyebrow}</p>
             <h2
               id="signup-prompt-title"
               className="pr-8 text-2xl font-medium text-[#efe6da]"
             >
-              Want Denominated to track this over time?
+              {saveFirstScenarioCopy.title}
             </h2>
             <p className="mt-3 text-sm leading-6 text-[#b9ab9a]">
-              Create a free account foundation with your email to save this
-              scenario, track how its BTC cost changes, build a personal
-              watchlist, and get purchasing-power updates later.
+              {saveFirstScenarioCopy.body}
             </p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {saveFirstScenarioCopy.features.map((feature) => (
+                <p
+                  key={feature}
+                  className="rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-3 text-xs leading-5 text-[#d9ccbd]"
+                >
+                  {feature}
+                </p>
+              ))}
+            </div>
 
             <label className="mt-5 block text-sm text-[#d9ccbd]">
               Email address
@@ -164,19 +174,18 @@ export function SignupPrompt({
                 type="submit"
                 className="copper-button rounded-md px-4 py-3 font-semibold"
               >
-                Save my scenario
+                {saveFirstScenarioCopy.primaryCta}
               </button>
               <button
                 type="button"
                 className="outline-button rounded-md px-4 py-3 text-[#f0a36f]"
                 onClick={continueWithoutAccount}
               >
-                Continue without account
+                {saveFirstScenarioCopy.secondaryCta}
               </button>
             </div>
             <p className="mt-4 text-xs leading-5 text-[#b9ab9a]">
-              Educational only. No financial advice. Phone number is not
-              required.
+              {saveFirstScenarioCopy.footnote}
             </p>
           </form>
         )}

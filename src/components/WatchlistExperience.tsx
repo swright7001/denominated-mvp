@@ -10,6 +10,7 @@ import {
   isProEntitled,
   type PlanTier,
 } from "@/lib/entitlements";
+import { getProConversionCopy } from "@/lib/pro-copy";
 import {
   buildSavedScenarioImpactCopy,
   calculateScenarioImpact,
@@ -23,7 +24,7 @@ import {
   WATCHLIST_STORAGE_KEY,
   watchlistChangedEvent,
 } from "@/lib/watchlist";
-import { ProUpgradePrompt } from "./ProUpgradePrompt";
+import { ProUpgradePromptFromCopy } from "./ProUpgradePrompt";
 const emptyWatchlist: SavedScenario[] = [];
 let cachedWatchlistRaw: string | null = null;
 let cachedWatchlistSnapshot: SavedScenario[] = emptyWatchlist;
@@ -95,16 +96,8 @@ export function WatchlistExperience() {
             ))}
           </div>
           {!hasProAccess ? (
-            <ProUpgradePrompt
-              eyebrow="Full watchlist"
-              title="Unlock unlimited saved scenarios"
-              body="Free accounts can save one scenario. Pro and Lifetime are planned for a full watchlist, BTC movement across every saved goal, historical comparisons, and exportable reports."
-              features={[
-                "Unlimited saved scenarios",
-                "BTC movement impact across all saved goals",
-                "Historical comparisons over time",
-                "Private share links and PDF/report exports",
-              ]}
+            <ProUpgradePromptFromCopy
+              copy={getProConversionCopy("fullWatchlist")}
             />
           ) : null}
         </div>

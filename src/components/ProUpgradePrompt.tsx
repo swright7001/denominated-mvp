@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { Lock, Sparkles } from "lucide-react";
+import type { ProConversionCopy } from "@/lib/pro-copy";
 
 type ProUpgradePromptProps = {
   eyebrow?: string;
   title: string;
   body: string;
   features?: string[];
+  primaryCta?: string;
+  secondaryCta?: string;
+  footnote?: string;
   compact?: boolean;
 };
 
@@ -14,6 +18,9 @@ export function ProUpgradePrompt({
   title,
   body,
   features = [],
+  primaryCta = "Compare Plans",
+  secondaryCta = "Run a Free Scenario",
+  footnote = "Pro and Lifetime are planned upgrade tiers. No payment is collected in this MVP.",
   compact = false,
 }: ProUpgradePromptProps) {
   return (
@@ -48,19 +55,37 @@ export function ProUpgradePrompt({
           className="copper-button inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-semibold"
           href="/plans"
         >
-          Compare Plans
+          {primaryCta}
         </Link>
         <Link
           className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-sm text-[#f0a36f]"
           href="/calculator"
         >
-          Run a Free Scenario
+          {secondaryCta}
         </Link>
       </div>
-      <p className="mt-4 text-xs leading-5 text-[#8f8172]">
-        Pro and Lifetime are planned upgrade tiers. No payment is collected in
-        this MVP.
-      </p>
+      <p className="mt-4 text-xs leading-5 text-[#8f8172]">{footnote}</p>
     </section>
+  );
+}
+
+export function ProUpgradePromptFromCopy({
+  copy,
+  compact,
+}: {
+  copy: ProConversionCopy;
+  compact?: boolean;
+}) {
+  return (
+    <ProUpgradePrompt
+      eyebrow={copy.eyebrow}
+      title={copy.title}
+      body={copy.body}
+      features={copy.features}
+      primaryCta={copy.primaryCta}
+      secondaryCta={copy.secondaryCta}
+      footnote={copy.footnote}
+      compact={compact}
+    />
   );
 }

@@ -26,6 +26,7 @@ import {
   type PlanTier,
 } from "@/lib/entitlements";
 import { applyBTCPriceToScenarios } from "@/lib/live-scenarios";
+import { getProConversionCopy } from "@/lib/pro-copy";
 import { scenarios } from "@/lib/scenarios";
 import {
   buildSavedScenarioImpactCopy,
@@ -41,7 +42,7 @@ import {
   watchlistChangedEvent,
 } from "@/lib/watchlist";
 import { DISCLAIMER } from "./Footer";
-import { ProUpgradePrompt } from "./ProUpgradePrompt";
+import { ProUpgradePromptFromCopy } from "./ProUpgradePrompt";
 
 const emptyWatchlist: SavedScenario[] = [];
 let cachedWatchlistRaw: string | null = null;
@@ -143,34 +144,21 @@ export function RecurringDashboard() {
       ) : (
         <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-6">
-            <ProUpgradePrompt
-              title="Track purchasing power every day"
-              body="The full dashboard is reserved for Pro and Lifetime so recurring, personalized tracking can become Denominated's paid value without limiting the free calculator."
-              features={[
-                "Daily purchasing-power snapshot",
-                "Historical comparisons over time",
-                "BTC movement impact across all saved scenarios",
-                "Custom categories and assumption presets",
-              ]}
+            <ProUpgradePromptFromCopy
+              copy={getProConversionCopy("dailySnapshot")}
             />
             <SavedScenarioSummary savedScenarios={savedScenarios.slice(0, 1)} />
           </div>
           <div className="space-y-6">
-            <ProUpgradePrompt
-              eyebrow="Weekly report"
-              title="Get a weekly cost-of-life view"
-              body="Pro will turn saved scenarios and popular examples into a readable report you can revisit, share, and use for long-term purchasing-power education."
-              features={[
-                "Weekly cost-of-life report",
-                "Email reports",
-                "Private share links",
-                "PDF/report exports",
-              ]}
+            <ProUpgradePromptFromCopy
+              copy={getProConversionCopy("weeklyReport")}
             />
-            <ProUpgradePrompt
-              eyebrow="Email reports"
-              title="Email updates are a Pro habit feature"
-              body="Educational emails stay warm and useful, but recurring reports tied to saved scenarios belong in the Pro/Lifetime experience."
+            <ProUpgradePromptFromCopy
+              copy={getProConversionCopy("exportPrivateShare")}
+              compact
+            />
+            <ProUpgradePromptFromCopy
+              copy={getProConversionCopy("customCategoriesPresets")}
               compact
             />
           </div>

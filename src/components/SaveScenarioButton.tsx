@@ -8,6 +8,7 @@ import {
   canSaveScenario,
   getMockPlanTierFromStorage,
 } from "@/lib/entitlements";
+import { getProConversionCopy } from "@/lib/pro-copy";
 import {
   addSavedScenario,
   parseSavedScenarios,
@@ -20,8 +21,9 @@ import { SignupPrompt } from "./SignupPrompt";
 
 export function SaveScenarioButton({ scenario }: { scenario: ScenarioInput }) {
   const [saved, setSaved] = useState(false);
-  const [limitMessage, setLimitMessage] = useState("");
+  const [limitReached, setLimitReached] = useState(false);
   const [isSignupPromptOpen, setIsSignupPromptOpen] = useState(false);
+  const saveLimitCopy = getProConversionCopy("saveLimitReached");
 
   function saveScenario() {
     const hasSignupEmail = window.localStorage.getItem(signupEmailKey);
@@ -38,11 +40,7 @@ export function SaveScenarioButton({ scenario }: { scenario: ScenarioInput }) {
     const decision = canSaveScenario(planTier, current.length);
 
     if (!decision.allowed) {
-      setLimitMessage(
-        decision.reason === "limit-reached"
-          ? "Free accounts can save 1 scenario. Pro and Lifetime will unlock unlimited saved scenarios."
-          : "Create a free account to save your first scenario.",
-      );
+      setLimitReached(decision.reason === "limit-reached");
       return;
     }
 
@@ -53,7 +51,7 @@ export function SaveScenarioButton({ scenario }: { scenario: ScenarioInput }) {
       serializeSavedScenarios(next),
     );
     window.dispatchEvent(new Event(watchlistChangedEvent));
-    setLimitMessage("");
+    setLimitReached(false);
     showSavedState();
   }
 
@@ -73,15 +71,28 @@ export function SaveScenarioButton({ scenario }: { scenario: ScenarioInput }) {
         {saved ? "Saved to Watchlist" : "Save Scenario"}
       </button>
 
-      {limitMessage ? (
+      {limitReached ? (
         <div className="mt-3 max-w-xl rounded-md border border-[rgba(240,163,111,0.26)] bg-black/24 p-4 text-sm leading-6 text-[#b9ab9a]">
           <p className="flex items-start gap-2">
             <Lock className="mt-0.5 shrink-0 text-[#f0a36f]" size={16} />
-            <span>{limitMessage}</span>
+            <span>
+              <span className="block font-medium text-[#efe6da]">
+                {saveLimitCopy.title}
+              </span>
+              <span className="mt-1 block">{saveLimitCopy.body}</span>
+            </span>
           </p>
-          <Link className="mt-3 inline-block text-[#f0a36f]" href="/plans">
-            Compare plans
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <Link className="text-[#f0a36f]" href="/plans">
+              {saveLimitCopy.primaryCta}
+            </Link>
+            <Link className="text-[#d9ccbd]" href="/calculator">
+              {saveLimitCopy.secondaryCta}
+            </Link>
+          </div>
+          <p className="mt-3 text-xs leading-5 text-[#8f8172]">
+            {saveLimitCopy.footnote}
+          </p>
         </div>
       ) : null}
 
