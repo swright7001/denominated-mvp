@@ -11,6 +11,7 @@ const navItems = [
   { href: "/examples", label: "Examples" },
   { href: "/watchlist", label: "Watchlist" },
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/plans", label: "Plans" },
   { href: "/learn", label: "Learn" },
 ];
 

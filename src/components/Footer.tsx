@@ -18,6 +18,7 @@ export function Footer() {
           <Link href="/calculator">Calculator</Link>
           <Link href="/examples">Examples</Link>
           <Link href="/dashboard">Dashboard</Link>
+          <Link href="/plans">Plans</Link>
           <Link href="/learn">Learn</Link>
         </div>
       </div>

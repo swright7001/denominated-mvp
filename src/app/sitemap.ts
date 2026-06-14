@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { scenarios } from "@/lib/scenarios";
 import { siteConfig } from "@/lib/site";
 
-const staticRoutes = ["", "/calculator", "/examples", "/learn"];
+const staticRoutes = ["", "/calculator", "/examples", "/learn", "/plans"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
