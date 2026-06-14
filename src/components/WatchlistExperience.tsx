@@ -6,6 +6,11 @@ import { ArrowRight, BookmarkPlus, RotateCcw, Trash2 } from "lucide-react";
 import type { BTCPriceResult } from "@/lib/btc-price";
 import { formatBTC, formatUSD } from "@/lib/calculations";
 import {
+  getMockPlanTierFromStorage,
+  isProEntitled,
+  type PlanTier,
+} from "@/lib/entitlements";
+import {
   buildSavedScenarioImpactCopy,
   calculateScenarioImpact,
 } from "@/lib/scenario-insights";
@@ -18,6 +23,7 @@ import {
   WATCHLIST_STORAGE_KEY,
   watchlistChangedEvent,
 } from "@/lib/watchlist";
+import { ProUpgradePrompt } from "./ProUpgradePrompt";
 const emptyWatchlist: SavedScenario[] = [];
 let cachedWatchlistRaw: string | null = null;
 let cachedWatchlistSnapshot: SavedScenario[] = emptyWatchlist;
@@ -29,6 +35,15 @@ export function WatchlistExperience() {
     getServerWatchlistSnapshot,
   );
   const btcPrice = useWatchlistBTCPrice();
+  const planTier = useSyncExternalStore(
+    subscribeToPlanTier,
+    getPlanTierSnapshot,
+    getServerPlanTierSnapshot,
+  );
+  const hasProAccess = isProEntitled(planTier);
+  const visibleSavedScenarios = hasProAccess
+    ? savedScenarios
+    : savedScenarios.slice(0, 1);
 
   function deleteSavedScenario(id: string) {
     const next = removeSavedScenario(savedScenarios, id);
@@ -65,18 +80,33 @@ export function WatchlistExperience() {
       {savedScenarios.length === 0 ? (
         <WatchlistEmptyState />
       ) : (
-        <div className="grid gap-5 lg:grid-cols-2">
-          {savedScenarios.map((savedScenario) => (
-            <WatchlistCard
-              key={savedScenario.id}
-              savedScenario={savedScenario}
-              currentBTCPriceUSD={
-                btcPrice.data?.priceUSD ??
-                savedScenario.scenario.currentBTCPriceUSD
-              }
-              onDelete={() => deleteSavedScenario(savedScenario.id)}
+        <div className="space-y-5">
+          <div className="grid gap-5 lg:grid-cols-2">
+            {visibleSavedScenarios.map((savedScenario) => (
+              <WatchlistCard
+                key={savedScenario.id}
+                savedScenario={savedScenario}
+                currentBTCPriceUSD={
+                  btcPrice.data?.priceUSD ??
+                  savedScenario.scenario.currentBTCPriceUSD
+                }
+                onDelete={() => deleteSavedScenario(savedScenario.id)}
+              />
+            ))}
+          </div>
+          {!hasProAccess ? (
+            <ProUpgradePrompt
+              eyebrow="Full watchlist"
+              title="Unlock unlimited saved scenarios"
+              body="Free accounts can save one scenario. Pro and Lifetime are planned for a full watchlist, BTC movement across every saved goal, historical comparisons, and exportable reports."
+              features={[
+                "Unlimited saved scenarios",
+                "BTC movement impact across all saved goals",
+                "Historical comparisons over time",
+                "Private share links and PDF/report exports",
+              ]}
             />
-          ))}
+          ) : null}
         </div>
       )}
     </div>
@@ -108,6 +138,20 @@ function getWatchlistSnapshot() {
 
 function getServerWatchlistSnapshot() {
   return emptyWatchlist;
+}
+
+function subscribeToPlanTier(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+
+  return () => window.removeEventListener("storage", onStoreChange);
+}
+
+function getPlanTierSnapshot(): PlanTier {
+  return getMockPlanTierFromStorage(window.localStorage);
+}
+
+function getServerPlanTierSnapshot(): PlanTier {
+  return "noAccount";
 }
 
 function WatchlistCard({

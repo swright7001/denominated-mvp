@@ -20,6 +20,11 @@ import {
 } from "@/lib/account";
 import type { BTCPriceResult } from "@/lib/btc-price";
 import { calculateScenario, formatBTC, formatUSD } from "@/lib/calculations";
+import {
+  getMockPlanTierFromStorage,
+  isProEntitled,
+  type PlanTier,
+} from "@/lib/entitlements";
 import { applyBTCPriceToScenarios } from "@/lib/live-scenarios";
 import { scenarios } from "@/lib/scenarios";
 import {
@@ -36,6 +41,7 @@ import {
   watchlistChangedEvent,
 } from "@/lib/watchlist";
 import { DISCLAIMER } from "./Footer";
+import { ProUpgradePrompt } from "./ProUpgradePrompt";
 
 const emptyWatchlist: SavedScenario[] = [];
 let cachedWatchlistRaw: string | null = null;
@@ -57,6 +63,11 @@ export function RecurringDashboard() {
       ? defaultEmailPreferences
       : parseEmailPreferences(window.localStorage.getItem(emailPreferencesKey)),
   );
+  const planTier = useSyncExternalStore(
+    subscribeToPlanTier,
+    getPlanTierSnapshot,
+    getServerPlanTierSnapshot,
+  );
   const btcPrice = useLiveBTCPrice();
   const currentBTCPriceUSD =
     btcPrice.data?.priceUSD ??
@@ -69,6 +80,7 @@ export function RecurringDashboard() {
       ),
     [currentBTCPriceUSD, savedScenarios],
   );
+  const hasProAccess = isProEntitled(planTier);
 
   function updatePreference(key: keyof EmailPreferences) {
     setPreferences((current) => {
@@ -103,30 +115,67 @@ export function RecurringDashboard() {
         </Link>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-6">
-          <DailySnapshot
-            impacts={impacts}
-            savedCount={savedScenarios.length}
-            currentBTCPriceUSD={currentBTCPriceUSD}
-            btcPriceStatus={btcPrice.status}
-          />
-          <RecentScenarioChanges impacts={impacts} />
-          <SavedScenarioSummary savedScenarios={savedScenarios} />
+      {hasProAccess ? (
+        <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <DailySnapshot
+              impacts={impacts}
+              savedCount={savedScenarios.length}
+              currentBTCPriceUSD={currentBTCPriceUSD}
+              btcPriceStatus={btcPrice.status}
+            />
+            <RecentScenarioChanges impacts={impacts} />
+            <SavedScenarioSummary savedScenarios={savedScenarios} />
+          </div>
+          <div className="space-y-6">
+            <WeeklyReportPreview
+              savedScenarios={savedScenarios}
+              impacts={impacts}
+              currentBTCPriceUSD={currentBTCPriceUSD}
+            />
+            <EmailPreferencesPanel
+              email={email}
+              preferences={preferences}
+              onToggle={updatePreference}
+            />
+          </div>
         </div>
-        <div className="space-y-6">
-          <WeeklyReportPreview
-            savedScenarios={savedScenarios}
-            impacts={impacts}
-            currentBTCPriceUSD={currentBTCPriceUSD}
-          />
-          <EmailPreferencesPanel
-            email={email}
-            preferences={preferences}
-            onToggle={updatePreference}
-          />
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <ProUpgradePrompt
+              title="Track purchasing power every day"
+              body="The full dashboard is reserved for Pro and Lifetime so recurring, personalized tracking can become Denominated's paid value without limiting the free calculator."
+              features={[
+                "Daily purchasing-power snapshot",
+                "Historical comparisons over time",
+                "BTC movement impact across all saved scenarios",
+                "Custom categories and assumption presets",
+              ]}
+            />
+            <SavedScenarioSummary savedScenarios={savedScenarios.slice(0, 1)} />
+          </div>
+          <div className="space-y-6">
+            <ProUpgradePrompt
+              eyebrow="Weekly report"
+              title="Get a weekly cost-of-life view"
+              body="Pro will turn saved scenarios and popular examples into a readable report you can revisit, share, and use for long-term purchasing-power education."
+              features={[
+                "Weekly cost-of-life report",
+                "Email reports",
+                "Private share links",
+                "PDF/report exports",
+              ]}
+            />
+            <ProUpgradePrompt
+              eyebrow="Email reports"
+              title="Email updates are a Pro habit feature"
+              body="Educational emails stay warm and useful, but recurring reports tied to saved scenarios belong in the Pro/Lifetime experience."
+              compact
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -553,4 +602,18 @@ function getWatchlistSnapshot() {
 
 function getServerWatchlistSnapshot() {
   return emptyWatchlist;
+}
+
+function subscribeToPlanTier(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+
+  return () => window.removeEventListener("storage", onStoreChange);
+}
+
+function getPlanTierSnapshot(): PlanTier {
+  return getMockPlanTierFromStorage(window.localStorage);
+}
+
+function getServerPlanTierSnapshot(): PlanTier {
+  return "noAccount";
 }

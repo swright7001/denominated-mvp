@@ -1,0 +1,66 @@
+import Link from "next/link";
+import { Lock, Sparkles } from "lucide-react";
+
+type ProUpgradePromptProps = {
+  eyebrow?: string;
+  title: string;
+  body: string;
+  features?: string[];
+  compact?: boolean;
+};
+
+export function ProUpgradePrompt({
+  eyebrow = "Pro preview",
+  title,
+  body,
+  features = [],
+  compact = false,
+}: ProUpgradePromptProps) {
+  return (
+    <section className={`panel rounded-lg ${compact ? "p-5" : "p-6 sm:p-7"}`}>
+      <div className="flex items-start gap-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+          <Lock size={20} />
+        </div>
+        <div className="min-w-0">
+          <p className="eyebrow mb-3">{eyebrow}</p>
+          <h2 className="text-2xl font-medium text-[#efe6da]">{title}</h2>
+          <p className="mt-3 text-sm leading-6 text-[#b9ab9a]">{body}</p>
+        </div>
+      </div>
+
+      {features.length > 0 ? (
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {features.map((feature) => (
+            <div
+              key={feature}
+              className="flex items-start gap-3 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4 text-sm leading-6 text-[#d9ccbd]"
+            >
+              <Sparkles className="mt-1 shrink-0 text-[#f0a36f]" size={15} />
+              <span>{feature}</span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+        <Link
+          className="copper-button inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-semibold"
+          href="/plans"
+        >
+          Compare Plans
+        </Link>
+        <Link
+          className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-sm text-[#f0a36f]"
+          href="/calculator"
+        >
+          Run a Free Scenario
+        </Link>
+      </div>
+      <p className="mt-4 text-xs leading-5 text-[#8f8172]">
+        Pro and Lifetime are planned upgrade tiers. No payment is collected in
+        this MVP.
+      </p>
+    </section>
+  );
+}

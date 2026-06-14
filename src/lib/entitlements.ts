@@ -130,6 +130,10 @@ export function canUseFeature(tier: PlanTier, feature: FeatureKey) {
   return getFeatureAccess(tier, feature) !== "none";
 }
 
+export function isProEntitled(tier: PlanTier) {
+  return tier === "pro" || tier === "lifetime";
+}
+
 export function canSaveScenario(
   tier: PlanTier,
   savedScenarioCount: number,

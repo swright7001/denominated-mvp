@@ -6,6 +6,7 @@ import {
   getFeatureAccess,
   getMockPlanTierFromStorage,
   getPlanEntitlements,
+  isProEntitled,
   mockPlanTierKey,
   parsePlanTier,
 } from "../src/lib/entitlements";
@@ -60,6 +61,13 @@ test("pro and lifetime can save unlimited scenarios", () => {
     tier: "lifetime",
     limit: "unlimited",
   });
+});
+
+test("lifetime is treated as pro-entitled for gated habit features", () => {
+  assert.equal(isProEntitled("noAccount"), false);
+  assert.equal(isProEntitled("freeAccount"), false);
+  assert.equal(isProEntitled("pro"), true);
+  assert.equal(isProEntitled("lifetime"), true);
 });
 
 test("premium features are centralized by feature access", () => {
