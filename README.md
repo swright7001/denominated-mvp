@@ -42,6 +42,7 @@ npm run lint
 - Implements no client-side third-party API calls.
 - Implements no payments.
 - Includes placeholder future API functions in `src/lib/api.ts`.
+- Documents the future Stripe checkout plan in `docs/stripe-checkout-plan.md`.
 - Uses the provided Denominated logo and UI references from `public/brand`.
 
 ## Live BTC Price Data

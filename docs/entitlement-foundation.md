@@ -66,6 +66,10 @@ only the plan-resolution layer:
   `getPlanEntitlements()`, `getFeatureAccess()`, `canUseFeature()`, and
   `canSaveScenario()`.
 
+Use `docs/stripe-checkout-plan.md` as the Stripe implementation map for
+products, prices, checkout sessions, webhook events, cancellation behavior, and
+Vercel environment variables.
+
 Do not scatter checks such as `if (user.isPro)` across components. Add or adjust
 feature access in `src/lib/entitlements.ts` first, then let UI surfaces query the
 central helpers.

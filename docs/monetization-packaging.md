@@ -118,7 +118,7 @@ This packaging affects:
 - DEN-83: Upgrade copy should sell recurring purchasing-power tracking, not
   trading, price panic, or financial advice.
 - DEN-84: Stripe planning should support monthly Pro, annual Pro, and Lifetime
-  ownership.
+  ownership. See `docs/stripe-checkout-plan.md`.
 
 ## Open Decisions
 
@@ -143,4 +143,5 @@ Use placeholders until pricing is finalized:
 - Lifetime standard price later: $149-$249.
 
 These are planning assumptions only. Do not implement checkout or present final
-pricing as confirmed until DEN-84 is completed.
+pricing as confirmed until Stripe implementation work follows
+`docs/stripe-checkout-plan.md`.
