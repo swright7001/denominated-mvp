@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { isClerkConfigured, signInPath, signUpPath } from "@/lib/auth";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -58,7 +60,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
+  const app = (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
@@ -69,5 +71,15 @@ export default function RootLayout({
         <SpeedInsights />
       </body>
     </html>
+  );
+
+  if (!isClerkConfigured()) {
+    return app;
+  }
+
+  return (
+    <ClerkProvider signInUrl={signInPath} signUpUrl={signUpPath}>
+      {app}
+    </ClerkProvider>
   );
 }

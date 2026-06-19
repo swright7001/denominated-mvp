@@ -51,7 +51,7 @@ const tiers = [
   },
   {
     name: "Pro",
-    eyebrow: "Placeholder pricing",
+    eyebrow: "Recurring tracking",
     price: "$7/mo",
     cadence: "or $59/year",
     icon: Clock,
@@ -67,7 +67,7 @@ const tiers = [
     name: "Lifetime",
     eyebrow: "Founder option",
     price: "$99",
-    cadence: "launch placeholder",
+    cadence: "one-time access",
     icon: Infinity,
     summary: "Full Pro ownership forever.",
     body: "Everything in Pro, plus lifetime access to future premium tools unless a later launch explicitly excludes them.",
@@ -190,7 +190,7 @@ const principles = [
   "The calculator stays useful without an account.",
   "The first scenario is never hard-gated.",
   "Paid value is recurring tracking, not basic access.",
-  "Prices are placeholders until Stripe planning is complete.",
+  "Paid launch requires real auth, storage, Stripe fulfillment, and legal signoff.",
 ];
 
 export default function PlansPage() {
@@ -311,8 +311,9 @@ export default function PlansPage() {
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-6 text-[#b9ab9a]">
-              This is the current packaging plan. Payment and checkout are
-              intentionally excluded until Stripe planning is complete.
+              This is the current packaging plan for launch. Paid access should
+              only be enabled once auth, storage, billing fulfillment, and legal
+              review are production-ready.
             </p>
           </div>
 
@@ -376,6 +377,20 @@ export default function PlansPage() {
           <section className="panel rounded-lg p-6">
             <p className="eyebrow">Disclaimer</p>
             <p className="mt-4 leading-7 text-[#b9ab9a]">{DISCLAIMER}</p>
+            <div className="mt-5 flex flex-wrap gap-4 text-sm">
+              <Link className="text-[#f0a36f]" href="/legal/terms">
+                Terms
+              </Link>
+              <Link className="text-[#f0a36f]" href="/legal/privacy">
+                Privacy
+              </Link>
+              <Link className="text-[#f0a36f]" href="/legal/refunds">
+                Refunds
+              </Link>
+              <Link className="text-[#f0a36f]" href="/billing">
+                Billing readiness
+              </Link>
+            </div>
           </section>
         </div>
       </section>

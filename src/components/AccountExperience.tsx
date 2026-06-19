@@ -239,6 +239,12 @@ export function AccountExperience() {
             >
               Compare Plans
             </Link>
+            <Link
+              className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-[#f0a36f]"
+              href="/billing"
+            >
+              Manage Billing
+            </Link>
           </div>
         </section>
       </div>

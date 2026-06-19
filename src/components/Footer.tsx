@@ -20,7 +20,11 @@ export function Footer() {
           <Link href="/dashboard">Dashboard</Link>
           <Link href="/plans">Plans</Link>
           <Link href="/account">Account</Link>
+          <Link href="/billing">Billing</Link>
           <Link href="/learn">Learn</Link>
+          <Link href="/legal/terms">Terms</Link>
+          <Link href="/legal/privacy">Privacy</Link>
+          <Link href="/legal/refunds">Refunds</Link>
         </div>
       </div>
     </footer>
