@@ -1,8 +1,8 @@
 import Link from "next/link";
+import { EDUCATIONAL_DISCLAIMER } from "@/lib/legal";
 import { BrandMark } from "./BrandMark";
 
-export const DISCLAIMER =
-  "This tool is educational only. It does not provide financial advice. Future Bitcoin prices, inflation rates, and item prices are assumptions, not guarantees.";
+export const DISCLAIMER = EDUCATIONAL_DISCLAIMER;
 
 export function Footer() {
   return (

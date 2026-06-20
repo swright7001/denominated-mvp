@@ -89,4 +89,4 @@ Bitcoin's USD spot price from CoinGecko's `/simple/price` endpoint with
 
 ## Disclaimer
 
-This tool is educational only. It does not provide financial advice. Future Bitcoin prices, inflation rates, and item prices are assumptions, not guarantees.
+This tool is educational only. It does not provide financial, investment, tax, legal, or accounting advice. Future Bitcoin prices, inflation rates, and item prices are assumptions, not guarantees.

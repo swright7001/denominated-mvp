@@ -1,4 +1,5 @@
 import { formatBTC, formatUSD, getChangeCopy } from "@/lib/calculations";
+import { ASSUMPTION_CAVEAT } from "@/lib/legal";
 import { ScenarioInput, ScenarioResult } from "@/lib/types";
 
 export function ResultCards({
@@ -47,6 +48,9 @@ export function ResultCards({
       </div>
       <p className="mt-6 rounded-md border border-[rgba(240,163,111,0.18)] bg-[#2a1810]/45 p-4 text-sm break-words text-[#f0c19f]">
         {getChangeCopy(result.btcCostChangePercent)}
+      </p>
+      <p className="mt-3 text-xs leading-5 text-[#8f8172]">
+        {ASSUMPTION_CAVEAT}
       </p>
     </section>
   );

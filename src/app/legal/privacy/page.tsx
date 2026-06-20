@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Layout } from "@/components/Layout";
+import { DATA_SOURCE_CAVEAT, SUPPORT_CONTACT_NOTE } from "@/lib/legal";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -18,11 +19,15 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: "What Denominated Collects",
-    body: "Before production auth is connected, the app may store calculator inputs, saved scenarios, account email placeholders, and plan test state in your browser. After launch, account, billing, email preference, and saved scenario data should be stored by the configured production providers.",
+    body: "Before production auth is connected, the app may store calculator inputs, saved scenarios, account email placeholders, and plan test state in your browser. When account features are connected, account, billing, email preference, and saved scenario data should be stored by the configured production providers.",
   },
   {
     title: "How Data Is Used",
     body: "Data is used to run calculator scenarios, save watchlist items, manage account access, process billing, deliver opted-in reports, improve the product, and provide support.",
+  },
+  {
+    title: "Price And Scenario Inputs",
+    body: DATA_SOURCE_CAVEAT,
   },
   {
     title: "Payment Data",
@@ -38,7 +43,7 @@ const sections = [
   },
   {
     title: "Production Review",
-    body: "This privacy notice is a launch scaffold. It should be reviewed and finalized before accepting production payments or storing durable user data.",
+    body: `${SUPPORT_CONTACT_NOTE} Privacy and data-retention language should be reviewed before accepting production payments or storing durable user data.`,
   },
 ];
 
@@ -53,7 +58,8 @@ export default function PrivacyPage() {
           </h1>
           <p className="mt-5 text-lg leading-8 text-[#b9ab9a]">
             Denominated should collect only what it needs to run the product,
-            support paid users, and send opted-in purchasing-power updates.
+            support account features, and send opted-in purchasing-power
+            updates.
           </p>
         </div>
 

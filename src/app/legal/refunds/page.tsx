@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import { Layout } from "@/components/Layout";
+import { PAID_FEATURES_CAVEAT, SUPPORT_CONTACT_NOTE } from "@/lib/legal";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Refunds and Cancellations",
-  description: "Refund and cancellation policy scaffold for Denominated.",
+  description: "Refund and cancellation policy for Denominated.",
   alternates: {
     canonical: "/legal/refunds",
   },
   openGraph: {
     title: "Refunds and Cancellations | Denominated",
-    description: "Refund and cancellation policy scaffold for Denominated.",
+    description: "Refund and cancellation policy for Denominated.",
     url: absoluteUrl("/legal/refunds"),
   },
 };
@@ -18,15 +19,15 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: "Free Calculator",
-    body: "The core calculator remains free. Paid tiers are for recurring tracking, saved scenarios, reports, exports, and other account-based tools.",
+    body: PAID_FEATURES_CAVEAT,
   },
   {
     title: "Pro Subscription",
-    body: "If Pro subscriptions are enabled, users should be able to cancel future renewals through the billing management flow. Access should continue until the end of the paid billing period unless a refund or account issue changes that status.",
+    body: "If Pro subscriptions are enabled, users should be able to cancel future renewals through the billing management flow. Access should continue until the end of the paid billing period unless a refund, chargeback, account issue, or terms violation changes that status.",
   },
   {
     title: "Lifetime Access",
-    body: "Lifetime should mean ongoing access to the included Pro feature set for the life of the product, subject to the final terms. Refund eligibility for Lifetime purchases must be decided before launch.",
+    body: "Lifetime access should mean ongoing access to the included Pro feature set for the life of the product, subject to the final terms and any refund policy published at checkout.",
   },
   {
     title: "Failed Payments",
@@ -34,7 +35,7 @@ const sections = [
   },
   {
     title: "Support",
-    body: "A production support contact should be published before accepting payments so users have a clear path for billing questions, cancellations, and account access problems.",
+    body: SUPPORT_CONTACT_NOTE,
   },
 ];
 
@@ -48,8 +49,8 @@ export default function RefundsPage() {
             Refunds and Cancellations
           </h1>
           <p className="mt-5 text-lg leading-8 text-[#b9ab9a]">
-            This policy scaffold keeps paid-launch expectations visible while
-            final legal, tax, and support decisions are completed.
+            This page keeps paid-launch expectations visible while final legal,
+            tax, and support decisions are completed.
           </p>
         </div>
 

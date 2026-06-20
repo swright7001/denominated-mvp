@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { formatBTC } from "@/lib/calculations";
+import { ASSUMPTION_CAVEAT } from "@/lib/legal";
 import { ScenarioInput, ScenarioResult } from "@/lib/types";
 
 export function ShareableResultCard({
@@ -56,6 +57,9 @@ export function ShareableResultCard({
           <p className="mt-5 text-base break-words text-[#f0a36f] sm:text-lg">
             {Math.abs(result.btcCostChangePercent).toFixed(1)}% {direction} in
             Bitcoin terms.
+          </p>
+          <p className="mt-4 text-xs leading-5 break-words text-[#b9ab9a]">
+            {ASSUMPTION_CAVEAT}
           </p>
         </div>
       </div>

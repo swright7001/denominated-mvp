@@ -21,8 +21,8 @@ until these systems are configured and verified:
 ## What Was Added
 
 - `/billing` shows billing management and paid-launch readiness checks.
-- `/legal/terms`, `/legal/privacy`, and `/legal/refunds` provide launch-safe
-  legal scaffolds.
+- `/legal/terms`, `/legal/privacy`, and `/legal/refunds` provide launch-facing
+  legal pages that still require final professional review before paid launch.
 - `/api/webhooks/stripe` verifies Stripe signatures and maps events to billing
   actions.
 - `/api/billing/portal` creates Stripe Billing Portal sessions only in explicit
@@ -94,9 +94,13 @@ Required persisted fields:
 Before enabling live paid CTAs:
 
 - Confirm final prices and plan language.
-- Confirm refund policy for subscriptions and Lifetime.
+- Confirm Terms, Privacy, and Refunds/Cancellations pages have been reviewed.
+- Confirm refund policy for subscriptions and Lifetime is visible at checkout.
 - Confirm sales tax/VAT handling.
 - Confirm support email and process.
-- Confirm legal copy has been reviewed.
+- Confirm financial disclaimer placement across calculator, result cards,
+  share/tweet surfaces, dashboard/report views, pricing, and footer.
+- Confirm assumptions and data-source caveats are visible wherever live/preset
+  prices or future scenarios are shown.
 - Run test-mode checkout, webhook, cancellation, and billing portal flows.
 - Repeat the flow in Vercel Preview before Production.

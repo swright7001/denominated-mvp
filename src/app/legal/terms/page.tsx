@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { Layout } from "@/components/Layout";
 import { DISCLAIMER } from "@/components/Footer";
+import {
+  ASSUMPTION_CAVEAT,
+  DATA_SOURCE_CAVEAT,
+  PAID_FEATURES_CAVEAT,
+  SUPPORT_CONTACT_NOTE,
+} from "@/lib/legal";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -22,7 +28,7 @@ export default function TermsPage() {
       <LegalArticle
         eyebrow="Legal"
         title="Terms of Use"
-        intro="These launch terms are written to set clear expectations before paid tiers go live. They should be reviewed by counsel before accepting production payments."
+        intro="These terms set expectations for using Denominated's calculator, examples, account features, and future paid tracking tools."
         sections={[
           {
             title: "Educational Tool",
@@ -30,7 +36,11 @@ export default function TermsPage() {
           },
           {
             title: "Assumptions Are User-Controlled",
-            body: "Denominated calculates scenarios from the prices, rates, and time horizons shown in the product. Bitcoin prices, item prices, inflation rates, and growth assumptions may be incomplete, delayed, stale, or wrong.",
+            body: `Denominated calculates scenarios from the prices, rates, and time horizons shown in the product. ${ASSUMPTION_CAVEAT}`,
+          },
+          {
+            title: "Data May Be Delayed Or Estimated",
+            body: DATA_SOURCE_CAVEAT,
           },
           {
             title: "No Investment Or Purchasing Advice",
@@ -38,7 +48,7 @@ export default function TermsPage() {
           },
           {
             title: "Accounts And Paid Features",
-            body: "If paid tiers are enabled, the free calculator remains available without payment. Paid features are intended for saved scenarios, watchlists, dashboards, reports, exports, and other recurring-use tools.",
+            body: PAID_FEATURES_CAVEAT,
           },
           {
             title: "Service Changes",
@@ -46,7 +56,7 @@ export default function TermsPage() {
           },
           {
             title: "Contact",
-            body: "For account, billing, or support questions, contact the support address published with the production launch.",
+            body: SUPPORT_CONTACT_NOTE,
           },
         ]}
       />
