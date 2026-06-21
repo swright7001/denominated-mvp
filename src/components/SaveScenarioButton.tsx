@@ -3,7 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { BookmarkPlus, Check, Lock } from "lucide-react";
-import { signupEmailKey } from "@/lib/account";
+import {
+  hasAcceptedPurchasingPowerCommitment,
+  signupEmailKey,
+} from "@/lib/account";
 import {
   canSaveScenario,
   getMockPlanTierFromStorage,
@@ -17,15 +20,26 @@ import {
   watchlistChangedEvent,
 } from "@/lib/watchlist";
 import type { ScenarioInput } from "@/lib/types";
+import { PurchasingPowerCommitmentPrompt } from "./PurchasingPowerCommitmentPrompt";
 import { SignupPrompt } from "./SignupPrompt";
 
 export function SaveScenarioButton({ scenario }: { scenario: ScenarioInput }) {
   const [saved, setSaved] = useState(false);
   const [limitReached, setLimitReached] = useState(false);
+  const [isCommitmentPromptOpen, setIsCommitmentPromptOpen] = useState(false);
   const [isSignupPromptOpen, setIsSignupPromptOpen] = useState(false);
   const saveLimitCopy = getProConversionCopy("saveLimitReached");
 
   function saveScenario() {
+    if (!hasAcceptedPurchasingPowerCommitment(window.localStorage)) {
+      setIsCommitmentPromptOpen(true);
+      return;
+    }
+
+    continueSaveScenario();
+  }
+
+  function continueSaveScenario() {
     const hasSignupEmail = window.localStorage.getItem(signupEmailKey);
     const planTier = getMockPlanTierFromStorage(window.localStorage);
 
@@ -95,6 +109,15 @@ export function SaveScenarioButton({ scenario }: { scenario: ScenarioInput }) {
           </p>
         </div>
       ) : null}
+
+      <PurchasingPowerCommitmentPrompt
+        isOpen={isCommitmentPromptOpen}
+        onAccept={() => {
+          setIsCommitmentPromptOpen(false);
+          continueSaveScenario();
+        }}
+        onClose={() => setIsCommitmentPromptOpen(false)}
+      />
 
       <SignupPrompt
         isOpen={isSignupPromptOpen}
