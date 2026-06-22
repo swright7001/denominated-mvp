@@ -34,13 +34,15 @@ until these systems are configured and verified:
   passes through so local MVP testing still works.
 - `src/lib/billing.ts` centralizes billing entitlement behavior.
 - `src/lib/production-readiness.ts` centralizes provider/env readiness checks.
+- Convex is initialized for durable account, billing snapshot, saved scenario,
+  and preset storage. See `docs/database-storage-foundation.md`.
 
 ## Required Environment Variables
 
 | Area | Environment variables |
 | --- | --- |
 | Clerk auth | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` |
-| Convex storage | `CONVEX_DEPLOYMENT`, `NEXT_PUBLIC_CONVEX_URL` |
+| Convex storage | `CONVEX_DEPLOYMENT`, `NEXT_PUBLIC_CONVEX_URL`, `CLERK_JWT_ISSUER_DOMAIN` |
 | Stripe checkout | `STRIPE_SECRET_KEY`, `STRIPE_PRO_MONTHLY_PRICE_ID`, `STRIPE_PRO_ANNUAL_PRICE_ID`, `STRIPE_LIFETIME_PRICE_ID` |
 | Stripe webhooks | `STRIPE_WEBHOOK_SECRET` |
 | Email | `RESEND_API_KEY` |

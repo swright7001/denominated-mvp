@@ -24,6 +24,7 @@ test("paid launch readiness passes environment checks when providers are configu
     CLERK_SECRET_KEY: "sk_test_123",
     CONVEX_DEPLOYMENT: "dev:denominated",
     NEXT_PUBLIC_CONVEX_URL: "https://convex.test",
+    CLERK_JWT_ISSUER_DOMAIN: "https://clerk.test",
     STRIPE_SECRET_KEY: "sk_test_123",
     STRIPE_PRO_MONTHLY_PRICE_ID: "price_monthly",
     STRIPE_PRO_ANNUAL_PRICE_ID: "price_annual",

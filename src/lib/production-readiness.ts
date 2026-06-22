@@ -21,9 +21,13 @@ const requiredLaunchEnvGroups = [
   {
     id: "storage",
     label: "Durable scenario storage",
-    envVars: ["CONVEX_DEPLOYMENT", "NEXT_PUBLIC_CONVEX_URL"],
+    envVars: [
+      "CONVEX_DEPLOYMENT",
+      "NEXT_PUBLIC_CONVEX_URL",
+      "CLERK_JWT_ISSUER_DOMAIN",
+    ],
     details:
-      "Convex must be configured before saved scenarios become durable product data.",
+      "Convex and Clerk JWT trust must be configured before saved scenarios become durable account data.",
   },
   {
     id: "stripe",
