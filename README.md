@@ -47,6 +47,8 @@ npm run lint
 - Includes a local account foundation at `/account`; production auth is planned
   with Clerk in `docs/account-auth-foundation.md`.
 - Documents the future Stripe checkout plan in `docs/stripe-checkout-plan.md`.
+- Documents the paid V2 Preview verification gate in
+  `docs/paid-v2-preview-runbook.md`.
 - Documents the free public launch checklist in
   `docs/free-launch-checklist.md`.
 - Uses the provided Denominated logo and UI references from `public/brand`.
@@ -90,7 +92,7 @@ Bitcoin's USD spot price from CoinGecko's `/simple/price` endpoint with
 - Decide custom domain strategy.
 - Add optional saved scenarios, email reports, auth, and premium features later.
 - Enable paid checkout only after Clerk-backed auth, Stripe billing portal, and
-  full test-mode billing flows are verified.
+  full test-mode billing flows are verified in Vercel Preview.
 
 ## Disclaimer
 

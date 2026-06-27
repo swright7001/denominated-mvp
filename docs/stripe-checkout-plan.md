@@ -11,6 +11,9 @@ Paid checkout is also protected by `DENOMINATED_ENABLE_PAID_CHECKOUT`. Keep that
 flag unset for the free public launch.
 Billing settings and payment fulfillment are not implemented in this MVP.
 
+For the paid V2 Preview verification sequence, see
+`docs/paid-v2-preview-runbook.md`.
+
 ## Product And Price Structure
 
 Create three Stripe Prices under two Stripe Products.
@@ -190,6 +193,8 @@ Recommended setup:
 7. Verify entitlement resolution returns `pro` and `lifetime`.
 8. Verify cancellation, failed payment, and Lifetime override behavior.
 9. Repeat in Vercel Preview before Production.
+10. Keep `DENOMINATED_ENABLE_PAID_CHECKOUT=true` out of Production until the
+    paid V2 Preview runbook has passed.
 
 ## Vercel Environment Variables
 

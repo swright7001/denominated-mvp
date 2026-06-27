@@ -85,8 +85,59 @@ const manualLaunchChecks = [
   },
 ];
 
-export function getProductionReadinessChecks(env: Env = process.env) {
-  const envChecks: ReadinessCheck[] = requiredLaunchEnvGroups.map((group) => {
+const paidPreviewVerificationChecks = [
+  {
+    id: "preview-deployment",
+    label: "Paid branch deployed to Vercel Preview",
+    details:
+      "The paid launch branch must be tested from a Preview deployment before it is merged or promoted.",
+  },
+  {
+    id: "preview-auth",
+    label: "Clerk auth verified on Preview",
+    details:
+      "Sign up, sign in, sign out, and protected account routes must work on the Preview URL.",
+  },
+  {
+    id: "preview-convex-identity",
+    label: "Signed-in identity linked to Convex",
+    details:
+      "Saved scenarios, watchlist, dashboard, and account surfaces must read and write through the authenticated Convex account.",
+  },
+  {
+    id: "preview-stripe-webhook",
+    label: "Stripe test webhook connected to Preview",
+    details:
+      "Stripe test-mode webhooks must reach the Preview /api/webhooks/stripe endpoint and persist billing snapshots.",
+  },
+  {
+    id: "preview-pro-checkout",
+    label: "Pro checkout tested in Stripe test mode",
+    details:
+      "Monthly or annual Pro checkout must grant Pro access from persisted Convex billing state.",
+  },
+  {
+    id: "preview-lifetime-checkout",
+    label: "Lifetime checkout tested in Stripe test mode",
+    details:
+      "Lifetime test checkout must grant Lifetime access and continue to override subscription changes.",
+  },
+  {
+    id: "preview-billing-portal",
+    label: "Authenticated billing portal tested",
+    details:
+      "A signed-in paid user must open the Stripe Billing Portal through the stored Stripe customer ID.",
+  },
+  {
+    id: "preview-cancel-failed-payment",
+    label: "Cancellation and failed-payment paths tested",
+    details:
+      "Cancel, subscription deletion, and failed-payment events must downgrade or warn without blocking the free calculator.",
+  },
+];
+
+function getProviderEnvChecks(env: Env): ReadinessCheck[] {
+  return requiredLaunchEnvGroups.map((group) => {
     const missingEnvVars = group.envVars.filter((key) => !env[key]);
 
     return {
@@ -97,13 +148,15 @@ export function getProductionReadinessChecks(env: Env = process.env) {
       missingEnvVars,
     };
   });
+}
 
+export function getProductionReadinessChecks(env: Env = process.env) {
   const manualChecks: ReadinessCheck[] = manualLaunchChecks.map((check) => ({
     ...check,
     status: "manual",
   }));
 
-  return [...envChecks, ...manualChecks];
+  return [...getProviderEnvChecks(env), ...manualChecks];
 }
 
 export function isPaidLaunchReady(env: Env = process.env) {
@@ -116,4 +169,34 @@ export function getMissingPaidLaunchEnvVars(env: Env = process.env) {
   return getProductionReadinessChecks(env).flatMap(
     (check) => check.missingEnvVars ?? [],
   );
+}
+
+export function getPaidPreviewVerificationChecks(env: Env = process.env) {
+  const checkoutFlagEnabled =
+    env.DENOMINATED_ENABLE_PAID_CHECKOUT?.toLowerCase() === "true";
+
+  const checkoutFlagCheck: ReadinessCheck = {
+    id: "paid-checkout-flag",
+    label: "Paid checkout flag controlled",
+    status: checkoutFlagEnabled ? "manual" : "ready",
+    details: checkoutFlagEnabled
+      ? "Paid checkout is enabled in this environment. Only keep it enabled while running verified Preview Stripe tests or after paid launch approval."
+      : "Paid checkout is off. Keep it off in Production until the paid launch PR passes Preview verification.",
+  };
+
+  const manualPreviewChecks: ReadinessCheck[] =
+    paidPreviewVerificationChecks.map((check) => ({
+      ...check,
+      status: "manual",
+    }));
+
+  return [
+    ...getProviderEnvChecks(env),
+    checkoutFlagCheck,
+    ...manualPreviewChecks,
+  ];
+}
+
+export function isPaidPreviewProviderSetupReady(env: Env = process.env) {
+  return getProviderEnvChecks(env).every((check) => check.status === "ready");
 }

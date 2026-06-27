@@ -19,6 +19,7 @@ until these systems are configured and verified:
 - Resend or equivalent email delivery for transactional/report emails
 
 For the free public launch checklist, see `docs/free-launch-checklist.md`.
+For the paid V2 Preview gate, see `docs/paid-v2-preview-runbook.md`.
 
 ## What Was Added
 
@@ -36,6 +37,8 @@ For the free public launch checklist, see `docs/free-launch-checklist.md`.
   passes through so local MVP testing still works.
 - `src/lib/billing.ts` centralizes billing entitlement behavior.
 - `src/lib/production-readiness.ts` centralizes provider/env readiness checks.
+  It separates provider setup from manual paid Preview verification so paid
+  launch is not treated as ready just because environment variables exist.
 - Convex is initialized for durable account, billing snapshot, saved scenario,
   and preset storage. See `docs/database-storage-foundation.md`.
 
@@ -124,3 +127,5 @@ Before enabling live paid CTAs:
   prices or future scenarios are shown.
 - Run test-mode checkout, webhook, cancellation, and billing portal flows.
 - Repeat the flow in Vercel Preview before Production.
+- Keep `DENOMINATED_ENABLE_PAID_CHECKOUT=true` out of Production until the paid
+  V2 Preview runbook has passed.
