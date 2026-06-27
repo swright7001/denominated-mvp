@@ -1,8 +1,11 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
+import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { FormEvent, useSyncExternalStore, useState } from "react";
 import { Check, LogOut, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { api } from "../../convex/_generated/api";
 import {
   accountChangedEvent,
   getStoredAccountEmail,
@@ -22,7 +25,19 @@ import {
   watchlistChangedEvent,
 } from "@/lib/watchlist";
 
-export function AccountExperience() {
+export function AccountExperience({
+  realAccountsEnabled = false,
+}: {
+  realAccountsEnabled?: boolean;
+}) {
+  if (realAccountsEnabled) {
+    return <AccountBackedExperience />;
+  }
+
+  return <LocalAccountExperience />;
+}
+
+function LocalAccountExperience() {
   const email = useSyncExternalStore(
     subscribeToAccount,
     getAccountEmailSnapshot,
@@ -252,6 +267,178 @@ export function AccountExperience() {
   );
 }
 
+function AccountBackedExperience() {
+  const { isLoaded, isSignedIn, user } = useUser();
+
+  if (!isLoaded) {
+    return <AccountLoadingState />;
+  }
+
+  if (!isSignedIn) {
+    return <AccountSignInState />;
+  }
+
+  return (
+    <SignedInAccountBackedExperience
+      email={user.primaryEmailAddress?.emailAddress ?? ""}
+    />
+  );
+}
+
+function SignedInAccountBackedExperience({ email }: { email: string }) {
+  const account = useQuery(api.accounts.getViewerAccount);
+  const savedScenarios = useQuery(api.savedScenarios.list, { limit: 100 });
+  const ensureAccount = useMutation(api.accounts.ensureViewerAccount);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const planTier = account?.planTier ?? "freeAccount";
+  const plan = getPlanEntitlements(planTier);
+  const savedScenarioCount = savedScenarios?.length ?? 0;
+
+  async function activateAccountStorage() {
+    setMessage("");
+    setError("");
+
+    try {
+      await ensureAccount({ email: email || undefined });
+      setMessage("Account storage is active.");
+    } catch {
+      setError(
+        "Account storage could not be activated. Confirm Clerk and Convex are connected.",
+      );
+    }
+  }
+
+  return (
+    <section className="container py-10">
+      <div className="mb-8 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+        <div>
+          <p className="eyebrow">Account</p>
+          <h1 className="mt-3 text-4xl font-medium text-[#efe6da] md:text-6xl">
+            Your Denominated account
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+            Manage your signed-in account, saved scenarios, and billing access.
+          </p>
+        </div>
+        <Link
+          className="copper-button inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold"
+          href="/calculator"
+        >
+          <Sparkles size={18} />
+          Run a Scenario
+        </Link>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <section className="panel rounded-lg p-5 sm:p-7">
+          <div className="mb-5 flex items-start gap-4">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+              <Mail size={20} />
+            </div>
+            <div>
+              <p className="eyebrow mb-3">Signed in</p>
+              <h2 className="text-2xl font-medium text-[#efe6da]">
+                {email || "Denominated account"}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-[#b9ab9a]">
+                Clerk handles sign-in. Convex stores saved scenarios and billing
+                state for this account.
+              </p>
+            </div>
+          </div>
+
+          {!account ? (
+            <button
+              className="copper-button rounded-md px-4 py-3 font-semibold"
+              type="button"
+              onClick={activateAccountStorage}
+            >
+              Activate account storage
+            </button>
+          ) : (
+            <p className="flex items-center gap-2 text-sm text-[#f0a36f]">
+              <Check size={16} />
+              Account storage active
+            </p>
+          )}
+          {message ? (
+            <p className="mt-3 flex items-center gap-2 text-sm text-[#f0a36f]">
+              <Check size={16} />
+              {message}
+            </p>
+          ) : null}
+          {error ? <p className="mt-3 text-sm text-[#f0a36f]">{error}</p> : null}
+          <p className="mt-5 text-xs leading-5 text-[#8f8172]">
+            Phone number is not required. SMS alerts can stay optional later.
+          </p>
+        </section>
+
+        <section className="panel rounded-lg p-5 sm:p-7">
+          <div className="mb-5 flex items-start gap-4">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+              <ShieldCheck size={20} />
+            </div>
+            <div>
+              <p className="eyebrow mb-3">Access</p>
+              <h2 className="text-2xl font-medium text-[#efe6da]">
+                {plan.label}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-[#b9ab9a]">
+                {plan.positioning}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <AccountMetric
+              label="Saved scenarios"
+              value={`${savedScenarioCount}`}
+            />
+            <AccountMetric
+              label="Save allowance"
+              value={
+                plan.savedScenarioLimit === "unlimited"
+                  ? "Unlimited"
+                  : `${plan.savedScenarioLimit}`
+              }
+            />
+          </div>
+
+          <div className="mt-5 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
+            <p className="text-sm leading-6 text-[#b9ab9a]">
+              This access level comes from persisted Convex billing state.
+              Stripe webhooks update it after checkout, cancellation, or failed
+              payment events.
+            </p>
+          </div>
+
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <Link
+              className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-[#f0a36f]"
+              href="/watchlist"
+            >
+              Open Watchlist
+            </Link>
+            <Link
+              className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-[#f0a36f]"
+              href="/plans"
+            >
+              Compare Plans
+            </Link>
+            <Link
+              className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-[#f0a36f]"
+              href="/billing"
+            >
+              Manage Billing
+            </Link>
+          </div>
+        </section>
+      </div>
+    </section>
+  );
+}
+
 function AccountMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
@@ -260,6 +447,57 @@ function AccountMetric({ label, value }: { label: string; value: string }) {
       </p>
       <p className="mt-2 text-2xl text-[#efe6da]">{value}</p>
     </div>
+  );
+}
+
+function AccountLoadingState() {
+  return (
+    <section className="container py-10">
+      <div className="panel rounded-lg p-7 text-center sm:p-10">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+          <ShieldCheck size={24} />
+        </div>
+        <h1 className="mt-5 text-3xl font-medium text-[#efe6da]">
+          Loading your account
+        </h1>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#b9ab9a]">
+          We are checking your account storage and access level.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function AccountSignInState() {
+  return (
+    <section className="container py-10">
+      <div className="panel rounded-lg p-7 text-center sm:p-10">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+          <ShieldCheck size={24} />
+        </div>
+        <h1 className="mt-5 text-3xl font-medium text-[#efe6da]">
+          Sign in to manage your account
+        </h1>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#b9ab9a]">
+          The calculator stays free. An account keeps saved scenarios and
+          billing access tied to you across devices.
+        </p>
+        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+          <Link
+            className="copper-button inline-flex items-center justify-center rounded-md px-5 py-3 font-semibold"
+            href="/sign-up"
+          >
+            Create account
+          </Link>
+          <Link
+            className="outline-button inline-flex items-center justify-center rounded-md px-5 py-3 font-semibold text-[#f0a36f]"
+            href="/sign-in"
+          >
+            Sign in
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }
 

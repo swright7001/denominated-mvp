@@ -1,5 +1,7 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
+import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import {
@@ -10,6 +12,8 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
+import { api } from "../../convex/_generated/api";
+import type { Doc } from "../../convex/_generated/dataModel";
 import {
   defaultEmailPreferences,
   emailPreferencesKey,
@@ -48,7 +52,19 @@ const emptyWatchlist: SavedScenario[] = [];
 let cachedWatchlistRaw: string | null = null;
 let cachedWatchlistSnapshot: SavedScenario[] = emptyWatchlist;
 
-export function RecurringDashboard() {
+export function RecurringDashboard({
+  realAccountsEnabled = false,
+}: {
+  realAccountsEnabled?: boolean;
+}) {
+  if (realAccountsEnabled) {
+    return <AccountRecurringDashboard />;
+  }
+
+  return <LocalRecurringDashboard />;
+}
+
+function LocalRecurringDashboard() {
   const savedScenarios = useSyncExternalStore(
     subscribeToWatchlist,
     getWatchlistSnapshot,
@@ -166,6 +182,143 @@ export function RecurringDashboard() {
       )}
     </div>
   );
+}
+
+function AccountRecurringDashboard() {
+  const { isLoaded, isSignedIn, user } = useUser();
+
+  if (!isLoaded) {
+    return <DashboardLoadingState />;
+  }
+
+  if (!isSignedIn) {
+    return <DashboardSignInState />;
+  }
+
+  return (
+    <SignedInAccountRecurringDashboard
+      email={user.primaryEmailAddress?.emailAddress ?? ""}
+    />
+  );
+}
+
+function SignedInAccountRecurringDashboard({ email }: { email: string }) {
+  const savedScenarioDocs = useQuery(api.savedScenarios.list, { limit: 100 });
+  const account = useQuery(api.accounts.getViewerAccount);
+  const updateEmailPreferences = useMutation(api.accounts.updateEmailPreferences);
+  const btcPrice = useLiveBTCPrice();
+  const savedScenarios = useMemo(
+    () => (savedScenarioDocs ?? []).map(toSavedScenario),
+    [savedScenarioDocs],
+  );
+  const preferences = account?.emailPreferences ?? defaultEmailPreferences;
+  const planTier: PlanTier = account?.planTier ?? "freeAccount";
+  const currentBTCPriceUSD =
+    btcPrice.data?.priceUSD ??
+    savedScenarios[0]?.scenario.currentBTCPriceUSD ??
+    80000;
+  const impacts = useMemo(
+    () =>
+      savedScenarios.map((savedScenario) =>
+        calculateScenarioImpact(savedScenario, currentBTCPriceUSD),
+      ),
+    [currentBTCPriceUSD, savedScenarios],
+  );
+  const hasProAccess = isProEntitled(planTier);
+
+  async function updatePreference(key: keyof EmailPreferences) {
+    await updateEmailPreferences({
+      preferences: {
+        ...preferences,
+        [key]: !preferences[key],
+      },
+    });
+  }
+
+  return (
+    <div className="container py-10">
+      <div className="mb-8 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+        <div>
+          <p className="eyebrow">Account dashboard</p>
+          <h1 className="mt-3 text-4xl font-medium text-[#efe6da] md:text-6xl">
+            Your purchasing-power home base
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+            Track saved expenses from your Denominated account, review
+            BTC-term movement, and keep your next scenario close at hand.
+          </p>
+        </div>
+        <Link
+          className="copper-button inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold"
+          href="/calculator"
+        >
+          <Plus size={18} />
+          Run a Scenario
+        </Link>
+      </div>
+
+      {!savedScenarioDocs || account === undefined ? (
+        <DashboardLoadingState />
+      ) : hasProAccess ? (
+        <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <DailySnapshot
+              impacts={impacts}
+              savedCount={savedScenarios.length}
+              currentBTCPriceUSD={currentBTCPriceUSD}
+              btcPriceStatus={btcPrice.status}
+            />
+            <RecentScenarioChanges impacts={impacts} />
+            <SavedScenarioSummary savedScenarios={savedScenarios} />
+          </div>
+          <div className="space-y-6">
+            <WeeklyReportPreview
+              savedScenarios={savedScenarios}
+              impacts={impacts}
+              currentBTCPriceUSD={currentBTCPriceUSD}
+            />
+            <EmailPreferencesPanel
+              email={account?.email ?? email}
+              preferences={preferences}
+              onToggle={updatePreference}
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <ProUpgradePromptFromCopy
+              copy={getProConversionCopy("dailySnapshot")}
+            />
+            <SavedScenarioSummary savedScenarios={savedScenarios.slice(0, 1)} />
+          </div>
+          <div className="space-y-6">
+            <ProUpgradePromptFromCopy
+              copy={getProConversionCopy("weeklyReport")}
+            />
+            <ProUpgradePromptFromCopy
+              copy={getProConversionCopy("exportPrivateShare")}
+              compact
+            />
+            <ProUpgradePromptFromCopy
+              copy={getProConversionCopy("customCategoriesPresets")}
+              compact
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function toSavedScenario(doc: Doc<"savedScenarios">): SavedScenario {
+  return {
+    id: doc._id,
+    scenario: doc.scenario,
+    savedAt: doc.savedAt,
+    baselineBTCPriceUSD: doc.baselineBTCPriceUSD,
+    baselineItemCostBTC: doc.baselineItemCostBTC,
+  };
 }
 
 function DailySnapshot({
@@ -527,6 +680,58 @@ function ReportSection({
     <div className="rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
       <h3 className="mb-2 text-sm font-semibold text-[#efe6da]">{title}</h3>
       {children}
+    </div>
+  );
+}
+
+function DashboardLoadingState() {
+  return (
+    <div className="container py-10">
+      <section className="panel rounded-lg p-7 text-center sm:p-10">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+          <CalendarDays size={24} />
+        </div>
+        <h1 className="mt-5 text-3xl font-medium text-[#efe6da]">
+          Loading your dashboard
+        </h1>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#b9ab9a]">
+          We are checking your account-backed scenarios and purchasing-power
+          settings.
+        </p>
+      </section>
+    </div>
+  );
+}
+
+function DashboardSignInState() {
+  return (
+    <div className="container py-10">
+      <section className="panel rounded-lg p-7 text-center sm:p-10">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+          <CalendarDays size={24} />
+        </div>
+        <h1 className="mt-5 text-3xl font-medium text-[#efe6da]">
+          Sign in to open your dashboard
+        </h1>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#b9ab9a]">
+          The calculator stays free. A Denominated account unlocks saved
+          scenarios, snapshots, and reports across devices.
+        </p>
+        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+          <Link
+            className="copper-button inline-flex items-center justify-center rounded-md px-5 py-3 font-semibold"
+            href="/sign-up"
+          >
+            Create account
+          </Link>
+          <Link
+            className="outline-button inline-flex items-center justify-center rounded-md px-5 py-3 font-semibold text-[#f0a36f]"
+            href="/sign-in"
+          >
+            Sign in
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

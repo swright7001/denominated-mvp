@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { AccountExperience } from "@/components/AccountExperience";
 import { Layout } from "@/components/Layout";
+import { isClerkConfigured } from "@/lib/auth";
+import { isConvexConfigured } from "@/lib/convex";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -21,7 +23,9 @@ export const metadata: Metadata = {
 export default function AccountPage() {
   return (
     <Layout>
-      <AccountExperience />
+      <AccountExperience
+        realAccountsEnabled={isClerkConfigured() && isConvexConfigured()}
+      />
     </Layout>
   );
 }
