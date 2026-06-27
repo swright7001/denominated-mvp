@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   getCheckoutPlan,
   getCheckoutPriceId,
+  getMissingAuthenticatedCheckoutEnvVars,
   getMissingCheckoutEnvVars,
   isPaidCheckoutEnabled,
   parseCheckoutPlanId,
@@ -37,6 +38,30 @@ test("checkout env helpers resolve configured and missing values", () => {
     "STRIPE_SECRET_KEY",
     "STRIPE_PRO_MONTHLY_PRICE_ID",
   ]);
+});
+
+test("authenticated checkout env helper requires auth, storage, and Stripe", () => {
+  const plan = getCheckoutPlan("proAnnual");
+
+  assert.deepEqual(getMissingAuthenticatedCheckoutEnvVars(plan, {}), [
+    "CLERK_SECRET_KEY",
+    "CLERK_JWT_ISSUER_DOMAIN",
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_CONVEX_URL",
+    "STRIPE_SECRET_KEY",
+    "STRIPE_PRO_ANNUAL_PRICE_ID",
+  ]);
+  assert.deepEqual(
+    getMissingAuthenticatedCheckoutEnvVars(plan, {
+      CLERK_SECRET_KEY: "sk_test_clerk",
+      CLERK_JWT_ISSUER_DOMAIN: "https://clerk.test",
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_clerk",
+      NEXT_PUBLIC_CONVEX_URL: "https://convex.test",
+      STRIPE_SECRET_KEY: "sk_test_stripe",
+      STRIPE_PRO_ANNUAL_PRICE_ID: "price_annual",
+    }),
+    [],
+  );
 });
 
 test("paid checkout requires an explicit launch flag", () => {

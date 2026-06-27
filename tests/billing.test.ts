@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  getMissingBillingPortalAuthEnvVars,
   getMissingBillingPersistenceEnvVars,
   getMissingBillingEnvVars,
   isBillingPortalLocalTestEnabled,
@@ -66,6 +67,26 @@ test("billing portal local test mode is explicit", () => {
       DENOMINATED_ENABLE_LOCAL_BILLING_TESTS: "true",
     }),
     true,
+  );
+});
+
+test("billing portal auth env helper requires Clerk, Convex, and Stripe", () => {
+  assert.deepEqual(getMissingBillingPortalAuthEnvVars({}), [
+    "CLERK_SECRET_KEY",
+    "CLERK_JWT_ISSUER_DOMAIN",
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_CONVEX_URL",
+    "STRIPE_SECRET_KEY",
+  ]);
+  assert.deepEqual(
+    getMissingBillingPortalAuthEnvVars({
+      CLERK_SECRET_KEY: "sk_test_clerk",
+      CLERK_JWT_ISSUER_DOMAIN: "https://clerk.test",
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_clerk",
+      NEXT_PUBLIC_CONVEX_URL: "https://convex.test",
+      STRIPE_SECRET_KEY: "sk_test_stripe",
+    }),
+    [],
   );
 });
 

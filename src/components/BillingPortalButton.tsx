@@ -12,12 +12,6 @@ export function BillingPortalButton() {
   async function openPortal() {
     const accountEmail = getStoredAccountEmail(window.localStorage);
 
-    if (!accountEmail) {
-      setStatus("error");
-      setMessage("Create or sign into an account before managing billing.");
-      return;
-    }
-
     setStatus("loading");
     setMessage("");
 

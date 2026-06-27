@@ -97,6 +97,18 @@ export function getMissingBillingPersistenceEnvVars(
   ].filter((key) => !env[key]);
 }
 
+export function getMissingBillingPortalAuthEnvVars(
+  env: Record<string, string | undefined> = process.env,
+) {
+  return [
+    "CLERK_SECRET_KEY",
+    "CLERK_JWT_ISSUER_DOMAIN",
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_CONVEX_URL",
+    "STRIPE_SECRET_KEY",
+  ].filter((key) => !env[key]);
+}
+
 export function isBillingPortalLocalTestEnabled(
   env: Record<string, string | undefined> = process.env,
 ) {

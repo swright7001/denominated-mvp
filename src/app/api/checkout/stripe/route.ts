@@ -1,10 +1,14 @@
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { api } from "../../../../../convex/_generated/api";
 import { isValidEmail, normalizeEmail } from "@/lib/account";
+import { isClerkConfigured } from "@/lib/auth";
 import {
   getCheckoutPlan,
   getCheckoutPriceId,
-  getMissingCheckoutEnvVars,
+  getMissingAuthenticatedCheckoutEnvVars,
   isPaidCheckoutEnabled,
   paidCheckoutEnabledEnvVar,
   parseCheckoutPlanId,
@@ -37,12 +41,25 @@ export async function POST(request: Request) {
     );
   }
 
-  const accountEmail =
-    typeof payload?.accountEmail === "string"
-      ? normalizeEmail(payload.accountEmail)
-      : "";
+  const plan = getCheckoutPlan(planId);
+  const missingEnvVars = getMissingAuthenticatedCheckoutEnvVars(plan);
 
-  if (!isValidEmail(accountEmail)) {
+  if (!isClerkConfigured() || missingEnvVars.length > 0) {
+    return NextResponse.json(
+      {
+        code: "CHECKOUT_AUTH_NOT_CONFIGURED",
+        error:
+          "Paid checkout requires Clerk auth, Convex account storage, and Stripe prices before it can accept payments.",
+        missingEnvVars,
+        setupRequired: true,
+      },
+      { status: 503 },
+    );
+  }
+
+  const { userId, getToken } = await auth();
+
+  if (!userId) {
     return NextResponse.json(
       {
         code: "ACCOUNT_REQUIRED",
@@ -52,33 +69,89 @@ export async function POST(request: Request) {
     );
   }
 
-  const plan = getCheckoutPlan(planId);
-  const missingEnvVars = getMissingCheckoutEnvVars(plan);
+  const token = await getToken({ template: "convex" });
 
-  if (missingEnvVars.length > 0) {
+  if (!token) {
     return NextResponse.json(
       {
-        code: "STRIPE_NOT_CONFIGURED",
+        code: "CONVEX_AUTH_TOKEN_REQUIRED",
         error:
-          "Stripe checkout is not configured yet. Add the required environment variables in Vercel before accepting payments.",
-        missingEnvVars,
+          "Convex account lookup needs the Clerk Convex JWT template before checkout can start.",
         setupRequired: true,
       },
       { status: 503 },
     );
   }
 
+  const clerkUser = await currentUser();
+  const userEmail = normalizeEmail(
+    clerkUser?.primaryEmailAddress?.emailAddress ?? "",
+  );
+
+  try {
+    await fetchMutation(
+      api.accounts.ensureViewerAccount,
+      {
+        email: isValidEmail(userEmail) ? userEmail : undefined,
+      },
+      { token },
+    );
+  } catch {
+    return NextResponse.json(
+      {
+        code: "ACCOUNT_LOOKUP_FAILED",
+        error:
+          "Checkout account setup is not ready yet. Confirm Clerk and Convex auth are connected.",
+        setupRequired: true,
+      },
+      { status: 503 },
+    );
+  }
+
+  let account: Awaited<ReturnType<typeof fetchViewerAccount>>;
+
+  try {
+    account = await fetchViewerAccount(token);
+  } catch {
+    return NextResponse.json(
+      {
+        code: "ACCOUNT_LOOKUP_FAILED",
+        error:
+          "Checkout account lookup is not ready yet. Confirm Clerk and Convex auth are connected.",
+        setupRequired: true,
+      },
+      { status: 503 },
+    );
+  }
+
+  const accountEmail = normalizeEmail(account?.email ?? userEmail);
+
+  if (!isValidEmail(accountEmail)) {
+    return NextResponse.json(
+      {
+        code: "ACCOUNT_EMAIL_REQUIRED",
+        error: "Add an email address to your account before starting checkout.",
+      },
+      { status: 401 },
+    );
+  }
+
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
   const priceId = getCheckoutPriceId(plan);
+  const customerId = account?.stripeCustomerId;
   const session = await stripe.checkout.sessions.create({
     mode: plan.mode,
-    customer_email: accountEmail,
-    client_reference_id: accountEmail,
+    ...(customerId
+      ? { customer: customerId }
+      : { customer_email: accountEmail }),
+    client_reference_id: account?._id ?? userId,
     line_items: [{ price: priceId, quantity: 1 }],
     metadata: {
       ...plan.metadata,
       account_email: accountEmail,
+      convex_account_id: account?._id ?? "",
+      clerk_user_id: userId,
       checkout_plan_id: plan.id,
       stripe_price_id: priceId,
     },
@@ -94,4 +167,8 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ url: session.url });
+}
+
+async function fetchViewerAccount(token: string) {
+  return await fetchQuery(api.accounts.getViewerAccount, {}, { token });
 }

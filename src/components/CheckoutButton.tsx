@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import { CreditCard, Loader2 } from "lucide-react";
-import { getStoredAccountEmail } from "@/lib/account";
 import { getCheckoutPlan, type CheckoutPlanId } from "@/lib/checkout";
 
 type CheckoutButtonProps = {
@@ -17,14 +16,6 @@ export function CheckoutButton({ planId, featured = false }: CheckoutButtonProps
   const [message, setMessage] = useState("");
 
   async function startCheckout() {
-    const accountEmail = getStoredAccountEmail(window.localStorage);
-
-    if (!accountEmail) {
-      setStatus("error");
-      setMessage("Create a free account before starting checkout.");
-      return;
-    }
-
     setStatus("loading");
     setMessage("");
 
@@ -32,7 +23,7 @@ export function CheckoutButton({ planId, featured = false }: CheckoutButtonProps
       const response = await fetch("/api/checkout/stripe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, accountEmail }),
+        body: JSON.stringify({ planId }),
       });
       const payload = (await response.json()) as {
         url?: string;

@@ -86,6 +86,19 @@ export function getMissingCheckoutEnvVars(
   return ["STRIPE_SECRET_KEY", plan.priceEnvVar].filter((key) => !env[key]);
 }
 
+export function getMissingAuthenticatedCheckoutEnvVars(
+  plan: CheckoutPlan,
+  env: Record<string, string | undefined> = process.env,
+) {
+  return [
+    "CLERK_SECRET_KEY",
+    "CLERK_JWT_ISSUER_DOMAIN",
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_CONVEX_URL",
+    ...getMissingCheckoutEnvVars(plan, env),
+  ].filter((key, index, keys) => !env[key] && keys.indexOf(key) === index);
+}
+
 export function isPaidCheckoutEnabled(
   env: Record<string, string | undefined> = process.env,
 ) {
