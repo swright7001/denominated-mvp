@@ -127,8 +127,15 @@ export const updateBillingSnapshot = mutation({
       throw new Error("Create an account before updating billing state.");
     }
 
+    const lifetimePurchasedAt =
+      args.lifetimePurchasedAt ?? account.lifetimePurchasedAt;
+    const ownsLifetime =
+      Boolean(lifetimePurchasedAt) || account.planTier === "lifetime";
+
     await ctx.db.patch(account._id, {
       ...args,
+      planTier: ownsLifetime ? "lifetime" : args.planTier,
+      lifetimePurchasedAt,
       updatedAt: Date.now(),
     });
 

@@ -20,6 +20,11 @@ const billingSnapshotFields = {
 
 const billingSnapshotValidator = v.object(billingSnapshotFields);
 type BillingWebhookSnapshot = Infer<typeof billingSnapshotValidator>;
+type BillingAccountState = {
+  planTier: "freeAccount" | "pro" | "lifetime";
+  stripeCustomerId?: string;
+  lifetimePurchasedAt?: string;
+};
 
 export const syncFromStripeWebhook = mutation({
   args: {
@@ -131,21 +136,32 @@ async function patchMatchingAccount(
     return null;
   }
 
-  await ctx.db.patch(account._id, {
-    planTier: snapshot.planTier,
+  await ctx.db.patch(account._id, buildAccountBillingPatch(account, snapshot, now));
+
+  return account._id;
+}
+
+export function buildAccountBillingPatch(
+  account: BillingAccountState,
+  snapshot: BillingWebhookSnapshot,
+  now: number,
+) {
+  const lifetimePurchasedAt =
+    snapshot.lifetimePurchasedAt ?? account.lifetimePurchasedAt;
+  const ownsLifetime = Boolean(lifetimePurchasedAt) || account.planTier === "lifetime";
+
+  return {
+    planTier: ownsLifetime ? "lifetime" : snapshot.planTier,
     stripeCustomerId: snapshot.stripeCustomerId ?? account.stripeCustomerId,
     stripeSubscriptionId: snapshot.stripeSubscriptionId,
     stripePriceId: snapshot.stripePriceId,
     subscriptionStatus: snapshot.subscriptionStatus,
     currentPeriodEnd: snapshot.currentPeriodEnd,
     cancelAtPeriodEnd: snapshot.cancelAtPeriodEnd,
-    lifetimePurchasedAt:
-      snapshot.lifetimePurchasedAt ?? account.lifetimePurchasedAt,
+    lifetimePurchasedAt,
     billingUpdatedAt: snapshot.billingUpdatedAt,
     updatedAt: now,
-  });
-
-  return account._id;
+  };
 }
 
 async function findMatchingAccount(
