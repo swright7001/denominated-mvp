@@ -13,6 +13,7 @@ import {
   paidCheckoutEnabledEnvVar,
   parseCheckoutPlanId,
 } from "@/lib/checkout";
+import { resolveRequestAppOrigin } from "@/lib/site";
 
 export async function POST(request: Request) {
   if (!isPaidCheckoutEnabled()) {
@@ -137,7 +138,7 @@ export async function POST(request: Request) {
   }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-  const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
+  const origin = resolveRequestAppOrigin({ requestUrl: request.url });
   const priceId = getCheckoutPriceId(plan);
   const customerId = account?.stripeCustomerId;
   const session = await stripe.checkout.sessions.create({

@@ -11,3 +11,30 @@ export const siteConfig = {
 export function absoluteUrl(path = "/") {
   return new URL(path, siteConfig.url).toString();
 }
+
+export function resolveRequestAppOrigin({
+  requestUrl,
+  configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL,
+}: {
+  requestUrl: string;
+  configuredAppUrl?: string;
+}) {
+  const requestOrigin = new URL(requestUrl).origin;
+
+  if (!configuredAppUrl) {
+    return requestOrigin;
+  }
+
+  try {
+    const configuredUrl = new URL(configuredAppUrl);
+    const requestUrlObject = new URL(requestUrl);
+
+    if (configuredUrl.host === requestUrlObject.host) {
+      return configuredUrl.origin;
+    }
+  } catch {
+    return requestOrigin;
+  }
+
+  return requestOrigin;
+}

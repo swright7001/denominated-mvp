@@ -10,6 +10,7 @@ import {
   getMissingBillingPortalAuthEnvVars,
   isBillingPortalLocalTestEnabled,
 } from "@/lib/billing";
+import { resolveRequestAppOrigin } from "@/lib/site";
 
 export async function POST(request: Request) {
   const payload = (await request.json().catch(() => null)) as {
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
   }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
+  const origin = resolveRequestAppOrigin({ requestUrl: request.url });
 
   if (isBillingPortalLocalTestEnabled()) {
     if (!isValidEmail(accountEmail)) {
