@@ -4,6 +4,8 @@ import { Layout } from "@/components/Layout";
 import { defaultScenario } from "@/lib/scenarios";
 import { parseScenarioSearchParams } from "@/lib/share-url";
 import { absoluteUrl } from "@/lib/site";
+import { isClerkConfigured } from "@/lib/auth";
+import { isConvexConfigured } from "@/lib/convex";
 
 export const metadata: Metadata = {
   title: "Bitcoin Purchasing-Power Calculator",
@@ -37,6 +39,7 @@ export default async function CalculatorPage({
       <CalculatorExperience
         initialScenario={sharedScenario ?? defaultScenario}
         hasSharedScenario={sharedScenario !== null}
+        realAccountsEnabled={isClerkConfigured() && isConvexConfigured()}
       />
     </Layout>
   );

@@ -24,11 +24,13 @@ import { SignupPrompt } from "./SignupPrompt";
 type CalculatorExperienceProps = {
   initialScenario?: ScenarioInput;
   hasSharedScenario?: boolean;
+  realAccountsEnabled?: boolean;
 };
 
 export function CalculatorExperience({
   initialScenario = defaultScenario,
   hasSharedScenario = false,
+  realAccountsEnabled = false,
 }: CalculatorExperienceProps) {
   const [scenario, setScenario] = useState<ScenarioInput>(initialScenario);
   const [btcPriceStatus, setBtcPriceStatus] = useState<BTCPriceLoadState>({
@@ -137,7 +139,10 @@ export function CalculatorExperience({
                   plain enough for everyday people.
                 </p>
                 <div className="grid gap-3 sm:flex sm:flex-row sm:flex-wrap">
-                  <SaveScenarioButton scenario={scenario} />
+                  <SaveScenarioButton
+                    scenario={scenario}
+                    realAccountsEnabled={realAccountsEnabled}
+                  />
                   <CopyTweetButton scenario={scenario} result={result} />
                   <CopyScenarioLinkButton scenario={scenario} />
                 </div>

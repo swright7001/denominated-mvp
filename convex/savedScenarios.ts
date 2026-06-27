@@ -54,6 +54,16 @@ export const save = mutation({
   handler: async (ctx, args) => {
     const ownerTokenIdentifier = await requireOwnerTokenIdentifier(ctx);
     const now = Date.now();
+    const account = await ctx.db
+      .query("accounts")
+      .withIndex("by_ownerTokenIdentifier", (q) =>
+        q.eq("ownerTokenIdentifier", ownerTokenIdentifier),
+      )
+      .unique();
+
+    if (!account) {
+      throw new Error("Create an account before saving scenarios.");
+    }
 
     if (args.clientId) {
       const existing = await ctx.db
@@ -73,6 +83,19 @@ export const save = mutation({
         });
 
         return existing._id;
+      }
+    }
+
+    if (account.planTier === "freeAccount") {
+      const existingSavedScenarios = await ctx.db
+        .query("savedScenarios")
+        .withIndex("by_ownerTokenIdentifier", (q) =>
+          q.eq("ownerTokenIdentifier", ownerTokenIdentifier),
+        )
+        .take(1);
+
+      if (existingSavedScenarios.length >= 1) {
+        throw new Error("Upgrade to Pro to save more than one scenario.");
       }
     }
 
