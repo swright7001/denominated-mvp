@@ -17,10 +17,6 @@ export function Footer() {
         <div className="flex flex-wrap gap-4 text-sm text-[#d9ccbd] md:justify-end">
           <Link href="/calculator">Calculator</Link>
           <Link href="/examples">Examples</Link>
-          <Link href="/dashboard">Dashboard</Link>
-          <Link href="/plans">Plans</Link>
-          <Link href="/account">Account</Link>
-          <Link href="/billing">Billing</Link>
           <Link href="/learn">Learn</Link>
           <Link href="/legal/terms">Terms</Link>
           <Link href="/legal/privacy">Privacy</Link>

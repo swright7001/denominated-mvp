@@ -41,11 +41,14 @@ npm run lint
 - Requires no login.
 - Implements no client-side third-party API calls.
 - Implements no live payments; Stripe checkout plumbing is setup-safe and
-  requires environment variables before it can create sessions.
+  requires `DENOMINATED_ENABLE_PAID_CHECKOUT=true` plus environment variables
+  before it can create sessions.
 - Includes placeholder future API functions in `src/lib/api.ts`.
 - Includes a local account foundation at `/account`; production auth is planned
   with Clerk in `docs/account-auth-foundation.md`.
 - Documents the future Stripe checkout plan in `docs/stripe-checkout-plan.md`.
+- Documents the free public launch checklist in
+  `docs/free-launch-checklist.md`.
 - Uses the provided Denominated logo and UI references from `public/brand`.
 
 ## Live BTC Price Data
@@ -86,6 +89,8 @@ Bitcoin's USD spot price from CoinGecko's `/simple/price` endpoint with
 - Harden live BTC pricing with stronger observability and provider fallback.
 - Decide custom domain strategy.
 - Add optional saved scenarios, email reports, auth, and premium features later.
+- Enable paid checkout only after Clerk-backed auth, Stripe billing portal, and
+  full test-mode billing flows are verified.
 
 ## Disclaimer
 

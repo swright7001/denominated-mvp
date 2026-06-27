@@ -4,7 +4,9 @@ import {
   getCheckoutPlan,
   getCheckoutPriceId,
   getMissingCheckoutEnvVars,
+  isPaidCheckoutEnabled,
   parseCheckoutPlanId,
+  paidCheckoutEnabledEnvVar,
 } from "../src/lib/checkout";
 
 test("parseCheckoutPlanId accepts known checkout plans only", () => {
@@ -35,4 +37,20 @@ test("checkout env helpers resolve configured and missing values", () => {
     "STRIPE_SECRET_KEY",
     "STRIPE_PRO_MONTHLY_PRICE_ID",
   ]);
+});
+
+test("paid checkout requires an explicit launch flag", () => {
+  assert.equal(isPaidCheckoutEnabled({}), false);
+  assert.equal(
+    isPaidCheckoutEnabled({
+      [paidCheckoutEnabledEnvVar]: "true",
+    }),
+    true,
+  );
+  assert.equal(
+    isPaidCheckoutEnabled({
+      [paidCheckoutEnabledEnvVar]: "false",
+    }),
+    false,
+  );
 });

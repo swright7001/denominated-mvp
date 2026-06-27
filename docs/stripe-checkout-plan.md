@@ -6,6 +6,9 @@ free.
 
 Checkout plumbing now exists behind `/api/checkout/stripe`, but it is not live
 until Stripe environment variables and real account identity are configured.
+
+Paid checkout is also protected by `DENOMINATED_ENABLE_PAID_CHECKOUT`. Keep that
+flag unset for the free public launch.
 Billing settings and payment fulfillment are not implemented in this MVP.
 
 ## Product And Price Structure
@@ -198,6 +201,7 @@ Expected future env vars:
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Client safe | Stripe client initialization if needed |
 | `STRIPE_WEBHOOK_SECRET` | Server only | Verify webhook signatures |
 | `DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET` | Server only, also set in Convex | Authorize the verified Next.js webhook route to persist billing snapshots in Convex |
+| `DENOMINATED_ENABLE_PAID_CHECKOUT` | Server only | Explicitly enables paid Checkout Session creation when set to `true` |
 | `STRIPE_PRO_MONTHLY_PRICE_ID` | Server only | Pro monthly Checkout line item |
 | `STRIPE_PRO_ANNUAL_PRICE_ID` | Server only | Pro annual Checkout line item |
 | `STRIPE_LIFETIME_PRICE_ID` | Server only | Lifetime Checkout line item |

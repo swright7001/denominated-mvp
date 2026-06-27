@@ -18,6 +18,8 @@ until these systems are configured and verified:
 - Support contact for billing and account issues
 - Resend or equivalent email delivery for transactional/report emails
 
+For the free public launch checklist, see `docs/free-launch-checklist.md`.
+
 ## What Was Added
 
 - `/billing` shows billing management and paid-launch readiness checks.
@@ -98,6 +100,14 @@ identity is configured.
 Production setup still requires `DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET` to be
 set in both Vercel and Convex. This is separate from Stripe signature
 verification and protects the Convex sync mutation from direct public calls.
+
+## Paid Checkout Safety
+
+`/api/checkout/stripe` is disabled by default for free launch. It will not
+create Checkout Sessions unless `DENOMINATED_ENABLE_PAID_CHECKOUT=true` is set.
+Do not set that flag in Production until Clerk-backed identity, billing portal
+access, Stripe products/prices, webhooks, support, and legal/tax signoffs are
+ready.
 
 ## Manual Launch Signoffs
 

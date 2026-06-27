@@ -4,11 +4,11 @@ import { siteConfig } from "@/lib/site";
 
 const staticRoutes = [
   "",
-  "/account",
   "/calculator",
   "/examples",
   "/learn",
-  "/plans",
+  "/legal/privacy",
+  "/legal/terms",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
