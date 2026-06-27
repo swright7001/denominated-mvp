@@ -1,8 +1,12 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
+import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { ArrowRight, BookmarkPlus, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import { api } from "../../convex/_generated/api";
+import type { Doc, Id } from "../../convex/_generated/dataModel";
 import type { BTCPriceResult } from "@/lib/btc-price";
 import { formatBTC, formatUSD } from "@/lib/calculations";
 import {
@@ -30,7 +34,19 @@ const emptyWatchlist: SavedScenario[] = [];
 let cachedWatchlistRaw: string | null = null;
 let cachedWatchlistSnapshot: SavedScenario[] = emptyWatchlist;
 
-export function WatchlistExperience() {
+export function WatchlistExperience({
+  realAccountsEnabled = false,
+}: {
+  realAccountsEnabled?: boolean;
+}) {
+  if (realAccountsEnabled) {
+    return <AccountWatchlistExperience />;
+  }
+
+  return <LocalWatchlistExperience />;
+}
+
+function LocalWatchlistExperience() {
   const savedScenarios = useSyncExternalStore(
     subscribeToWatchlist,
     getWatchlistSnapshot,
@@ -117,6 +133,112 @@ export function WatchlistExperience() {
       )}
     </div>
   );
+}
+
+function AccountWatchlistExperience() {
+  const { isLoaded, isSignedIn } = useUser();
+
+  if (!isLoaded) {
+    return <WatchlistLoadingState />;
+  }
+
+  if (!isSignedIn) {
+    return <WatchlistSignInState />;
+  }
+
+  return <SignedInAccountWatchlistExperience />;
+}
+
+function SignedInAccountWatchlistExperience() {
+  const savedScenarioDocs = useQuery(api.savedScenarios.list, { limit: 100 });
+  const account = useQuery(api.accounts.getViewerAccount);
+  const removeSavedScenarioMutation = useMutation(api.savedScenarios.remove);
+  const renameSavedScenarioMutation = useMutation(api.savedScenarios.rename);
+  const btcPrice = useWatchlistBTCPrice();
+  const savedScenarios = useMemo(
+    () => (savedScenarioDocs ?? []).map(toSavedScenario),
+    [savedScenarioDocs],
+  );
+  const planTier: PlanTier = account?.planTier ?? "freeAccount";
+  const hasProAccess = isProEntitled(planTier);
+  const visibleSavedScenarios = hasProAccess
+    ? savedScenarios
+    : savedScenarios.slice(0, 1);
+
+  async function deleteSavedScenario(id: string) {
+    await removeSavedScenarioMutation({ id: id as Id<"savedScenarios"> });
+  }
+
+  async function renameScenario(id: string, itemName: string) {
+    await renameSavedScenarioMutation({
+      id: id as Id<"savedScenarios">,
+      itemName,
+    });
+  }
+
+  return (
+    <div className="container py-10">
+      <div className="mb-8 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+        <div>
+          <p className="eyebrow">Account watchlist</p>
+          <h1 className="mt-3 text-4xl font-medium text-[#efe6da] md:text-6xl">
+            Saved purchasing-power goals
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+            Your signed-in watchlist is tied to your Denominated account and
+            recalculates from stored assumptions as BTC prices change.
+          </p>
+        </div>
+        <Link
+          className="copper-button inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold"
+          href="/calculator"
+        >
+          <BookmarkPlus size={18} />
+          Save a Scenario
+        </Link>
+      </div>
+
+      {!savedScenarioDocs ? (
+        <WatchlistLoadingState />
+      ) : savedScenarios.length === 0 ? (
+        <WatchlistEmptyState />
+      ) : (
+        <div className="space-y-5">
+          <div className="grid gap-5 lg:grid-cols-2">
+            {visibleSavedScenarios.map((savedScenario) => (
+              <WatchlistCard
+                key={savedScenario.id}
+                savedScenario={savedScenario}
+                currentBTCPriceUSD={
+                  btcPrice.data?.priceUSD ??
+                  savedScenario.scenario.currentBTCPriceUSD
+                }
+                onDelete={() => deleteSavedScenario(savedScenario.id)}
+                onRename={(itemName) =>
+                  renameScenario(savedScenario.id, itemName)
+                }
+              />
+            ))}
+          </div>
+          {!hasProAccess ? (
+            <ProUpgradePromptFromCopy
+              copy={getProConversionCopy("fullWatchlist")}
+            />
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function toSavedScenario(doc: Doc<"savedScenarios">): SavedScenario {
+  return {
+    id: doc._id,
+    scenario: doc.scenario,
+    savedAt: doc.savedAt,
+    baselineBTCPriceUSD: doc.baselineBTCPriceUSD,
+    baselineItemCostBTC: doc.baselineItemCostBTC,
+  };
 }
 
 function subscribeToWatchlist(onStoreChange: () => void) {
@@ -342,6 +464,55 @@ function WatchlistEmptyState() {
         <ArrowRight size={18} />
       </Link>
     </section>
+  );
+}
+
+function WatchlistLoadingState() {
+  return (
+    <section className="panel rounded-lg p-7 text-center sm:p-10">
+      <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+        <BookmarkPlus size={24} />
+      </div>
+      <h2 className="mt-5 text-2xl font-medium text-[#efe6da]">
+        Loading your watchlist
+      </h2>
+      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#b9ab9a]">
+        We are checking your account-backed purchasing-power scenarios.
+      </p>
+    </section>
+  );
+}
+
+function WatchlistSignInState() {
+  return (
+    <div className="container py-10">
+      <section className="panel rounded-lg p-7 text-center sm:p-10">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+          <BookmarkPlus size={24} />
+        </div>
+        <h1 className="mt-5 text-3xl font-medium text-[#efe6da]">
+          Sign in to see your watchlist
+        </h1>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#b9ab9a]">
+          The calculator stays free. A Denominated account keeps saved
+          scenarios tied to you across devices.
+        </p>
+        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+          <Link
+            className="copper-button inline-flex items-center justify-center rounded-md px-5 py-3 font-semibold"
+            href="/sign-up"
+          >
+            Create account
+          </Link>
+          <Link
+            className="outline-button inline-flex items-center justify-center rounded-md px-5 py-3 font-semibold text-[#f0a36f]"
+            href="/sign-in"
+          >
+            Sign in
+          </Link>
+        </div>
+      </section>
+    </div>
   );
 }
 
