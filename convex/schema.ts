@@ -42,9 +42,9 @@ export const subscriptionStatusValidator = v.union(
 );
 
 export default defineSchema({
-  accounts: defineTable({
-    ownerTokenIdentifier: v.string(),
-    email: v.optional(v.string()),
+    accounts: defineTable({
+      ownerTokenIdentifier: v.string(),
+      email: v.optional(v.string()),
     planTier: planTierValidator,
     emailPreferences: emailPreferencesValidator,
     stripeCustomerId: v.optional(v.string()),
@@ -54,12 +54,36 @@ export default defineSchema({
     currentPeriodEnd: v.optional(v.string()),
     cancelAtPeriodEnd: v.optional(v.boolean()),
     lifetimePurchasedAt: v.optional(v.string()),
-    billingUpdatedAt: v.optional(v.string()),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  }).index("by_ownerTokenIdentifier", ["ownerTokenIdentifier"]),
+      billingUpdatedAt: v.optional(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+      .index("by_ownerTokenIdentifier", ["ownerTokenIdentifier"])
+      .index("by_email", ["email"])
+      .index("by_stripeCustomerId", ["stripeCustomerId"]),
 
-  savedScenarios: defineTable({
+    billingSnapshots: defineTable({
+      stripeCustomerId: v.optional(v.string()),
+      email: v.optional(v.string()),
+      planTier: planTierValidator,
+      stripeSubscriptionId: v.optional(v.string()),
+      stripePriceId: v.optional(v.string()),
+      subscriptionStatus: v.optional(subscriptionStatusValidator),
+      currentPeriodEnd: v.optional(v.string()),
+      cancelAtPeriodEnd: v.optional(v.boolean()),
+      lifetimePurchasedAt: v.optional(v.string()),
+      billingUpdatedAt: v.string(),
+      stripeEventId: v.string(),
+      stripeEventType: v.string(),
+      lastWebhookAction: v.string(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+      .index("by_stripeCustomerId", ["stripeCustomerId"])
+      .index("by_email", ["email"])
+      .index("by_stripeEventId", ["stripeEventId"]),
+
+    savedScenarios: defineTable({
     ownerTokenIdentifier: v.string(),
     clientId: v.optional(v.string()),
     scenario: scenarioInputValidator,

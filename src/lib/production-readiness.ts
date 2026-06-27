@@ -44,7 +44,7 @@ const requiredLaunchEnvGroups = [
   {
     id: "webhooks",
     label: "Stripe webhook fulfillment",
-    envVars: ["STRIPE_WEBHOOK_SECRET"],
+    envVars: ["STRIPE_WEBHOOK_SECRET", "DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET"],
     details:
       "Stripe webhooks must be verified and connected before paid entitlements are granted.",
   },

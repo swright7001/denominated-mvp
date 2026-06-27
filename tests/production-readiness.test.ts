@@ -30,6 +30,7 @@ test("paid launch readiness passes environment checks when providers are configu
     STRIPE_PRO_ANNUAL_PRICE_ID: "price_annual",
     STRIPE_LIFETIME_PRICE_ID: "price_lifetime",
     STRIPE_WEBHOOK_SECRET: "whsec_123",
+    DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
     RESEND_API_KEY: "re_123",
     NEXT_PUBLIC_APP_URL: "https://denominated.app",
   };

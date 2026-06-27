@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
+import { fetchMutation } from "convex/nextjs";
 import Stripe from "stripe";
+import { api } from "../../../../../convex/_generated/api";
 import {
-  getMissingBillingEnvVars,
+  getMissingBillingPersistenceEnvVars,
+  mapStripeEventToBillingSnapshot,
   mapStripeEventToBillingResult,
 } from "@/lib/billing";
 
 export async function POST(request: Request) {
-  const missingEnvVars = getMissingBillingEnvVars();
+  const missingEnvVars = getMissingBillingPersistenceEnvVars();
 
   if (missingEnvVars.length > 0) {
     return NextResponse.json(
@@ -47,6 +50,13 @@ export async function POST(request: Request) {
   }
 
   const result = mapStripeEventToBillingResult(event);
+  const snapshot = mapStripeEventToBillingSnapshot(event);
+  const persistenceResult = snapshot
+    ? await fetchMutation(api.billing.syncFromStripeWebhook, {
+        syncSecret: process.env.DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET!,
+        snapshot,
+      })
+    : null;
 
   console.info("stripe_webhook_received", {
     eventId: event.id,
@@ -55,7 +65,12 @@ export async function POST(request: Request) {
     planTier: result.planTier,
     stripeCustomerId: result.stripeCustomerId,
     stripeSubscriptionId: result.stripeSubscriptionId,
+    persisted: Boolean(persistenceResult),
   });
 
-  return NextResponse.json({ received: true, result });
+  return NextResponse.json({
+    received: true,
+    result,
+    persisted: Boolean(persistenceResult),
+  });
 }

@@ -65,6 +65,7 @@ export async function POST(request: Request) {
       ...plan.metadata,
       account_email: accountEmail,
       checkout_plan_id: plan.id,
+      stripe_price_id: priceId,
     },
     success_url: `${origin}/dashboard?checkout=success&plan=${plan.id}`,
     cancel_url: `${origin}/plans?checkout=cancelled&plan=${plan.id}`,

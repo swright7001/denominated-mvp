@@ -23,8 +23,8 @@ until these systems are configured and verified:
 - `/billing` shows billing management and paid-launch readiness checks.
 - `/legal/terms`, `/legal/privacy`, and `/legal/refunds` provide launch-facing
   legal pages that still require final professional review before paid launch.
-- `/api/webhooks/stripe` verifies Stripe signatures and maps events to billing
-  actions.
+- `/api/webhooks/stripe` verifies Stripe signatures, maps events to billing
+  actions, and persists normalized billing snapshots to Convex.
 - `/api/billing/portal` creates Stripe Billing Portal sessions only in explicit
   local test mode until real auth and customer IDs exist.
 - `/sign-in` and `/sign-up` are Clerk-ready routes. They show a setup fallback
@@ -44,7 +44,7 @@ until these systems are configured and verified:
 | Clerk auth | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` |
 | Convex storage | `CONVEX_DEPLOYMENT`, `NEXT_PUBLIC_CONVEX_URL`, `CLERK_JWT_ISSUER_DOMAIN` |
 | Stripe checkout | `STRIPE_SECRET_KEY`, `STRIPE_PRO_MONTHLY_PRICE_ID`, `STRIPE_PRO_ANNUAL_PRICE_ID`, `STRIPE_LIFETIME_PRICE_ID` |
-| Stripe webhooks | `STRIPE_WEBHOOK_SECRET` |
+| Stripe webhooks | `STRIPE_WEBHOOK_SECRET`, `DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET` |
 | Email | `RESEND_API_KEY` |
 | App URL | `NEXT_PUBLIC_APP_URL` |
 
@@ -73,13 +73,12 @@ development before production keys exist, but paid launch still requires:
 - Hiding or removing local mock plan controls outside development.
 - Migrating local saved scenarios into the authenticated account.
 
-## Stripe Webhook Persistence TODO
+## Stripe Webhook Persistence
 
-`/api/webhooks/stripe` currently verifies signatures and maps events to the
-correct billing actions. The remaining launch work is to persist those actions
-to durable user billing records in Convex.
+`/api/webhooks/stripe` now verifies signatures and persists normalized billing
+snapshots to Convex through `convex/billing.ts`.
 
-Required persisted fields:
+Persisted fields include:
 
 - `planTier`
 - `stripeCustomerId`
@@ -90,6 +89,15 @@ Required persisted fields:
 - `cancelAtPeriodEnd`
 - `lifetimePurchasedAt`
 - `billingUpdatedAt`
+
+If a matching account exists by Stripe customer ID or email, the account billing
+snapshot is patched too. If no matching account exists yet, the webhook data is
+still stored in `billingSnapshots` so it can be linked after Clerk-backed account
+identity is configured.
+
+Production setup still requires `DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET` to be
+set in both Vercel and Convex. This is separate from Stripe signature
+verification and protects the Convex sync mutation from direct public calls.
 
 ## Manual Launch Signoffs
 

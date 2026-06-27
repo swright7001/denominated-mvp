@@ -197,6 +197,7 @@ Expected future env vars:
 | `STRIPE_SECRET_KEY` | Server only | Create checkout sessions and verify Stripe state |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Client safe | Stripe client initialization if needed |
 | `STRIPE_WEBHOOK_SECRET` | Server only | Verify webhook signatures |
+| `DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET` | Server only, also set in Convex | Authorize the verified Next.js webhook route to persist billing snapshots in Convex |
 | `STRIPE_PRO_MONTHLY_PRICE_ID` | Server only | Pro monthly Checkout line item |
 | `STRIPE_PRO_ANNUAL_PRICE_ID` | Server only | Pro annual Checkout line item |
 | `STRIPE_LIFETIME_PRICE_ID` | Server only | Lifetime Checkout line item |

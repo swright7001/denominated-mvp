@@ -36,6 +36,10 @@ Saved scenarios are owned by Convex auth identity through
 - `updateEmailPreferences`
 - `updateBillingSnapshot`
 
+`convex/billing.ts`:
+
+- `syncFromStripeWebhook`
+
 `convex/savedScenarios.ts`:
 
 - `list`
@@ -100,6 +104,8 @@ truth.
 - Configure Clerk JWT templates and production domain.
 - Add the Clerk issuer to `convex/auth.config.ts`.
 - Wire account/watchlist/dashboard UI reads and writes to Convex when signed in.
-- Persist Stripe webhook billing events into `accounts`.
+- Set `DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET` in both Vercel and Convex.
+- Link stored `billingSnapshots` to Clerk-backed accounts during account
+  creation/sign-in.
 - Add a controlled preset seed workflow with source metadata.
 - Verify Preview and Production Vercel env vars after the domain is selected.
