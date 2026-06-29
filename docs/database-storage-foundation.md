@@ -34,7 +34,6 @@ Saved scenarios are owned by Convex auth identity through
 - `getViewerAccount`
 - `ensureViewerAccount`
 - `updateEmailPreferences`
-- `updateBillingSnapshot`
 
 `convex/billing.ts`:
 
@@ -57,6 +56,10 @@ Saved scenarios are owned by Convex auth identity through
 Preset writes currently require a signed-in user. Before launch, decide whether
 to keep preset management as a privileged internal operation or move seeding to
 a controlled script/admin route.
+
+Billing state is not client-writable. Paid plan fields on `accounts` are updated
+through the Stripe webhook sync path in `convex/billing.ts`, protected by
+`DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET`.
 
 ## Clerk Dependency
 

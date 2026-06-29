@@ -5,11 +5,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
-import {
-  emailPreferencesValidator,
-  planTierValidator,
-  subscriptionStatusValidator,
-} from "./schema";
+import { emailPreferencesValidator } from "./schema";
 
 const defaultEmailPreferences = {
   weeklyReport: true,
@@ -95,47 +91,6 @@ export const updateEmailPreferences = mutation({
 
     await ctx.db.patch(account._id, {
       emailPreferences: args.preferences,
-      updatedAt: Date.now(),
-    });
-
-    return account._id;
-  },
-});
-
-export const updateBillingSnapshot = mutation({
-  args: {
-    planTier: planTierValidator,
-    stripeCustomerId: v.optional(v.string()),
-    stripeSubscriptionId: v.optional(v.string()),
-    stripePriceId: v.optional(v.string()),
-    subscriptionStatus: v.optional(subscriptionStatusValidator),
-    currentPeriodEnd: v.optional(v.string()),
-    cancelAtPeriodEnd: v.optional(v.boolean()),
-    lifetimePurchasedAt: v.optional(v.string()),
-    billingUpdatedAt: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const ownerTokenIdentifier = await requireOwnerTokenIdentifier(ctx);
-    const account = await ctx.db
-      .query("accounts")
-      .withIndex("by_ownerTokenIdentifier", (q) =>
-        q.eq("ownerTokenIdentifier", ownerTokenIdentifier),
-      )
-      .unique();
-
-    if (!account) {
-      throw new Error("Create an account before updating billing state.");
-    }
-
-    const lifetimePurchasedAt =
-      args.lifetimePurchasedAt ?? account.lifetimePurchasedAt;
-    const ownsLifetime =
-      Boolean(lifetimePurchasedAt) || account.planTier === "lifetime";
-
-    await ctx.db.patch(account._id, {
-      ...args,
-      planTier: ownsLifetime ? "lifetime" : args.planTier,
-      lifetimePurchasedAt,
       updatedAt: Date.now(),
     });
 
