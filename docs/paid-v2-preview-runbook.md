@@ -35,6 +35,50 @@ branch-scoped Preview variable for `codex/paid-v2-launch` when possible.
 `DENOMINATED_ENABLE_PAID_CHECKOUT` should stay unset or `false` until the
 Preview deployment is ready for Stripe test-mode checkout validation.
 
+## Preview Environment Setup Commands
+
+Use Preview-scoped values first. Prefer branch-scoped values for
+`codex/paid-v2-launch` when the Vercel CLI prompts for branch targeting, or add
+the equivalent branch-scoped values in the Vercel dashboard.
+
+```bash
+vercel env add NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY preview --scope swright7001-gmailcoms-projects
+vercel env add CLERK_SECRET_KEY preview --scope swright7001-gmailcoms-projects
+vercel env add CLERK_JWT_ISSUER_DOMAIN preview --scope swright7001-gmailcoms-projects
+vercel env add CONVEX_DEPLOYMENT preview --scope swright7001-gmailcoms-projects
+vercel env add NEXT_PUBLIC_CONVEX_URL preview --scope swright7001-gmailcoms-projects
+vercel env add STRIPE_SECRET_KEY preview --scope swright7001-gmailcoms-projects
+vercel env add STRIPE_PRO_MONTHLY_PRICE_ID preview --scope swright7001-gmailcoms-projects
+vercel env add STRIPE_PRO_ANNUAL_PRICE_ID preview --scope swright7001-gmailcoms-projects
+vercel env add STRIPE_LIFETIME_PRICE_ID preview --scope swright7001-gmailcoms-projects
+vercel env add STRIPE_WEBHOOK_SECRET preview --scope swright7001-gmailcoms-projects
+vercel env add DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET preview --scope swright7001-gmailcoms-projects
+vercel env add RESEND_API_KEY preview --scope swright7001-gmailcoms-projects
+vercel env add NEXT_PUBLIC_APP_URL preview --scope swright7001-gmailcoms-projects
+```
+
+Do not add `DENOMINATED_ENABLE_PAID_CHECKOUT=true` until Clerk auth, Convex
+account storage, Stripe prices, and the Stripe webhook are configured and the
+Preview deployment has been redeployed once with those provider values.
+
+When the provider setup is ready for payment testing, set the checkout flag only
+for Preview:
+
+```bash
+vercel env add DENOMINATED_ENABLE_PAID_CHECKOUT preview --scope swright7001-gmailcoms-projects
+```
+
+Then redeploy the paid branch Preview.
+
+Convex also needs the same webhook sync secret value:
+
+```bash
+npx convex env set DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET <same-preview-sync-secret>
+```
+
+Never paste live Stripe keys into Preview. Use Stripe test-mode keys, products,
+prices, and webhook secrets until the paid launch is approved.
+
 ## Provider Setup
 
 1. Configure Clerk for the Preview URL.
