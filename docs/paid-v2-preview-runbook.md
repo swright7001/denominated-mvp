@@ -72,6 +72,15 @@ vercel env add DENOMINATED_ENABLE_PAID_CHECKOUT preview --scope swright7001-gmai
 
 Then redeploy the paid branch Preview.
 
+After each Preview redeploy, inspect setup state without exposing secret values:
+
+```bash
+curl https://<paid-preview-url>/api/readiness/paid-preview
+```
+
+The endpoint is disabled in Production. In Preview, it reports missing provider
+groups and missing environment variable names only, never secret values.
+
 Convex also needs the same webhook sync secret value:
 
 ```bash

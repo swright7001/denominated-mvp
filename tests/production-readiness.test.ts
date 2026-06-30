@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   getMissingPaidLaunchEnvVars,
+  getPaidPreviewReadinessSummary,
   getPaidPreviewVerificationChecks,
   getProductionReadinessChecks,
   isPaidPreviewProviderSetupReady,
@@ -97,4 +98,58 @@ test("paid preview provider setup is separate from manual preview verification",
     checks.some((check) => check.status === "manual"),
     true,
   );
+});
+
+test("paid preview readiness summary separates missing providers from manual E2E", () => {
+  const summary = getPaidPreviewReadinessSummary({
+    VERCEL_ENV: "preview",
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_123",
+    CLERK_SECRET_KEY: "sk_test_123",
+  });
+
+  assert.equal(summary.environment, "preview");
+  assert.equal(summary.providerSetupReady, false);
+  assert.equal(summary.checkoutFlagEnabled, false);
+  assert.deepEqual(summary.readyProviderGroups, ["auth"]);
+  assert.deepEqual(
+    summary.missingProviderGroups.map((group) => group.id),
+    ["storage", "stripe", "webhooks", "email", "app-url"],
+  );
+  assert.ok(
+    summary.manualVerificationGroups.some(
+      (group) => group.id === "preview-pro-checkout",
+    ),
+  );
+});
+
+test("paid preview readiness summary reports provider-ready flag state", () => {
+  const summary = getPaidPreviewReadinessSummary({
+    VERCEL_ENV: "preview",
+    DENOMINATED_ENABLE_PAID_CHECKOUT: "true",
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_123",
+    CLERK_SECRET_KEY: "sk_test_123",
+    CONVEX_DEPLOYMENT: "dev:denominated",
+    NEXT_PUBLIC_CONVEX_URL: "https://convex.test",
+    CLERK_JWT_ISSUER_DOMAIN: "https://clerk.test",
+    STRIPE_SECRET_KEY: "sk_test_123",
+    STRIPE_PRO_MONTHLY_PRICE_ID: "price_monthly",
+    STRIPE_PRO_ANNUAL_PRICE_ID: "price_annual",
+    STRIPE_LIFETIME_PRICE_ID: "price_lifetime",
+    STRIPE_WEBHOOK_SECRET: "whsec_123",
+    DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
+    RESEND_API_KEY: "re_123",
+    NEXT_PUBLIC_APP_URL: "https://preview.denominated.test",
+  });
+
+  assert.equal(summary.providerSetupReady, true);
+  assert.equal(summary.checkoutFlagEnabled, true);
+  assert.deepEqual(summary.missingProviderGroups, []);
+  assert.deepEqual(summary.readyProviderGroups, [
+    "auth",
+    "storage",
+    "stripe",
+    "webhooks",
+    "email",
+    "app-url",
+  ]);
 });

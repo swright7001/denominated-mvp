@@ -10,6 +10,23 @@ export type ReadinessCheck = {
 
 type Env = Record<string, string | undefined>;
 
+export type PaidPreviewReadinessSummary = {
+  environment: string;
+  providerSetupReady: boolean;
+  checkoutFlagEnabled: boolean;
+  readyProviderGroups: string[];
+  missingProviderGroups: Array<{
+    id: string;
+    label: string;
+    missingEnvVars: string[];
+  }>;
+  manualVerificationGroups: Array<{
+    id: string;
+    label: string;
+    details: string;
+  }>;
+};
+
 const requiredLaunchEnvGroups = [
   {
     id: "auth",
@@ -199,4 +216,38 @@ export function getPaidPreviewVerificationChecks(env: Env = process.env) {
 
 export function isPaidPreviewProviderSetupReady(env: Env = process.env) {
   return getProviderEnvChecks(env).every((check) => check.status === "ready");
+}
+
+export function getPaidPreviewReadinessSummary(
+  env: Env = process.env,
+): PaidPreviewReadinessSummary {
+  const checks = getPaidPreviewVerificationChecks(env);
+  const checkoutFlagEnabled =
+    env.DENOMINATED_ENABLE_PAID_CHECKOUT?.toLowerCase() === "true";
+
+  return {
+    environment: env.VERCEL_ENV ?? "local",
+    providerSetupReady: isPaidPreviewProviderSetupReady(env),
+    checkoutFlagEnabled,
+    readyProviderGroups: checks
+      .filter(
+        (check) =>
+          check.status === "ready" && check.id !== "paid-checkout-flag",
+      )
+      .map((check) => check.id),
+    missingProviderGroups: checks
+      .filter((check) => check.status === "missing")
+      .map((check) => ({
+        id: check.id,
+        label: check.label,
+        missingEnvVars: check.missingEnvVars ?? [],
+      })),
+    manualVerificationGroups: checks
+      .filter((check) => check.status === "manual")
+      .map((check) => ({
+        id: check.id,
+        label: check.label,
+        details: check.details,
+      })),
+  };
 }
