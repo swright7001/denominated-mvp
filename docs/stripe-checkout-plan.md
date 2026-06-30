@@ -67,6 +67,7 @@ Recommended user billing fields:
 | Field | Purpose |
 | --- | --- |
 | `planTier` | `freeAccount`, `pro`, or `lifetime` |
+| `convexAccountId` | Convex account identifier from checkout metadata |
 | `stripeCustomerId` | Stripe customer identifier |
 | `stripeSubscriptionId` | Active or most recent Pro subscription |
 | `stripePriceId` | Current Pro monthly/annual price or Lifetime price |
@@ -150,6 +151,8 @@ Handle Stripe webhooks server-side and verify signatures with
 
 For Lifetime, `checkout.session.completed` should be enough to grant access,
 but storing the related PaymentIntent and invoice data is useful for support.
+Checkout webhooks should match the Convex account id from Stripe metadata first,
+then fall back to Stripe customer id and email.
 
 ## Cancellation And Failed Payment Behavior
 

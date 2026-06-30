@@ -63,6 +63,7 @@ export default defineSchema({
       .index("by_stripeCustomerId", ["stripeCustomerId"]),
 
     billingSnapshots: defineTable({
+      convexAccountId: v.optional(v.id("accounts")),
       stripeCustomerId: v.optional(v.string()),
       email: v.optional(v.string()),
       planTier: planTierValidator,
@@ -79,6 +80,7 @@ export default defineSchema({
       createdAt: v.number(),
       updatedAt: v.number(),
     })
+      .index("by_convexAccountId", ["convexAccountId"])
       .index("by_stripeCustomerId", ["stripeCustomerId"])
       .index("by_email", ["email"])
       .index("by_stripeEventId", ["stripeEventId"]),

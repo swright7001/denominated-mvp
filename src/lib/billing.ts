@@ -16,6 +16,7 @@ export type SubscriptionStatus =
   | "unknown";
 
 export type BillingSnapshot = {
+  convexAccountId?: string;
   planTier?: BillingPlanTier;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
@@ -216,6 +217,9 @@ export function mapStripeEventToBillingSnapshot(
         return {
           ...base,
           planTier: "lifetime",
+          convexAccountId: normalizeOptionalString(
+            session.metadata?.convex_account_id,
+          ),
           email,
           stripeCustomerId: result.stripeCustomerId,
           stripePriceId: session.metadata?.stripe_price_id,
@@ -226,6 +230,9 @@ export function mapStripeEventToBillingSnapshot(
       return {
         ...base,
         planTier: "pro",
+        convexAccountId: normalizeOptionalString(
+          session.metadata?.convex_account_id,
+        ),
         email,
         stripeCustomerId: result.stripeCustomerId,
         stripeSubscriptionId: result.stripeSubscriptionId,
@@ -318,6 +325,12 @@ function normalizeOptionalEmail(value: string | null | undefined) {
   const email = normalizeEmail(value);
 
   return isValidEmail(email) ? email : undefined;
+}
+
+function normalizeOptionalString(value: string | null | undefined) {
+  const normalized = value?.trim();
+
+  return normalized ? normalized : undefined;
 }
 
 function toIsoFromUnix(value: number | null | undefined) {

@@ -121,6 +121,7 @@ test("Stripe checkout session maps to a durable lifetime billing snapshot", () =
           customer_email: "USER@Example.COM",
           metadata: {
             entitlement_tier: "lifetime",
+            convex_account_id: "account_123",
             stripe_price_id: "price_lifetime",
           },
         },
@@ -135,6 +136,7 @@ test("Stripe checkout session maps to a durable lifetime billing snapshot", () =
     lastWebhookAction: "grant-lifetime",
     billingUpdatedAt: "2026-06-27T12:00:00.000Z",
     planTier: "lifetime",
+    convexAccountId: "account_123",
     email: "user@example.com",
     stripeCustomerId: "cus_123",
     stripePriceId: "price_lifetime",

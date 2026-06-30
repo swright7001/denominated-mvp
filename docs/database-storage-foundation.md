@@ -59,6 +59,10 @@ Billing state is not client-writable. Paid plan fields on `accounts` are updated
 through the Stripe webhook sync path in `convex/billing.ts`, protected by
 `DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET`.
 
+Stripe checkout metadata includes the Convex account id. Webhook persistence
+matches accounts by Convex account id first, then Stripe customer id, then email
+as a final fallback.
+
 ## Clerk Dependency
 
 Convex authenticated writes require Clerk JWT configuration:

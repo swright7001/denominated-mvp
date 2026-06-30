@@ -2,11 +2,20 @@ import { NextResponse } from "next/server";
 import { fetchMutation } from "convex/nextjs";
 import Stripe from "stripe";
 import { api } from "../../../../../convex/_generated/api";
+import type { Id } from "../../../../../convex/_generated/dataModel";
 import {
   getMissingBillingPersistenceEnvVars,
   mapStripeEventToBillingSnapshot,
   mapStripeEventToBillingResult,
+  type StripeBillingSnapshot,
 } from "@/lib/billing";
+
+type ConvexStripeBillingSnapshot = Omit<
+  StripeBillingSnapshot,
+  "convexAccountId"
+> & {
+  convexAccountId?: Id<"accounts">;
+};
 
 export async function POST(request: Request) {
   const missingEnvVars = getMissingBillingPersistenceEnvVars();
@@ -54,7 +63,7 @@ export async function POST(request: Request) {
   const persistenceResult = snapshot
     ? await fetchMutation(api.billing.syncFromStripeWebhook, {
         syncSecret: process.env.DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET!,
-        snapshot,
+        snapshot: toConvexStripeBillingSnapshot(snapshot),
       })
     : null;
 
@@ -73,4 +82,13 @@ export async function POST(request: Request) {
     result,
     persisted: Boolean(persistenceResult),
   });
+}
+
+function toConvexStripeBillingSnapshot(
+  snapshot: StripeBillingSnapshot,
+): ConvexStripeBillingSnapshot {
+  return {
+    ...snapshot,
+    convexAccountId: snapshot.convexAccountId as Id<"accounts"> | undefined,
+  };
 }

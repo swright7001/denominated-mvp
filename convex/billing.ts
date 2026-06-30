@@ -1,8 +1,10 @@
 import { v, type Infer } from "convex/values";
 import { mutation, type MutationCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { planTierValidator, subscriptionStatusValidator } from "./schema";
 
 const billingSnapshotFields = {
+  convexAccountId: v.optional(v.id("accounts")),
   stripeCustomerId: v.optional(v.string()),
   email: v.optional(v.string()),
   planTier: planTierValidator,
@@ -34,8 +36,14 @@ export const syncFromStripeWebhook = mutation({
   handler: async (ctx, args) => {
     assertWebhookSyncSecret(args.syncSecret);
 
-    if (!args.snapshot.stripeCustomerId && !args.snapshot.email) {
-      throw new Error("Stripe billing snapshot requires a customer ID or email.");
+    if (
+      !args.snapshot.convexAccountId &&
+      !args.snapshot.stripeCustomerId &&
+      !args.snapshot.email
+    ) {
+      throw new Error(
+        "Stripe billing snapshot requires an account ID, customer ID, or email.",
+      );
     }
 
     const now = Date.now();
@@ -56,6 +64,7 @@ export const syncFromStripeWebhook = mutation({
 
     const existingSnapshot = await findExistingBillingSnapshot(
       ctx,
+      args.snapshot.convexAccountId,
       args.snapshot.stripeCustomerId,
       args.snapshot.email,
     );
@@ -99,9 +108,21 @@ function assertWebhookSyncSecret(syncSecret: string) {
 
 async function findExistingBillingSnapshot(
   ctx: MutationCtx,
+  convexAccountId: Id<"accounts"> | undefined,
   stripeCustomerId: string | undefined,
   email: string | undefined,
 ) {
+  if (convexAccountId) {
+    const byAccount = await ctx.db
+      .query("billingSnapshots")
+      .withIndex("by_convexAccountId", (q) =>
+        q.eq("convexAccountId", convexAccountId),
+      )
+      .unique();
+
+    if (byAccount) return byAccount;
+  }
+
   if (stripeCustomerId) {
     const byCustomer = await ctx.db
       .query("billingSnapshots")
@@ -128,6 +149,7 @@ async function patchMatchingAccount(
 ) {
   const account = await findMatchingAccount(
     ctx,
+    snapshot.convexAccountId,
     snapshot.stripeCustomerId,
     snapshot.email,
   );
@@ -166,9 +188,16 @@ export function buildAccountBillingPatch(
 
 async function findMatchingAccount(
   ctx: MutationCtx,
+  convexAccountId: Id<"accounts"> | undefined,
   stripeCustomerId: string | undefined,
   email: string | undefined,
 ) {
+  if (convexAccountId) {
+    const byId = await ctx.db.get(convexAccountId);
+
+    if (byId) return byId;
+  }
+
   if (stripeCustomerId) {
     const byCustomer = await ctx.db
       .query("accounts")
