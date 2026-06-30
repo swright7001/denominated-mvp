@@ -21,6 +21,8 @@ and Stripe webhooks are configured for Preview.
 
 Add these to the Vercel project for the Preview environment first. Prefer a
 branch-scoped Preview variable for `codex/paid-v2-launch` when possible.
+Use `docs/paid-v2-provider-setup-worksheet.md` to identify where each value
+comes from and what shape it should have.
 
 | Area | Environment variables |
 | --- | --- |
