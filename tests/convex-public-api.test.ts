@@ -23,3 +23,12 @@ test("Stripe billing persistence requires the webhook sync secret", () => {
   assert.match(billingSource, /syncSecret: v\.string\(\)/);
   assert.match(billingSource, /assertWebhookSyncSecret\(args\.syncSecret\)/);
 });
+
+test("scenario presets expose public reads only", () => {
+  const presetsSource = readFileSync(join(repoRoot, "convex/presets.ts"), "utf8");
+
+  assert.match(presetsSource, /export const list = query/);
+  assert.equal(presetsSource.includes("export const upsert"), false);
+  assert.equal(presetsSource.includes("export const remove"), false);
+  assert.equal(presetsSource.includes("mutation("), false);
+});

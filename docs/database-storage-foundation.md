@@ -50,12 +50,10 @@ Saved scenarios are owned by Convex auth identity through
 `convex/presets.ts`:
 
 - `list`
-- `upsert`
-- `remove`
 
-Preset writes currently require a signed-in user. Before launch, decide whether
-to keep preset management as a privileged internal operation or move seeding to
-a controlled script/admin route.
+Preset writes are intentionally not exposed as public signed-in mutations.
+Before launch, add a controlled seed workflow with source metadata if presets
+need to move into Convex.
 
 Billing state is not client-writable. Paid plan fields on `accounts` are updated
 through the Stripe webhook sync path in `convex/billing.ts`, protected by
