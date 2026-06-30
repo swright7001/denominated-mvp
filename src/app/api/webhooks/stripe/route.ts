@@ -9,6 +9,7 @@ import {
   mapStripeEventToBillingResult,
   type StripeBillingSnapshot,
 } from "@/lib/billing";
+import { createStripeClient } from "@/lib/stripe";
 
 type ConvexStripeBillingSnapshot = Omit<
   StripeBillingSnapshot,
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  const stripe = createStripeClient(process.env.STRIPE_SECRET_KEY!);
   const body = await request.text();
   let event: Stripe.Event;
 

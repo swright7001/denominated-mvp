@@ -77,6 +77,10 @@ vercel env pull .env.local --environment=preview --yes
 
 Never commit `.env.local` or provider secrets.
 
+For local billing-portal tests only, `DENOMINATED_ENABLE_LOCAL_BILLING_TESTS`
+may be set to `true`. That bypass is intentionally restricted to localhost
+requests and should not be set in Preview or Production.
+
 ## Preview Verification
 
 Use a fresh test user and Stripe test card data.

@@ -9,7 +9,9 @@ until Stripe environment variables and real account identity are configured.
 
 Paid checkout is also protected by `DENOMINATED_ENABLE_PAID_CHECKOUT`. Keep that
 flag unset for the free public launch.
-Billing settings and payment fulfillment are not implemented in this MVP.
+Billing state, webhook persistence, and the authenticated billing portal now
+exist as paid V2 Preview plumbing, but they remain unverified until the Preview
+runbook passes with Stripe test-mode payments.
 
 For the paid V2 Preview verification sequence, see
 `docs/paid-v2-preview-runbook.md`.
@@ -234,24 +236,27 @@ Before production checkout:
 
 ## Implementation Boundaries
 
-Implemented as setup-safe plumbing:
+Implemented as setup-safe paid V2 plumbing:
 
-- `/api/checkout/stripe` validates plan ID and local account email.
+- `/api/checkout/stripe` requires Clerk auth, Convex account lookup, the
+  explicit paid checkout flag, and Stripe price configuration before creating
+  Checkout Sessions.
 - `/plans` can start Pro monthly, Pro annual, or Lifetime checkout.
 - Missing Stripe env vars return a setup-required response instead of creating
   a fake payment.
+- `/api/webhooks/stripe` verifies the Stripe signature and persists normalized
+  billing snapshots through Convex.
+- `/api/billing/portal` opens the Stripe Billing Portal for the authenticated
+  account's stored Stripe customer. The email-based portal test helper is
+  restricted to localhost only.
 
-Do implement later:
+Do implement or verify before Production:
 
-- Webhook signature verification.
-- Server-side billing state.
-- Entitlement resolution from real auth/payment state.
-- Billing success/cancel screens.
-- Billing support states.
-
-Still not implemented:
-
-- Billing portal.
+- Full Clerk/Convex/Stripe Preview environment configuration.
+- Stripe test-mode Pro monthly, cancellation, failed-payment, and Lifetime
+  verification on Preview.
+- Billing success/cancel polish and support states.
+- Final pricing, refund, support, tax/accounting, and legal approval.
 - B2B billing.
 - SMS billing.
 - Crypto payments.

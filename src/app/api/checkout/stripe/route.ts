@@ -1,7 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import { api } from "../../../../../convex/_generated/api";
 import { isValidEmail, normalizeEmail } from "@/lib/account";
 import { isClerkConfigured } from "@/lib/auth";
@@ -14,6 +13,7 @@ import {
   parseCheckoutPlanId,
 } from "@/lib/checkout";
 import { resolveRequestAppOrigin } from "@/lib/site";
+import { createStripeClient } from "@/lib/stripe";
 
 export async function POST(request: Request) {
   if (!isPaidCheckoutEnabled()) {
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  const stripe = createStripeClient(process.env.STRIPE_SECRET_KEY!);
   const origin = resolveRequestAppOrigin({ requestUrl: request.url });
   const priceId = getCheckoutPriceId(plan);
   const customerId = account?.stripeCustomerId;

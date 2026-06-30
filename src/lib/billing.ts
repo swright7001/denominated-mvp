@@ -116,6 +116,29 @@ export function isBillingPortalLocalTestEnabled(
   return env[billingPortalTestModeEnvVar] === "true";
 }
 
+export function isBillingPortalLocalTestRequest({
+  requestUrl,
+  env = process.env,
+}: {
+  requestUrl: string;
+  env?: Record<string, string | undefined>;
+}) {
+  if (!isBillingPortalLocalTestEnabled(env)) return false;
+
+  try {
+    const { hostname } = new URL(requestUrl);
+
+    return (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "::1" ||
+      hostname === "[::1]"
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function mapStripeEventToBillingResult(
   event: Pick<Stripe.Event, "type" | "data">,
 ): BillingWebhookResult {

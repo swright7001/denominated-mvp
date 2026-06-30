@@ -1,16 +1,17 @@
 import { auth } from "@clerk/nextjs/server";
 import { fetchQuery } from "convex/nextjs";
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import { api } from "../../../../../convex/_generated/api";
 import { isValidEmail, normalizeEmail } from "@/lib/account";
 import { isClerkConfigured } from "@/lib/auth";
 import {
   billingPortalTestModeEnvVar,
   getMissingBillingPortalAuthEnvVars,
-  isBillingPortalLocalTestEnabled,
+  isBillingPortalLocalTestRequest,
 } from "@/lib/billing";
 import { resolveRequestAppOrigin } from "@/lib/site";
+import { createStripeClient } from "@/lib/stripe";
+import type Stripe from "stripe";
 
 export async function POST(request: Request) {
   const payload = (await request.json().catch(() => null)) as {
@@ -32,10 +33,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  const stripe = createStripeClient(process.env.STRIPE_SECRET_KEY);
   const origin = resolveRequestAppOrigin({ requestUrl: request.url });
 
-  if (isBillingPortalLocalTestEnabled()) {
+  if (isBillingPortalLocalTestRequest({ requestUrl: request.url })) {
     if (!isValidEmail(accountEmail)) {
       return NextResponse.json(
         {
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         code: "AUTH_PROVIDER_REQUIRED",
-        error: `Billing portal access requires Clerk auth, Convex account storage, and stored Stripe customer IDs. Set ${billingPortalTestModeEnvVar}=true only for local Stripe portal testing.`,
+        error: `Billing portal access requires Clerk auth, Convex account storage, and stored Stripe customer IDs. Set ${billingPortalTestModeEnvVar}=true only for localhost Stripe portal testing.`,
         missingEnvVars: missingPortalEnvVars,
         setupRequired: true,
       },

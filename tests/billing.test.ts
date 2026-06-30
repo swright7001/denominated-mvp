@@ -5,6 +5,7 @@ import {
   getMissingBillingPersistenceEnvVars,
   getMissingBillingEnvVars,
   isBillingPortalLocalTestEnabled,
+  isBillingPortalLocalTestRequest,
   mapStripeEventToBillingSnapshot,
   mapStripeEventToBillingResult,
   resolveBillingPlanTier,
@@ -67,6 +68,39 @@ test("billing portal local test mode is explicit", () => {
       DENOMINATED_ENABLE_LOCAL_BILLING_TESTS: "true",
     }),
     true,
+  );
+});
+
+test("billing portal local test mode only works for localhost requests", () => {
+  const env = { DENOMINATED_ENABLE_LOCAL_BILLING_TESTS: "true" };
+
+  assert.equal(
+    isBillingPortalLocalTestRequest({
+      requestUrl: "http://localhost:3000/api/billing/portal",
+      env,
+    }),
+    true,
+  );
+  assert.equal(
+    isBillingPortalLocalTestRequest({
+      requestUrl: "http://127.0.0.1:3000/api/billing/portal",
+      env,
+    }),
+    true,
+  );
+  assert.equal(
+    isBillingPortalLocalTestRequest({
+      requestUrl: "https://denominated-preview.vercel.app/api/billing/portal",
+      env,
+    }),
+    false,
+  );
+  assert.equal(
+    isBillingPortalLocalTestRequest({
+      requestUrl: "not a url",
+      env,
+    }),
+    false,
   );
 });
 
