@@ -21,6 +21,7 @@ const savedScenarioInputFields = {
 };
 
 const savedScenarioInputValidator = v.object(savedScenarioInputFields);
+type SavedScenarioPlanTier = "freeAccount" | "pro" | "lifetime";
 
 async function requireOwnerTokenIdentifier(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
@@ -115,15 +116,27 @@ export const importLocalWatchlist = mutation({
   },
   handler: async (ctx, args) => {
     const ownerTokenIdentifier = await requireOwnerTokenIdentifier(ctx);
+    const now = Date.now();
 
     if (args.savedScenarios.length > 50) {
       throw new Error("Import up to 50 saved scenarios at a time.");
     }
 
-    const importedIds = [];
+    const account = await ctx.db
+      .query("accounts")
+      .withIndex("by_ownerTokenIdentifier", (q) =>
+        q.eq("ownerTokenIdentifier", ownerTokenIdentifier),
+      )
+      .unique();
+
+    if (!account) {
+      throw new Error("Create an account before importing saved scenarios.");
+    }
+
+    const importRows = [];
+    let incomingNewScenarioCount = 0;
 
     for (const savedScenario of args.savedScenarios) {
-      const now = Date.now();
       const existing = savedScenario.clientId
         ? await ctx.db
             .query("savedScenarios")
@@ -135,6 +148,29 @@ export const importLocalWatchlist = mutation({
             .unique()
         : null;
 
+      if (!existing) incomingNewScenarioCount += 1;
+      importRows.push({ savedScenario, existing });
+    }
+
+    const existingSavedScenarios = await ctx.db
+      .query("savedScenarios")
+      .withIndex("by_ownerTokenIdentifier", (q) =>
+        q.eq("ownerTokenIdentifier", ownerTokenIdentifier),
+      )
+      .take(2);
+    const importDecision = getSavedScenarioImportDecision(
+      account.planTier,
+      existingSavedScenarios.length,
+      incomingNewScenarioCount,
+    );
+
+    if (!importDecision.allowed) {
+      throw new Error(importDecision.reason);
+    }
+
+    const importedIds = [];
+
+    for (const { savedScenario, existing } of importRows) {
       if (existing) {
         await ctx.db.patch(existing._id, {
           ...savedScenario,
@@ -158,6 +194,26 @@ export const importLocalWatchlist = mutation({
     return importedIds;
   },
 });
+
+export function getSavedScenarioImportDecision(
+  planTier: SavedScenarioPlanTier,
+  existingScenarioCount: number,
+  incomingNewScenarioCount: number,
+) {
+  const remainingFreeSlots = Math.max(1 - existingScenarioCount, 0);
+
+  if (
+    planTier === "freeAccount" &&
+    incomingNewScenarioCount > remainingFreeSlots
+  ) {
+    return {
+      allowed: false,
+      reason: "Upgrade to Pro to import more than one saved scenario.",
+    };
+  }
+
+  return { allowed: true };
+}
 
 export const rename = mutation({
   args: {

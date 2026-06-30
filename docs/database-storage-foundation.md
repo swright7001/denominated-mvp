@@ -100,6 +100,10 @@ When the signed-in UI is wired, call `savedScenarios.importLocalWatchlist` after
 account creation/sign-in, then continue using Convex as the account source of
 truth.
 
+`savedScenarios.importLocalWatchlist` requires an account record and enforces
+the same plan boundary as direct saves: Free Account can have one saved
+scenario, while Pro and Lifetime can import up to the mutation batch cap.
+
 ## Remaining Launch Work
 
 - Configure Clerk JWT templates and production domain.
