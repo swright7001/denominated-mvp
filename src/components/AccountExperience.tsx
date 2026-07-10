@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { FormEvent, useSyncExternalStore, useState } from "react";
@@ -286,11 +286,13 @@ function AccountBackedExperience() {
 }
 
 function SignedInAccountBackedExperience({ email }: { email: string }) {
+  const { signOut } = useAuth();
   const account = useQuery(api.accounts.getViewerAccount);
   const savedScenarios = useQuery(api.savedScenarios.list, { limit: 100 });
   const ensureAccount = useMutation(api.accounts.ensureViewerAccount);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const planTier = account?.planTier ?? "freeAccount";
   const plan = getPlanEntitlements(planTier);
   const savedScenarioCount = savedScenarios?.length ?? 0;
@@ -306,6 +308,18 @@ function SignedInAccountBackedExperience({ email }: { email: string }) {
       setError(
         "Account storage could not be activated. Confirm Clerk and Convex are connected.",
       );
+    }
+  }
+
+  async function signOutAccount() {
+    setError("");
+    setIsSigningOut(true);
+
+    try {
+      await signOut({ redirectUrl: "/" });
+    } catch {
+      setError("Could not sign out. Please try again.");
+      setIsSigningOut(false);
     }
   }
 
@@ -369,6 +383,15 @@ function SignedInAccountBackedExperience({ email }: { email: string }) {
             </p>
           ) : null}
           {error ? <p className="mt-3 text-sm text-[#f0a36f]">{error}</p> : null}
+          <button
+            className="outline-button mt-5 inline-flex items-center justify-center gap-2 rounded-md px-4 py-3 text-[#f0a36f]"
+            type="button"
+            disabled={isSigningOut}
+            onClick={signOutAccount}
+          >
+            <LogOut size={16} />
+            {isSigningOut ? "Signing out..." : "Sign out"}
+          </button>
           <p className="mt-5 text-xs leading-5 text-[#8f8172]">
             Phone number is not required. SMS alerts can stay optional later.
           </p>
