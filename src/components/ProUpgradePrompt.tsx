@@ -20,7 +20,7 @@ export function ProUpgradePrompt({
   features = [],
   primaryCta = "Compare Plans",
   secondaryCta = "Run a Free Scenario",
-  footnote = "Pro and Lifetime are planned upgrade tiers. No payment is collected in this MVP.",
+  footnote = "The free calculator stays open. Paid access adds recurring tracking tools.",
   compact = false,
 }: ProUpgradePromptProps) {
   return (
