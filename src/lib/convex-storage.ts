@@ -27,9 +27,19 @@ export type ConvexPresetInput = {
 export function toConvexSavedScenarioInput(
   savedScenario: SavedScenario,
 ): ConvexSavedScenarioInput {
+  const scenario = savedScenario.scenario;
+
   return {
     clientId: savedScenario.id,
-    scenario: savedScenario.scenario,
+    scenario: {
+      itemName: scenario.itemName,
+      currentItemPriceUSD: scenario.currentItemPriceUSD,
+      currentBTCPriceUSD: scenario.currentBTCPriceUSD,
+      years: scenario.years,
+      itemInflationRate: scenario.itemInflationRate,
+      btcGrowthRate: scenario.btcGrowthRate,
+      purchaseType: scenario.purchaseType,
+    },
     savedAt: savedScenario.savedAt,
     baselineBTCPriceUSD: savedScenario.baselineBTCPriceUSD,
     baselineItemCostBTC: savedScenario.baselineItemCostBTC,

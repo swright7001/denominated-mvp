@@ -15,7 +15,15 @@ test("toConvexSavedScenarioInput preserves local saved scenario baseline data", 
 
   assert.deepEqual(toConvexSavedScenarioInput(savedScenario), {
     clientId: "saved-local-1",
-    scenario: savedScenario.scenario,
+    scenario: {
+      itemName: "Tesla Model 3",
+      currentItemPriceUSD: 41000,
+      currentBTCPriceUSD: 80000,
+      years: 5,
+      itemInflationRate: 4,
+      btcGrowthRate: 15,
+      purchaseType: "one-time",
+    },
     savedAt: "2026-06-22T12:00:00.000Z",
     baselineBTCPriceUSD: 80000,
     baselineItemCostBTC: 0.5125,
