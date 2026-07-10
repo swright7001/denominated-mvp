@@ -214,3 +214,32 @@ test("Stripe subscription updates map status and period fields", () => {
   assert.equal(snapshot?.currentPeriodEnd, "2026-10-03T04:00:00.000Z");
   assert.equal(snapshot?.cancelAtPeriodEnd, true);
 });
+
+test("failed invoice maps to a past-due Free Account snapshot", () => {
+  const snapshot = mapStripeEventToBillingSnapshot(
+    {
+      id: "evt_failed_invoice",
+      type: "invoice.payment_failed",
+      created: 1790000000,
+      data: {
+        object: {
+          customer: "cus_failed",
+          customer_email: "USER@Example.COM",
+          parent: {
+            subscription_details: {
+              subscription: "sub_failed",
+            },
+          },
+        },
+      },
+    } as never,
+    new Date("2026-06-27T12:00:00.000Z"),
+  );
+
+  assert.equal(snapshot?.planTier, "freeAccount");
+  assert.equal(snapshot?.subscriptionStatus, "past_due");
+  assert.equal(snapshot?.stripeCustomerId, "cus_failed");
+  assert.equal(snapshot?.stripeSubscriptionId, "sub_failed");
+  assert.equal(snapshot?.email, "user@example.com");
+  assert.equal(snapshot?.lastWebhookAction, "mark-payment-issue");
+});
