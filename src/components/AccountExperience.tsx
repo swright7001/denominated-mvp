@@ -4,7 +4,14 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { FormEvent, useSyncExternalStore, useState } from "react";
-import { Check, LogOut, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  LogOut,
+  Mail,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import {
   accountChangedEvent,
@@ -19,6 +26,7 @@ import {
   planOrder,
   type PlanTier,
 } from "@/lib/entitlements";
+import { getBillingStatusNotice } from "@/lib/billing";
 import {
   parseSavedScenarios,
   WATCHLIST_STORAGE_KEY,
@@ -301,6 +309,10 @@ function SignedInAccountBackedExperience({ email }: { email: string }) {
   const planTier = account?.planTier ?? "freeAccount";
   const plan = getPlanEntitlements(planTier);
   const savedScenarioCount = savedScenarios?.length ?? 0;
+  const billingStatusNotice = getBillingStatusNotice({
+    planTier,
+    subscriptionStatus: account?.subscriptionStatus,
+  });
 
   async function activateAccountStorage() {
     setMessage("");
@@ -432,6 +444,31 @@ function SignedInAccountBackedExperience({ email }: { email: string }) {
               }
             />
           </div>
+
+          {billingStatusNotice ? (
+            <div className="mt-5 rounded-md border border-[rgba(240,163,111,0.42)] bg-[#2a1810]/55 p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle
+                  className="mt-0.5 shrink-0 text-[#f0a36f]"
+                  size={18}
+                />
+                <div>
+                  <p className="font-medium text-[#efe6da]">
+                    {billingStatusNotice.title}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[#b9ab9a]">
+                    {billingStatusNotice.body}
+                  </p>
+                  <Link
+                    className="mt-3 inline-flex text-sm font-medium text-[#f0a36f] underline decoration-[rgba(240,163,111,0.45)] underline-offset-4"
+                    href="/billing"
+                  >
+                    Review billing
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           <div className="mt-5 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
             <p className="text-sm leading-6 text-[#b9ab9a]">

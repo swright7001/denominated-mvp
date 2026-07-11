@@ -28,6 +28,11 @@ export type BillingSnapshot = {
   billingUpdatedAt?: string;
 };
 
+export type BillingStatusNotice = {
+  title: string;
+  body: string;
+};
+
 export type BillingWebhookAction =
   | "grant-lifetime"
   | "sync-subscription"
@@ -78,6 +83,56 @@ export function resolveBillingPlanTier(
   }
 
   return "freeAccount";
+}
+
+export function getBillingStatusNotice({
+  planTier,
+  subscriptionStatus,
+}: {
+  planTier: PlanTier;
+  subscriptionStatus?: SubscriptionStatus;
+}): BillingStatusNotice | null {
+  if (
+    planTier === "lifetime" ||
+    subscriptionStatus === undefined ||
+    subscriptionStatus === "active" ||
+    subscriptionStatus === "trialing"
+  ) {
+    return null;
+  }
+
+  if (subscriptionStatus === "past_due" || subscriptionStatus === "unpaid") {
+    return {
+      title: "Payment needs attention",
+      body: "Your latest Pro payment did not go through, so this account is using Free Account access for now. The calculator, examples, Learn, and sharing remain available while you update billing.",
+    };
+  }
+
+  if (
+    subscriptionStatus === "incomplete" ||
+    subscriptionStatus === "incomplete_expired"
+  ) {
+    return {
+      title: "Pro setup is incomplete",
+      body: "Stripe could not finish this Pro subscription. Free Account access remains available, and you can return to billing when you are ready to try again.",
+    };
+  }
+
+  if (subscriptionStatus === "canceled") {
+    return {
+      title: "Pro subscription ended",
+      body: "This account has returned to Free Account access. Your free calculator, examples, Learn, and sharing tools remain available.",
+    };
+  }
+
+  if (subscriptionStatus === "paused") {
+    return {
+      title: "Pro access is paused",
+      body: "This account is using Free Account access while the subscription is paused. You can keep using the free tools and review billing whenever you are ready.",
+    };
+  }
+
+  return null;
 }
 
 export function getMissingBillingEnvVars(

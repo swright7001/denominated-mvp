@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  getBillingStatusNotice,
   getMissingBillingPortalAuthEnvVars,
   getMissingBillingPersistenceEnvVars,
   getMissingBillingEnvVars,
@@ -26,6 +27,36 @@ test("resolveBillingPlanTier maps active subscriptions to pro", () => {
   assert.equal(resolveBillingPlanTier({ subscriptionStatus: "active" }), "pro");
   assert.equal(resolveBillingPlanTier({ subscriptionStatus: "trialing" }), "pro");
   assert.equal(resolveBillingPlanTier({ subscriptionStatus: "canceled" }), "freeAccount");
+});
+
+test("billing status notice explains failed payment without blocking free tools", () => {
+  assert.deepEqual(
+    getBillingStatusNotice({
+      planTier: "freeAccount",
+      subscriptionStatus: "past_due",
+    }),
+    {
+      title: "Payment needs attention",
+      body: "Your latest Pro payment did not go through, so this account is using Free Account access for now. The calculator, examples, Learn, and sharing remain available while you update billing.",
+    },
+  );
+});
+
+test("billing status notice stays hidden for healthy and Lifetime access", () => {
+  assert.equal(
+    getBillingStatusNotice({
+      planTier: "pro",
+      subscriptionStatus: "active",
+    }),
+    null,
+  );
+  assert.equal(
+    getBillingStatusNotice({
+      planTier: "lifetime",
+      subscriptionStatus: "past_due",
+    }),
+    null,
+  );
 });
 
 test("billing env helper requires Stripe secret and webhook secret", () => {
