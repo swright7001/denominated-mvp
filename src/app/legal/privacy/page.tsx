@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: "What Denominated Collects",
-    body: "Before production auth is connected, the app may store calculator inputs, saved scenarios, account email placeholders, and plan test state in your browser. When account features are connected, account, billing, email preference, and saved scenario data should be stored by the configured production providers.",
+    body: "Denominated may store calculator preferences and unauthenticated scenarios in your browser. If you create an account, Denominated processes account identifiers, saved scenarios, assumptions, email preferences, and billing entitlement records needed to provide account features.",
   },
   {
     title: "How Data Is Used",
@@ -30,20 +30,24 @@ const sections = [
     body: DATA_SOURCE_CAVEAT,
   },
   {
+    title: "Service Providers",
+    body: "Clerk processes account authentication, Convex stores account and saved-scenario data, Stripe processes payments and billing, Resend delivers opted-in email, Vercel hosts the app and provides operational analytics, and CoinGecko supplies the reference Bitcoin price. These providers process data under their own terms and privacy notices.",
+  },
+  {
     title: "Payment Data",
-    body: "Payment details should be handled by Stripe. Denominated should not store raw card numbers or sensitive payment credentials.",
+    body: "Stripe handles payment details. Denominated stores billing identifiers and entitlement status needed to provide paid access, but does not store raw card numbers or card security codes.",
   },
   {
-    title: "Email Preferences",
-    body: "If recurring emails are enabled, users should be able to opt in or out of educational updates, saved scenario updates, and report-style emails.",
+    title: "Email And Analytics",
+    body: "You can opt out of optional educational and report emails. Required account, billing, security, and service messages may still be sent. Product analytics are used to understand performance and usage; Denominated does not enable session replay by default.",
   },
   {
-    title: "Analytics",
-    body: "Analytics should measure product usage without logging sensitive calculator inputs by default. Any session replay or invasive tracking should require a separate product decision.",
+    title: "Retention And Your Choices",
+    body: "Browser data can be cleared through your browser. Account, billing, and support records are retained while needed to provide the service, meet legal obligations, resolve disputes, and prevent abuse. Contact support to request account-data access, correction, or deletion; some records may be retained where law requires it.",
   },
   {
-    title: "Production Review",
-    body: `${SUPPORT_CONTACT_NOTE()} Privacy and data-retention language should be reviewed before accepting production payments or storing durable user data.`,
+    title: "Contact",
+    body: SUPPORT_CONTACT_NOTE(),
   },
 ];
 
@@ -57,9 +61,9 @@ export default function PrivacyPage() {
             Privacy Notice
           </h1>
           <p className="mt-5 text-lg leading-8 text-[#b9ab9a]">
-            Denominated should collect only what it needs to run the product,
-            support account features, and send opted-in purchasing-power
-            updates.
+            Denominated collects and processes only the information needed to
+            run the product, support accounts, manage billing, and deliver
+            opted-in purchasing-power updates.
           </p>
         </div>
 

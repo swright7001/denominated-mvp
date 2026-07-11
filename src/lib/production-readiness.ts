@@ -119,6 +119,8 @@ const requiredPaidLaunchDecisionGroups = [
       "DENOMINATED_LEGAL_SIGNOFF",
       "DENOMINATED_OPERATOR_NAME",
       "DENOMINATED_LEGAL_EFFECTIVE_DATE",
+      "DENOMINATED_GOVERNING_JURISDICTION",
+      "DENOMINATED_REFUND_WINDOW_DAYS",
     ],
     details:
       "The operator identity, effective date, and owner or professional legal approval must be recorded before live checkout.",
@@ -273,6 +275,17 @@ function isIsoDate(value: string | undefined) {
   return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
 }
 
+function isRefundWindowDays(value: string | undefined) {
+  const normalized = value?.trim() ?? "";
+
+  if (!/^\d{1,3}$/.test(normalized)) {
+    return false;
+  }
+
+  const days = Number(normalized);
+  return Number.isInteger(days) && days >= 0 && days <= 365;
+}
+
 function getPaidLaunchDecisionChecks(env: Env): ReadinessCheck[] {
   return requiredPaidLaunchDecisionGroups.map((group) => {
     const missingEnvVars = group.envVars.filter((key) => {
@@ -286,6 +299,17 @@ function getPaidLaunchDecisionChecks(env: Env): ReadinessCheck[] {
 
       if (key === "DENOMINATED_LEGAL_EFFECTIVE_DATE") {
         return !isIsoDate(env[key]?.trim());
+      }
+
+      if (
+        key === "DENOMINATED_OPERATOR_NAME" ||
+        key === "DENOMINATED_GOVERNING_JURISDICTION"
+      ) {
+        return !env[key]?.trim();
+      }
+
+      if (key === "DENOMINATED_REFUND_WINDOW_DAYS") {
+        return !isRefundWindowDays(env[key]);
       }
 
       if (

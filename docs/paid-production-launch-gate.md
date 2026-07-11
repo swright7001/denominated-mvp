@@ -15,6 +15,8 @@ be the literal value `true`.
 | `DENOMINATED_LEGAL_SIGNOFF` | The owner or a qualified legal professional has approved the paid Terms, Privacy, and Refund policies. |
 | `DENOMINATED_OPERATOR_NAME` | Accurate legal/operator identity for the published policies. |
 | `DENOMINATED_LEGAL_EFFECTIVE_DATE` | Effective date for the approved policies in `YYYY-MM-DD` format. |
+| `DENOMINATED_GOVERNING_JURISDICTION` | Approved governing jurisdiction displayed in the Terms. |
+| `DENOMINATED_REFUND_WINDOW_DAYS` | Approved initial-purchase refund request window from `0` through `365` days. |
 | `DENOMINATED_TAX_SIGNOFF` | The owner or tax professional has recorded the Stripe Tax, registration, and bookkeeping decision. |
 | `DENOMINATED_SUPPORT_EMAIL` | Monitored customer support email for billing, refunds, and account access. |
 | `NEXT_PUBLIC_SUPPORT_URL` | Published customer support URL configured in both the app and Stripe. |

@@ -8,6 +8,7 @@ import {
   SUPPORT_CONTACT_NOTE,
 } from "@/lib/legal";
 import { absoluteUrl } from "@/lib/site";
+import { getLegalPolicyConfig } from "@/lib/legal-policy";
 
 export const metadata: Metadata = {
   title: "Terms",
@@ -23,12 +24,18 @@ export const metadata: Metadata = {
 };
 
 export default function TermsPage() {
+  const policy = getLegalPolicyConfig();
+
   return (
     <Layout>
       <LegalArticle
         eyebrow="Legal"
         title="Terms of Use"
-        intro="These terms set expectations for using Denominated's calculator, examples, account features, and future paid tracking tools."
+        intro={
+          policy
+            ? `Effective ${policy.effectiveDate}. These terms govern your use of Denominated, operated by ${policy.operatorName}.`
+            : "These terms govern the free Denominated calculator. Paid checkout remains unavailable until the operator, effective date, jurisdiction, and refund policy are approved and published."
+        }
         sections={[
           {
             title: "Educational Tool",
@@ -48,11 +55,25 @@ export default function TermsPage() {
           },
           {
             title: "Accounts And Paid Features",
-            body: PAID_FEATURES_CAVEAT,
+            body: `${PAID_FEATURES_CAVEAT} You are responsible for maintaining access to your account and for activity performed through it. Subscription pricing and renewal intervals are shown before checkout.`,
+          },
+          {
+            title: "Acceptable Use",
+            body: "Do not misuse the service, interfere with its operation, attempt unauthorized access, automate abusive traffic, or use Denominated to violate applicable law or another person's rights.",
+          },
+          {
+            title: "Availability And Warranty",
+            body: "Denominated is provided on an as-available basis. Calculations, data, and online access may contain errors or interruptions. To the extent permitted by law, no warranty is made that the service will always be available or fit for a particular purpose.",
           },
           {
             title: "Service Changes",
             body: "Denominated may improve, change, pause, or remove features over time. We will try to avoid disrupting paid access, but no online service can be guaranteed to be uninterrupted.",
+          },
+          {
+            title: "Governing Terms",
+            body: policy
+              ? `These terms are governed by the laws applicable in ${policy.governingJurisdiction}, without overriding consumer protections that cannot legally be waived.`
+              : "A governing jurisdiction must be approved and published before paid checkout is enabled.",
           },
           {
             title: "Contact",
