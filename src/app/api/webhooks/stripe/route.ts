@@ -73,8 +73,6 @@ export async function POST(request: Request) {
     eventType: event.type,
     action: result.action,
     planTier: result.planTier,
-    stripeCustomerId: result.stripeCustomerId,
-    stripeSubscriptionId: result.stripeSubscriptionId,
     persisted: Boolean(persistenceResult),
   });
 

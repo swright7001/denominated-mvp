@@ -12,6 +12,7 @@ import {
   getWeeklyReportPeriodKey,
   sendWeeklyReportEmail,
 } from "@/lib/weekly-report-email";
+import { getErrorKind } from "@/lib/monitoring";
 
 export async function POST(request: Request) {
   const emailEnv = getWeeklyReportEmailEnv();
@@ -27,7 +28,10 @@ export async function POST(request: Request) {
   }
 
   if (!isSameOriginRequest(request, emailEnv.appUrl)) {
-    return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+    return NextResponse.json(
+      { error: "Invalid request origin." },
+      { status: 403 },
+    );
   }
 
   const { userId, getToken } = await auth();
@@ -115,7 +119,7 @@ export async function POST(request: Request) {
 
     console.error("weekly_report_delivery_failed", {
       periodKey,
-      error: error instanceof Error ? error.message : "Unknown error",
+      errorKind: getErrorKind(error),
     });
     return NextResponse.json(
       {

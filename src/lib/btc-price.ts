@@ -137,7 +137,7 @@ export function buildBTCPriceLogEvent(price: BTCPriceResult) {
     lastUpdatedAt: price.lastUpdatedAt,
     staleAfterSeconds: price.staleAfterSeconds,
     sourceUrl: price.sourceUrl,
-    error: price.error,
+    errorCode: price.error ? "provider_unavailable" : null,
   };
 }
 
