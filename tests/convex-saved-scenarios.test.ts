@@ -1,6 +1,19 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getSavedScenarioImportDecision } from "../convex/savedScenarios";
+import {
+  assertSavedScenarioOwner,
+  getSavedScenarioImportDecision,
+} from "../convex/savedScenarios";
+
+test("saved scenario ownership allows only the authenticated owner", () => {
+  assert.doesNotThrow(() =>
+    assertSavedScenarioOwner("issuer|owner", "issuer|owner"),
+  );
+  assert.throws(
+    () => assertSavedScenarioOwner("issuer|owner", "issuer|other-user"),
+    /You do not have access to this saved scenario/,
+  );
+});
 
 test("free account import allows one new saved scenario", () => {
   assert.deepEqual(getSavedScenarioImportDecision("freeAccount", 0, 1), {

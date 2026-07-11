@@ -215,6 +215,15 @@ export function getSavedScenarioImportDecision(
   return { allowed: true };
 }
 
+export function assertSavedScenarioOwner(
+  savedScenarioOwnerTokenIdentifier: string,
+  viewerTokenIdentifier: string,
+) {
+  if (savedScenarioOwnerTokenIdentifier !== viewerTokenIdentifier) {
+    throw new Error("You do not have access to this saved scenario.");
+  }
+}
+
 export const rename = mutation({
   args: {
     id: v.id("savedScenarios"),
@@ -228,9 +237,10 @@ export const rename = mutation({
       throw new Error("Saved scenario not found.");
     }
 
-    if (savedScenario.ownerTokenIdentifier !== ownerTokenIdentifier) {
-      throw new Error("You do not have access to this saved scenario.");
-    }
+    assertSavedScenarioOwner(
+      savedScenario.ownerTokenIdentifier,
+      ownerTokenIdentifier,
+    );
 
     const itemName = args.itemName.trim();
 
@@ -262,9 +272,10 @@ export const remove = mutation({
       return null;
     }
 
-    if (savedScenario.ownerTokenIdentifier !== ownerTokenIdentifier) {
-      throw new Error("You do not have access to this saved scenario.");
-    }
+    assertSavedScenarioOwner(
+      savedScenario.ownerTokenIdentifier,
+      ownerTokenIdentifier,
+    );
 
     await ctx.db.delete(args.id);
 
