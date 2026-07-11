@@ -25,12 +25,14 @@ type CalculatorExperienceProps = {
   initialScenario?: ScenarioInput;
   hasSharedScenario?: boolean;
   realAccountsEnabled?: boolean;
+  isSignedIn?: boolean;
 };
 
 export function CalculatorExperience({
   initialScenario = defaultScenario,
   hasSharedScenario = false,
   realAccountsEnabled = false,
+  isSignedIn = false,
 }: CalculatorExperienceProps) {
   const [scenario, setScenario] = useState<ScenarioInput>(initialScenario);
   const [btcPriceStatus, setBtcPriceStatus] = useState<BTCPriceLoadState>({
@@ -89,7 +91,9 @@ export function CalculatorExperience({
     );
     const hasShownPrompt = window.localStorage.getItem(signupPromptShownKey);
 
-    if (hasSignupEmail || hasDismissedPrompt || hasShownPrompt) return;
+    if (isSignedIn || hasSignupEmail || hasDismissedPrompt || hasShownPrompt) {
+      return;
+    }
 
     const promptTimer = window.setTimeout(() => {
       window.localStorage.setItem(signupPromptShownKey, "true");
@@ -97,7 +101,7 @@ export function CalculatorExperience({
     }, 1400);
 
     return () => window.clearTimeout(promptTimer);
-  }, []);
+  }, [isSignedIn]);
 
   return (
     <div className="container py-10">

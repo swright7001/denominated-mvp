@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
 import { CalculatorExperience } from "@/components/CalculatorExperience";
 import { Layout } from "@/components/Layout";
 import { defaultScenario } from "@/lib/scenarios";
@@ -33,13 +34,16 @@ export default async function CalculatorPage({
     await searchParams,
     defaultScenario,
   );
+  const realAccountsEnabled = isClerkConfigured() && isConvexConfigured();
+  const isSignedIn = realAccountsEnabled ? Boolean((await auth()).userId) : false;
 
   return (
     <Layout>
       <CalculatorExperience
         initialScenario={sharedScenario ?? defaultScenario}
         hasSharedScenario={sharedScenario !== null}
-        realAccountsEnabled={isClerkConfigured() && isConvexConfigured()}
+        realAccountsEnabled={realAccountsEnabled}
+        isSignedIn={isSignedIn}
       />
     </Layout>
   );
