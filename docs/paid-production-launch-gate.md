@@ -23,6 +23,16 @@ These values do not replace the provider variables reported by
 `getProductionReadinessChecks`. Production also needs live Clerk, Convex,
 Stripe, webhook, Resend, and canonical app URL configuration.
 
+Production readiness validates provider values, not only their presence:
+
+- Clerk keys must be live-mode keys.
+- Convex must use a `prod:` deployment and public HTTPS URLs.
+- Stripe must use a live secret key and valid price/webhook identifiers.
+- The canonical app, Convex, Clerk issuer, and support URLs must be public HTTPS
+  URLs.
+- The legal effective date must be a real `YYYY-MM-DD` date, and the support
+  email/URL pair must pass the same validation used by `/support`.
+
 ## Release sequence
 
 1. Keep `DENOMINATED_ENABLE_PAID_CHECKOUT` disabled in Production.

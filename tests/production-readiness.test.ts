@@ -34,12 +34,12 @@ test("paid launch readiness reports missing provider env vars", () => {
 
 test("paid launch readiness passes environment checks when providers are configured", () => {
   const env = {
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_123",
-    CLERK_SECRET_KEY: "sk_test_123",
-    CONVEX_DEPLOYMENT: "dev:denominated",
-    NEXT_PUBLIC_CONVEX_URL: "https://convex.test",
-    CLERK_JWT_ISSUER_DOMAIN: "https://clerk.test",
-    STRIPE_SECRET_KEY: "sk_test_123",
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_live_123",
+    CLERK_SECRET_KEY: "sk_live_123",
+    CONVEX_DEPLOYMENT: "prod:denominated",
+    NEXT_PUBLIC_CONVEX_URL: "https://convex.example.test",
+    CLERK_JWT_ISSUER_DOMAIN: "https://clerk.example.test",
+    STRIPE_SECRET_KEY: "sk_live_123",
     STRIPE_PRO_MONTHLY_PRICE_ID: "price_monthly",
     STRIPE_PRO_ANNUAL_PRICE_ID: "price_annual",
     STRIPE_LIFETIME_PRICE_ID: "price_lifetime",
@@ -52,6 +52,65 @@ test("paid launch readiness passes environment checks when providers are configu
 
   assert.equal(getMissingPaidLaunchEnvVars(env).length, 0);
   assert.equal(isPaidLaunchReady(env), true);
+});
+
+test("paid production readiness rejects development and test provider values", () => {
+  const env = {
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_123",
+    CLERK_SECRET_KEY: "sk_test_123",
+    CONVEX_DEPLOYMENT: "dev:denominated",
+    NEXT_PUBLIC_CONVEX_URL: "http://localhost:3210",
+    CLERK_JWT_ISSUER_DOMAIN: "http://localhost:3000",
+    STRIPE_SECRET_KEY: "sk_test_123",
+    STRIPE_PRO_MONTHLY_PRICE_ID: "price_monthly",
+    STRIPE_PRO_ANNUAL_PRICE_ID: "price_annual",
+    STRIPE_LIFETIME_PRICE_ID: "price_lifetime",
+    STRIPE_WEBHOOK_SECRET: "whsec_123",
+    DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
+    RESEND_API_KEY: "re_123",
+    NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+    ...paidLaunchDecisionEnv,
+  };
+
+  assert.equal(isPaidLaunchReady(env), false);
+  assert.deepEqual(getMissingPaidLaunchEnvVars(env), [
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+    "CLERK_SECRET_KEY",
+    "CONVEX_DEPLOYMENT",
+    "NEXT_PUBLIC_CONVEX_URL",
+    "CLERK_JWT_ISSUER_DOMAIN",
+    "STRIPE_SECRET_KEY",
+    "NEXT_PUBLIC_APP_URL",
+  ]);
+});
+
+test("paid production readiness rejects malformed legal and support values", () => {
+  const env = {
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_live_123",
+    CLERK_SECRET_KEY: "sk_live_123",
+    CONVEX_DEPLOYMENT: "prod:denominated",
+    NEXT_PUBLIC_CONVEX_URL: "https://convex.example.test",
+    CLERK_JWT_ISSUER_DOMAIN: "https://clerk.example.test",
+    STRIPE_SECRET_KEY: "sk_live_123",
+    STRIPE_PRO_MONTHLY_PRICE_ID: "price_monthly",
+    STRIPE_PRO_ANNUAL_PRICE_ID: "price_annual",
+    STRIPE_LIFETIME_PRICE_ID: "price_lifetime",
+    STRIPE_WEBHOOK_SECRET: "whsec_123",
+    DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
+    RESEND_API_KEY: "re_123",
+    NEXT_PUBLIC_APP_URL: "https://denominated.example.test",
+    ...paidLaunchDecisionEnv,
+    DENOMINATED_LEGAL_EFFECTIVE_DATE: "2026-02-31",
+    DENOMINATED_SUPPORT_EMAIL: "not-an-email",
+    NEXT_PUBLIC_SUPPORT_URL: "http://localhost:3000/support",
+  };
+
+  assert.equal(isPaidLaunchReady(env), false);
+  assert.deepEqual(getMissingPaidLaunchEnvVars(env), [
+    "DENOMINATED_LEGAL_EFFECTIVE_DATE",
+    "DENOMINATED_SUPPORT_EMAIL",
+    "NEXT_PUBLIC_SUPPORT_URL",
+  ]);
 });
 
 test("paid launch readiness stays false until business decisions are explicit", () => {

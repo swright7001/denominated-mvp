@@ -1,3 +1,5 @@
+import { getSupportContact } from "./support";
+
 export type ReadinessStatus = "ready" | "missing" | "manual";
 
 export type ReadinessCheck = {
@@ -188,9 +190,24 @@ const paidPreviewVerificationChecks = [
   },
 ];
 
-function getProviderEnvChecks(env: Env): ReadinessCheck[] {
+function getProviderEnvChecks(
+  env: Env,
+  mode: "preview" | "production" = "preview",
+): ReadinessCheck[] {
   return requiredLaunchEnvGroups.map((group) => {
-    const missingEnvVars = group.envVars.filter((key) => !env[key]);
+    const missingEnvVars = group.envVars.filter((key) => {
+      const value = env[key]?.trim();
+
+      if (!value) {
+        return true;
+      }
+
+      if (mode === "preview") {
+        return false;
+      }
+
+      return !isValidProductionProviderValue(key, value);
+    });
 
     return {
       id: group.id,
@@ -206,6 +223,56 @@ function isAffirmative(value: string | undefined) {
   return value?.trim().toLowerCase() === "true";
 }
 
+function isValidProductionProviderValue(key: string, value: string) {
+  switch (key) {
+    case "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY":
+      return value.startsWith("pk_live_");
+    case "CLERK_SECRET_KEY":
+      return value.startsWith("sk_live_");
+    case "CONVEX_DEPLOYMENT":
+      return value.startsWith("prod:");
+    case "NEXT_PUBLIC_CONVEX_URL":
+    case "CLERK_JWT_ISSUER_DOMAIN":
+    case "NEXT_PUBLIC_APP_URL":
+      return isPublicHttpsUrl(value);
+    case "STRIPE_SECRET_KEY":
+      return value.startsWith("sk_live_");
+    case "STRIPE_PRO_MONTHLY_PRICE_ID":
+    case "STRIPE_PRO_ANNUAL_PRICE_ID":
+    case "STRIPE_LIFETIME_PRICE_ID":
+      return value.startsWith("price_");
+    case "STRIPE_WEBHOOK_SECRET":
+      return value.startsWith("whsec_");
+    case "RESEND_API_KEY":
+      return value.startsWith("re_");
+    default:
+      return true;
+  }
+}
+
+function isPublicHttpsUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      Boolean(url.hostname) &&
+      url.hostname !== "localhost" &&
+      url.hostname !== "127.0.0.1"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isIsoDate(value: string | undefined) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
+}
+
 function getPaidLaunchDecisionChecks(env: Env): ReadinessCheck[] {
   return requiredPaidLaunchDecisionGroups.map((group) => {
     const missingEnvVars = group.envVars.filter((key) => {
@@ -215,6 +282,17 @@ function getPaidLaunchDecisionChecks(env: Env): ReadinessCheck[] {
         key === "DENOMINATED_TAX_SIGNOFF"
       ) {
         return !isAffirmative(env[key]);
+      }
+
+      if (key === "DENOMINATED_LEGAL_EFFECTIVE_DATE") {
+        return !isIsoDate(env[key]?.trim());
+      }
+
+      if (
+        key === "DENOMINATED_SUPPORT_EMAIL" ||
+        key === "NEXT_PUBLIC_SUPPORT_URL"
+      ) {
+        return !getSupportContact(env);
       }
 
       return !env[key]?.trim();
@@ -237,7 +315,7 @@ export function getProductionReadinessChecks(env: Env = process.env) {
   }));
 
   return [
-    ...getProviderEnvChecks(env),
+    ...getProviderEnvChecks(env, "production"),
     ...getPaidLaunchDecisionChecks(env),
     ...manualChecks,
   ];
@@ -279,14 +357,16 @@ export function getPaidPreviewVerificationChecks(env: Env = process.env) {
     }));
 
   return [
-    ...getProviderEnvChecks(env),
+    ...getProviderEnvChecks(env, "preview"),
     checkoutFlagCheck,
     ...manualPreviewChecks,
   ];
 }
 
 export function isPaidPreviewProviderSetupReady(env: Env = process.env) {
-  return getProviderEnvChecks(env).every((check) => check.status === "ready");
+  return getProviderEnvChecks(env, "preview").every(
+    (check) => check.status === "ready",
+  );
 }
 
 export function getPaidPreviewReadinessSummary(
