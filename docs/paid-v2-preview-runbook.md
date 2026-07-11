@@ -31,6 +31,7 @@ comes from and what shape it should have.
 | Stripe checkout | `STRIPE_SECRET_KEY`, `STRIPE_PRO_MONTHLY_PRICE_ID`, `STRIPE_PRO_ANNUAL_PRICE_ID`, `STRIPE_LIFETIME_PRICE_ID` |
 | Stripe webhooks | `STRIPE_WEBHOOK_SECRET`, `DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET` |
 | Email foundation | `RESEND_API_KEY` |
+| Email sender | `DENOMINATED_EMAIL_FROM` |
 | App URL | `NEXT_PUBLIC_APP_URL` |
 | Feature flag | `DENOMINATED_ENABLE_PAID_CHECKOUT` |
 

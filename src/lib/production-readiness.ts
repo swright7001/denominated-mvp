@@ -1,4 +1,5 @@
 import { getSupportContact } from "./support";
+import { isValidEmailFrom } from "./weekly-report-email";
 
 export type ReadinessStatus = "ready" | "missing" | "manual";
 
@@ -70,7 +71,7 @@ const requiredLaunchEnvGroups = [
   {
     id: "email",
     label: "Email delivery",
-    envVars: ["RESEND_API_KEY"],
+    envVars: ["RESEND_API_KEY", "DENOMINATED_EMAIL_FROM"],
     details:
       "Resend is needed for production transactional and recurring report emails.",
   },
@@ -247,6 +248,11 @@ function isValidProductionProviderValue(key: string, value: string) {
       return value.startsWith("whsec_");
     case "RESEND_API_KEY":
       return value.startsWith("re_");
+    case "DENOMINATED_EMAIL_FROM":
+      return (
+        isValidEmailFrom(value) &&
+        !/@resend\.dev>?$/i.test(value)
+      );
     default:
       return true;
   }

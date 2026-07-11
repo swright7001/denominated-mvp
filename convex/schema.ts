@@ -120,4 +120,24 @@ export default defineSchema({
   })
     .index("by_slug", ["slug"])
     .index("by_category", ["category"]),
+
+  emailDeliveries: defineTable({
+    ownerTokenIdentifier: v.string(),
+    kind: v.literal("weekly-report"),
+    periodKey: v.string(),
+    status: v.union(
+      v.literal("processing"),
+      v.literal("sent"),
+      v.literal("failed"),
+    ),
+    attempts: v.number(),
+    providerMessageId: v.optional(v.string()),
+    failureCode: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_ownerTokenIdentifier_and_kind_and_periodKey", [
+    "ownerTokenIdentifier",
+    "kind",
+    "periodKey",
+  ]),
 });

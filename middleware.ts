@@ -9,6 +9,7 @@ const isProtectedRoute = createRouteMatcher([
   "/watchlist(.*)",
   "/api/billing(.*)",
   "/api/checkout(.*)",
+  "/api/email(.*)",
 ]);
 
 const middleware = isClerkConfigured()

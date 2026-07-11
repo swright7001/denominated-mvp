@@ -20,6 +20,7 @@ be the literal value `true`.
 | `DENOMINATED_TAX_SIGNOFF` | The owner or tax professional has recorded the Stripe Tax, registration, and bookkeeping decision. |
 | `DENOMINATED_SUPPORT_EMAIL` | Monitored customer support email for billing, refunds, and account access. |
 | `NEXT_PUBLIC_SUPPORT_URL` | Published customer support URL configured in both the app and Stripe. |
+| `DENOMINATED_EMAIL_FROM` | Verified customer-facing Resend sender, such as `Denominated <reports@approved-domain>`. |
 
 These values do not replace the provider variables reported by
 `getProductionReadinessChecks`. Production also needs live Clerk, Convex,

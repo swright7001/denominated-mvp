@@ -149,6 +149,7 @@ function LocalRecurringDashboard() {
               savedScenarios={savedScenarios}
               impacts={impacts}
               currentBTCPriceUSD={currentBTCPriceUSD}
+              canSendEmail={false}
             />
             <EmailPreferencesPanel
               email={email}
@@ -276,6 +277,7 @@ function SignedInAccountRecurringDashboard({ email }: { email: string }) {
               savedScenarios={savedScenarios}
               impacts={impacts}
               currentBTCPriceUSD={currentBTCPriceUSD}
+              canSendEmail={preferences.weeklyReport}
             />
             <EmailPreferencesPanel
               email={account?.email ?? email}
@@ -479,11 +481,16 @@ function WeeklyReportPreview({
   savedScenarios,
   impacts,
   currentBTCPriceUSD,
+  canSendEmail,
 }: {
   savedScenarios: SavedScenario[];
   impacts: ScenarioImpact[];
   currentBTCPriceUSD: number;
+  canSendEmail: boolean;
 }) {
+  const [emailStatus, setEmailStatus] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
   const reportDate = new Intl.DateTimeFormat("en-US", {
     month: "long",
     day: "numeric",
@@ -571,10 +578,35 @@ function WeeklyReportPreview({
       </div>
 
       <p className="mt-5 text-xs leading-5 text-[#8f8172]">{DISCLAIMER}</p>
-      <p className="mt-3 text-xs leading-5 text-[#8f8172]">
-        Backend requirement: connect Resend or another email provider, store
-        preferences server-side, and schedule weekly sends after auth exists.
-      </p>
+      {canSendEmail ? (
+        <div className="mt-5">
+          <button
+            className="outline-button inline-flex items-center gap-2 rounded-md px-4 py-3 text-sm text-[#f0a36f] disabled:cursor-not-allowed disabled:opacity-55"
+            disabled={emailStatus === "sending" || emailStatus === "sent"}
+            onClick={async () => {
+              setEmailStatus("sending");
+              const response = await fetch("/api/email/weekly-report", {
+                method: "POST",
+              });
+              setEmailStatus(response.ok ? "sent" : "error");
+            }}
+            type="button"
+          >
+            <Mail size={17} />
+            {emailStatus === "sending"
+              ? "Sending..."
+              : emailStatus === "sent"
+                ? "Report sent"
+                : "Email this report"}
+          </button>
+          {emailStatus === "error" ? (
+            <p className="mt-3 text-sm text-[#f0a36f]">
+              The report could not be sent. Check your email preferences and
+              try again later.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
 }

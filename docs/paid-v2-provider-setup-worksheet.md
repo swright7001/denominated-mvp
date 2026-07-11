@@ -25,6 +25,7 @@ Preview values for `codex/paid-v2-launch` when possible.
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook endpoint | `whsec_...` | Signing secret for the Preview webhook endpoint. |
 | `DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET` | Generate locally | random secret string | Same exact value must also be set in Convex. |
 | `RESEND_API_KEY` | Resend dashboard | `re_...` | Required before paid/account email flows are launch-ready. |
+| `DENOMINATED_EMAIL_FROM` | Resend verified sender | `Denominated <reports@domain>` | Preview may use `onboarding@resend.dev`; Production may not. |
 | `NEXT_PUBLIC_APP_URL` | Vercel Preview URL or stable branch alias | `https://...vercel.app` | Should point at the Preview URL used for checkout returns. |
 
 Generate the webhook sync secret locally:

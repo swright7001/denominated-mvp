@@ -48,6 +48,7 @@ test("paid launch readiness passes environment checks when providers are configu
     STRIPE_WEBHOOK_SECRET: "whsec_123",
     DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
     RESEND_API_KEY: "re_123",
+    DENOMINATED_EMAIL_FROM: "Denominated <reports@example.test>",
     NEXT_PUBLIC_APP_URL: "https://denominated.app",
     ...paidLaunchDecisionEnv,
   };
@@ -70,6 +71,7 @@ test("paid production readiness rejects development and test provider values", (
     STRIPE_WEBHOOK_SECRET: "whsec_123",
     DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
     RESEND_API_KEY: "re_123",
+    DENOMINATED_EMAIL_FROM: "Denominated <reports@example.test>",
     NEXT_PUBLIC_APP_URL: "http://localhost:3000",
     ...paidLaunchDecisionEnv,
   };
@@ -100,6 +102,7 @@ test("paid production readiness rejects malformed legal and support values", () 
     STRIPE_WEBHOOK_SECRET: "whsec_123",
     DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
     RESEND_API_KEY: "re_123",
+    DENOMINATED_EMAIL_FROM: "Denominated <reports@example.test>",
     NEXT_PUBLIC_APP_URL: "https://denominated.example.test",
     ...paidLaunchDecisionEnv,
     DENOMINATED_LEGAL_EFFECTIVE_DATE: "2026-02-31",
@@ -129,6 +132,7 @@ test("paid launch readiness stays false until business decisions are explicit", 
     STRIPE_WEBHOOK_SECRET: "whsec_123",
     DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
     RESEND_API_KEY: "re_123",
+    DENOMINATED_EMAIL_FROM: "Denominated <reports@example.test>",
     NEXT_PUBLIC_APP_URL: "https://denominated.example.test",
   };
 
@@ -167,6 +171,7 @@ test("Production checkout fails closed while Preview checkout stays testable", (
       STRIPE_WEBHOOK_SECRET: "whsec_123",
       DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
       RESEND_API_KEY: "re_123",
+      DENOMINATED_EMAIL_FROM: "Denominated <reports@example.test>",
       NEXT_PUBLIC_APP_URL: "https://denominated.example.test",
       ...paidLaunchDecisionEnv,
     }),
@@ -220,6 +225,7 @@ test("paid preview provider setup is separate from manual preview verification",
     STRIPE_WEBHOOK_SECRET: "whsec_123",
     DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
     RESEND_API_KEY: "re_123",
+    DENOMINATED_EMAIL_FROM: "Denominated <onboarding@resend.dev>",
     NEXT_PUBLIC_APP_URL: "https://preview.denominated.test",
   };
 
@@ -270,6 +276,7 @@ test("paid preview readiness summary reports provider-ready flag state", () => {
     STRIPE_WEBHOOK_SECRET: "whsec_123",
     DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
     RESEND_API_KEY: "re_123",
+    DENOMINATED_EMAIL_FROM: "Denominated <onboarding@resend.dev>",
     NEXT_PUBLIC_APP_URL: "https://preview.denominated.test",
   });
 

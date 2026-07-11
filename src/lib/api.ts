@@ -1,5 +1,6 @@
-import { ScenarioInput } from "./types";
+import type { ScenarioInput } from "./types";
 export { getBTCPrice } from "./btc-price";
+export { sendWeeklyReportEmail as sendEmailReport } from "./weekly-report-email";
 
 const notImplemented = async () => {
   throw new Error("Placeholder only. External APIs are not implemented in the MVP.");
@@ -23,12 +24,6 @@ export async function getSavedScenario(id: string) {
 }
 
 export async function createShareLink(scenario: ScenarioInput) {
-  void scenario;
-  return notImplemented();
-}
-
-export async function sendEmailReport(email: string, scenario: ScenarioInput) {
-  void email;
   void scenario;
   return notImplemented();
 }

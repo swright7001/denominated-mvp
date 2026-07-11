@@ -50,7 +50,7 @@ For the paid V2 Preview gate, see `docs/paid-v2-preview-runbook.md`.
 | Convex storage | `CONVEX_DEPLOYMENT`, `NEXT_PUBLIC_CONVEX_URL`, `CLERK_JWT_ISSUER_DOMAIN` |
 | Stripe checkout | `STRIPE_SECRET_KEY`, `STRIPE_PRO_MONTHLY_PRICE_ID`, `STRIPE_PRO_ANNUAL_PRICE_ID`, `STRIPE_LIFETIME_PRICE_ID` |
 | Stripe webhooks | `STRIPE_WEBHOOK_SECRET`, `DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET` |
-| Email | `RESEND_API_KEY` |
+| Email | `RESEND_API_KEY`, `DENOMINATED_EMAIL_FROM` |
 | App URL | `NEXT_PUBLIC_APP_URL` |
 
 ## Billing Portal Safety

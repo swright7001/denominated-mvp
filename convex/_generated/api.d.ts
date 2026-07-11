@@ -10,6 +10,7 @@
 
 import type * as accounts from "../accounts.js";
 import type * as billing from "../billing.js";
+import type * as emailDeliveries from "../emailDeliveries.js";
 import type * as presets from "../presets.js";
 import type * as savedScenarios from "../savedScenarios.js";
 
@@ -22,6 +23,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
   billing: typeof billing;
+  emailDeliveries: typeof emailDeliveries;
   presets: typeof presets;
   savedScenarios: typeof savedScenarios;
 }>;
