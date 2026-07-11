@@ -10,5 +10,4 @@ export const DATA_SOURCE_CAVEAT =
 export const PAID_FEATURES_CAVEAT =
   "The free calculator remains available without payment. Paid features are for saved scenarios, watchlists, dashboards, reports, exports, and other recurring-use tools.";
 
-export const SUPPORT_CONTACT_NOTE =
-  "A production support contact must be published before paid checkout is enabled.";
+export { getSupportContactNote as SUPPORT_CONTACT_NOTE } from "./support";

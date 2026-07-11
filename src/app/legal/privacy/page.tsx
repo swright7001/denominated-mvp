@@ -43,7 +43,7 @@ const sections = [
   },
   {
     title: "Production Review",
-    body: `${SUPPORT_CONTACT_NOTE} Privacy and data-retention language should be reviewed before accepting production payments or storing durable user data.`,
+    body: `${SUPPORT_CONTACT_NOTE()} Privacy and data-retention language should be reviewed before accepting production payments or storing durable user data.`,
   },
 ];
 

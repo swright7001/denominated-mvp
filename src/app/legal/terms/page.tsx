@@ -56,7 +56,7 @@ export default function TermsPage() {
           },
           {
             title: "Contact",
-            body: SUPPORT_CONTACT_NOTE,
+            body: SUPPORT_CONTACT_NOTE(),
           },
         ]}
       />

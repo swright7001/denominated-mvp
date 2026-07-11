@@ -35,7 +35,7 @@ const sections = [
   },
   {
     title: "Support",
-    body: SUPPORT_CONTACT_NOTE,
+    body: SUPPORT_CONTACT_NOTE(),
   },
 ];
 
