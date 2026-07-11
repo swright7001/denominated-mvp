@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { Bitcoin, Menu, X } from "lucide-react";
 import { BrandMark } from "./BrandMark";
+import { trackProductEvent } from "@/lib/product-analytics";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -60,6 +61,12 @@ export function Navbar() {
           <Link
             className="outline-button hidden rounded-md px-4 py-2 text-sm text-[#f0a36f] sm:block"
             href="/calculator"
+            onClick={() =>
+              trackProductEvent({
+                event: "cta_clicked",
+                cta: "nav_run_scenario",
+              })
+            }
           >
             Run a Scenario
           </Link>
@@ -77,9 +84,7 @@ export function Navbar() {
       </div>
       <div
         id={mobileMenuId}
-        className={`container md:hidden ${
-          isMenuOpen ? "block" : "hidden"
-        }`}
+        className={`container md:hidden ${isMenuOpen ? "block" : "hidden"}`}
       >
         <nav className="mb-4 rounded-lg border border-[rgba(240,163,111,0.24)] bg-[#120d09]/95 p-3 shadow-2xl">
           {navItems.map((item) => (
@@ -95,7 +100,13 @@ export function Navbar() {
           <Link
             className="copper-button mt-2 block rounded-md px-4 py-3 text-center text-sm font-semibold"
             href="/calculator"
-            onClick={closeMenu}
+            onClick={() => {
+              trackProductEvent({
+                event: "cta_clicked",
+                cta: "nav_run_scenario",
+              });
+              closeMenu();
+            }}
           >
             Run a Scenario
           </Link>

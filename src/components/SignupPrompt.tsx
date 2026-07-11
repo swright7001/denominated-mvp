@@ -12,6 +12,7 @@ import {
   signupPromptDismissedKey,
 } from "@/lib/account";
 import { getProConversionCopy } from "@/lib/pro-copy";
+import { trackProductEvent } from "@/lib/product-analytics";
 import type { ScenarioInput } from "@/lib/types";
 import {
   addSavedScenario,
@@ -78,6 +79,10 @@ export function SignupPrompt({
   }
 
   function continueWithoutAccount() {
+    trackProductEvent({
+      event: "cta_clicked",
+      cta: "signup_continue_without_account",
+    });
     if (persistDismissalOnContinue) {
       window.localStorage.setItem(signupPromptDismissedKey, "true");
     }
@@ -156,6 +161,12 @@ export function SignupPrompt({
               <Link
                 className="copper-button rounded-md px-4 py-3 text-center font-semibold"
                 href="/sign-up"
+                onClick={() =>
+                  trackProductEvent({
+                    event: "cta_clicked",
+                    cta: "signup_save_scenario",
+                  })
+                }
               >
                 {saveFirstScenarioCopy.primaryCta}
               </Link>

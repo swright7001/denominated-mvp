@@ -10,6 +10,7 @@ import { calculateScenario } from "@/lib/calculations";
 import { defaultScenario } from "@/lib/scenarios";
 import type { BTCPriceResult } from "@/lib/btc-price";
 import type { ScenarioInput } from "@/lib/types";
+import { trackProductEvent } from "@/lib/product-analytics";
 import { AssumptionsPanel } from "./AssumptionsPanel";
 import { BTCComparisonChart } from "./BTCComparisonChart";
 import { CopyScenarioLinkButton } from "./CopyScenarioLinkButton";
@@ -42,7 +43,18 @@ export function CalculatorExperience({
     useState(hasSharedScenario);
   const [isSoftSignupPromptOpen, setIsSoftSignupPromptOpen] = useState(false);
   const btcPriceWasEdited = useRef(hasSharedScenario);
+  const calculatorUsageTracked = useRef(false);
   const result = useMemo(() => calculateScenario(scenario), [scenario]);
+
+  useEffect(() => {
+    if (!calculatorUsageTracked.current) {
+      calculatorUsageTracked.current = true;
+      trackProductEvent({
+        event: "calculator_used",
+        source: hasSharedScenario ? "shared" : "direct",
+      });
+    }
+  }, [hasSharedScenario]);
 
   useEffect(() => {
     const controller = new AbortController();

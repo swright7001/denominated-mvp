@@ -4,18 +4,23 @@ import Link from "next/link";
 import { useState } from "react";
 import { CreditCard, Loader2 } from "lucide-react";
 import { getCheckoutPlan, type CheckoutPlanId } from "@/lib/checkout";
+import { trackProductEvent } from "@/lib/product-analytics";
 
 type CheckoutButtonProps = {
   planId: CheckoutPlanId;
   featured?: boolean;
 };
 
-export function CheckoutButton({ planId, featured = false }: CheckoutButtonProps) {
+export function CheckoutButton({
+  planId,
+  featured = false,
+}: CheckoutButtonProps) {
   const plan = getCheckoutPlan(planId);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [message, setMessage] = useState("");
 
   async function startCheckout() {
+    trackProductEvent({ event: "checkout_started", plan: planId });
     setStatus("loading");
     setMessage("");
 
@@ -60,7 +65,11 @@ export function CheckoutButton({ planId, featured = false }: CheckoutButtonProps
         disabled={status === "loading"}
         onClick={startCheckout}
       >
-        {status === "loading" ? <Loader2 size={16} /> : <CreditCard size={16} />}
+        {status === "loading" ? (
+          <Loader2 size={16} />
+        ) : (
+          <CreditCard size={16} />
+        )}
         {plan.label}
       </button>
       {message ? (
