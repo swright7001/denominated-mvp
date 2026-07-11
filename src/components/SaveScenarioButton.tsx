@@ -93,9 +93,6 @@ export function SaveScenarioButton({
   }
 
   async function saveScenarioToAccount() {
-    const current = parseSavedScenarios(
-      window.localStorage.getItem(WATCHLIST_STORAGE_KEY),
-    );
     const savedScenario = buildSavedScenario(scenario);
 
     setIsSaving(true);
@@ -129,11 +126,6 @@ export function SaveScenarioButton({
         return;
       }
 
-      window.localStorage.setItem(
-        WATCHLIST_STORAGE_KEY,
-        serializeSavedScenarios([savedScenario, ...current]),
-      );
-      window.dispatchEvent(new Event(watchlistChangedEvent));
       showSavedState();
     } catch {
       setSyncError("Saved scenario account sync failed. Please try again.");

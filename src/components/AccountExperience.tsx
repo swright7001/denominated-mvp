@@ -27,6 +27,7 @@ import {
   type PlanTier,
 } from "@/lib/entitlements";
 import { getBillingStatusNotice } from "@/lib/billing";
+import { toConvexSavedScenarioInput } from "@/lib/convex-storage";
 import {
   parseSavedScenarios,
   WATCHLIST_STORAGE_KEY,
@@ -298,9 +299,18 @@ function SignedInAccountBackedExperience({ email }: { email: string }) {
   const account = useQuery(api.accounts.getViewerAccount);
   const savedScenarios = useQuery(api.savedScenarios.list, { limit: 100 });
   const ensureAccount = useMutation(api.accounts.ensureViewerAccount);
+  const importLocalWatchlist = useMutation(
+    api.savedScenarios.importLocalWatchlist,
+  );
+  const localSavedScenarioCount = useSyncExternalStore(
+    subscribeToAccount,
+    getSavedScenarioCountSnapshot,
+    getServerSavedScenarioCountSnapshot,
+  );
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   if (account === undefined || savedScenarios === undefined) {
     return <AccountLoadingState />;
@@ -337,6 +347,40 @@ function SignedInAccountBackedExperience({ email }: { email: string }) {
     } catch {
       setError("Could not sign out. Please try again.");
       setIsSigningOut(false);
+    }
+  }
+
+  async function importScenariosFromDevice() {
+    setMessage("");
+    setError("");
+    setIsImporting(true);
+
+    try {
+      const localSavedScenarios = parseSavedScenarios(
+        window.localStorage.getItem(WATCHLIST_STORAGE_KEY),
+      );
+
+      if (localSavedScenarios.length === 0) {
+        setMessage("No local scenarios were found on this device.");
+        return;
+      }
+
+      await importLocalWatchlist({
+        savedScenarios: localSavedScenarios.map(toConvexSavedScenarioInput),
+      });
+      window.localStorage.removeItem(WATCHLIST_STORAGE_KEY);
+      window.dispatchEvent(new Event(watchlistChangedEvent));
+      setMessage(
+        `Imported ${localSavedScenarios.length} scenario${localSavedScenarios.length === 1 ? "" : "s"} from this device.`,
+      );
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Local scenarios could not be imported. Please try again.",
+      );
+    } finally {
+      setIsImporting(false);
     }
   }
 
@@ -400,6 +444,26 @@ function SignedInAccountBackedExperience({ email }: { email: string }) {
             </p>
           ) : null}
           {error ? <p className="mt-3 text-sm text-[#f0a36f]">{error}</p> : null}
+          {account && localSavedScenarioCount > 0 ? (
+            <div className="mt-5 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
+              <p className="text-sm font-medium text-[#efe6da]">
+                Local scenarios found
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[#b9ab9a]">
+                Move {localSavedScenarioCount} saved scenario
+                {localSavedScenarioCount === 1 ? "" : "s"} from this browser
+                into your signed-in Denominated account.
+              </p>
+              <button
+                className="outline-button mt-3 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-medium text-[#f0a36f]"
+                type="button"
+                disabled={isImporting}
+                onClick={importScenariosFromDevice}
+              >
+                {isImporting ? "Importing..." : "Import from this device"}
+              </button>
+            </div>
+          ) : null}
           <button
             className="outline-button mt-5 inline-flex items-center justify-center gap-2 rounded-md px-4 py-3 text-[#f0a36f]"
             type="button"
