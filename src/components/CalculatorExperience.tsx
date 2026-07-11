@@ -155,6 +155,7 @@ export function CalculatorExperience({
       <SignupPrompt
         isOpen={isSoftSignupPromptOpen}
         scenario={scenario}
+        realAccountsEnabled={realAccountsEnabled}
         onClose={() => setIsSoftSignupPromptOpen(false)}
       />
     </div>

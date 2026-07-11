@@ -225,6 +225,7 @@ export function SaveScenarioButton({
       <SignupPrompt
         isOpen={isSignupPromptOpen}
         scenario={scenario}
+        realAccountsEnabled={realAccountsEnabled}
         onClose={() => setIsSignupPromptOpen(false)}
         onSaved={showSavedState}
         persistDismissalOnContinue={false}
