@@ -1,4 +1,5 @@
 import type { PlanTier } from "./entitlements";
+import type { SubscriptionStatus } from "./billing";
 
 export type CheckoutPlanId = "proMonthly" | "proAnnual" | "lifetime";
 
@@ -10,6 +11,11 @@ export type CheckoutPlan = {
   tier: Extract<PlanTier, "pro" | "lifetime">;
   priceEnvVar: string;
   metadata: Record<string, string>;
+};
+
+export type CheckoutAccountState = {
+  planTier?: Exclude<PlanTier, "noAccount">;
+  subscriptionStatus?: SubscriptionStatus;
 };
 
 export const paidCheckoutEnabledEnvVar = "DENOMINATED_ENABLE_PAID_CHECKOUT";
@@ -103,4 +109,34 @@ export function isPaidCheckoutEnabled(
   env: Record<string, string | undefined> = process.env,
 ) {
   return env[paidCheckoutEnabledEnvVar] === "true";
+}
+
+export function getCheckoutAccountConflict(
+  plan: CheckoutPlan,
+  account: CheckoutAccountState | null | undefined,
+) {
+  if (!account) return null;
+
+  if (account.planTier === "lifetime") {
+    return {
+      code: "LIFETIME_ACCESS_EXISTS",
+      error:
+        "This account already has Lifetime access. No additional checkout is needed.",
+    };
+  }
+
+  const hasActiveProSubscription =
+    account.planTier === "pro" ||
+    account.subscriptionStatus === "active" ||
+    account.subscriptionStatus === "trialing";
+
+  if (plan.mode === "subscription" && hasActiveProSubscription) {
+    return {
+      code: "ACTIVE_SUBSCRIPTION_EXISTS",
+      error:
+        "This account already has an active Pro subscription. Manage it from billing instead of starting another subscription.",
+    };
+  }
+
+  return null;
 }

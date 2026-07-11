@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   getCheckoutPlan,
+  getCheckoutAccountConflict,
   getCheckoutPriceId,
   getMissingAuthenticatedCheckoutEnvVars,
   getMissingCheckoutEnvVars,
@@ -77,5 +78,51 @@ test("paid checkout requires an explicit launch flag", () => {
       [paidCheckoutEnabledEnvVar]: "false",
     }),
     false,
+  );
+});
+
+test("active Pro accounts cannot start duplicate subscriptions", () => {
+  assert.deepEqual(
+    getCheckoutAccountConflict(getCheckoutPlan("proMonthly"), {
+      planTier: "pro",
+      subscriptionStatus: "active",
+    }),
+    {
+      code: "ACTIVE_SUBSCRIPTION_EXISTS",
+      error:
+        "This account already has an active Pro subscription. Manage it from billing instead of starting another subscription.",
+    },
+  );
+  assert.equal(
+    getCheckoutAccountConflict(getCheckoutPlan("lifetime"), {
+      planTier: "pro",
+      subscriptionStatus: "active",
+    }),
+    null,
+  );
+});
+
+test("past-due accounts can recover through a new Pro checkout", () => {
+  assert.equal(
+    getCheckoutAccountConflict(getCheckoutPlan("proAnnual"), {
+      planTier: "freeAccount",
+      subscriptionStatus: "past_due",
+    }),
+    null,
+  );
+});
+
+test("Lifetime accounts cannot purchase another paid plan", () => {
+  assert.equal(
+    getCheckoutAccountConflict(getCheckoutPlan("proAnnual"), {
+      planTier: "lifetime",
+    })?.code,
+    "LIFETIME_ACCESS_EXISTS",
+  );
+  assert.equal(
+    getCheckoutAccountConflict(getCheckoutPlan("lifetime"), {
+      planTier: "lifetime",
+    })?.code,
+    "LIFETIME_ACCESS_EXISTS",
   );
 });

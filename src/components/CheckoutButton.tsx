@@ -28,6 +28,7 @@ export function CheckoutButton({ planId, featured = false }: CheckoutButtonProps
       const payload = (await response.json()) as {
         url?: string;
         error?: string;
+        code?: string;
         setupRequired?: boolean;
       };
 
@@ -65,7 +66,11 @@ export function CheckoutButton({ planId, featured = false }: CheckoutButtonProps
       {message ? (
         <p className="mt-2 text-xs leading-5 text-[#b9ab9a]">
           {message}{" "}
-          {message.includes("account") ? (
+          {message.includes("billing") ? (
+            <Link className="text-[#f0a36f]" href="/billing">
+              Manage billing
+            </Link>
+          ) : message.includes("account") ? (
             <Link className="text-[#f0a36f]" href="/account">
               Go to account
             </Link>

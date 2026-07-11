@@ -6,6 +6,7 @@ import { isValidEmail, normalizeEmail } from "@/lib/account";
 import { isClerkConfigured } from "@/lib/auth";
 import {
   getCheckoutPlan,
+  getCheckoutAccountConflict,
   getCheckoutPriceId,
   getMissingAuthenticatedCheckoutEnvVars,
   isPaidCheckoutEnabled,
@@ -143,6 +144,11 @@ export async function POST(request: Request) {
   }
 
   const accountEmail = normalizeEmail(account?.email ?? userEmail);
+  const checkoutConflict = getCheckoutAccountConflict(plan, account);
+
+  if (checkoutConflict) {
+    return NextResponse.json(checkoutConflict, { status: 409 });
+  }
 
   if (!isValidEmail(accountEmail)) {
     return NextResponse.json(
