@@ -14,6 +14,10 @@ import {
 } from "@/lib/checkout";
 import { resolveRequestAppOrigin } from "@/lib/site";
 import { createStripeClient } from "@/lib/stripe";
+import {
+  getMissingPaidLaunchEnvVars,
+  shouldBlockProductionPaidCheckout,
+} from "@/lib/production-readiness";
 
 export async function POST(request: Request) {
   if (!isPaidCheckoutEnabled()) {
@@ -23,6 +27,19 @@ export async function POST(request: Request) {
         error:
           "Paid checkout is not enabled for the free public launch. The calculator remains available.",
         requiredEnvVar: paidCheckoutEnabledEnvVar,
+        setupRequired: true,
+      },
+      { status: 503 },
+    );
+  }
+
+  if (shouldBlockProductionPaidCheckout()) {
+    return NextResponse.json(
+      {
+        code: "PAID_PRODUCTION_NOT_READY",
+        error:
+          "Paid checkout is not ready for Production. The free calculator remains available.",
+        missingEnvVars: getMissingPaidLaunchEnvVars(),
         setupRequired: true,
       },
       { status: 503 },

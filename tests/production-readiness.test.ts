@@ -7,7 +7,18 @@ import {
   getProductionReadinessChecks,
   isPaidPreviewProviderSetupReady,
   isPaidLaunchReady,
+  shouldBlockProductionPaidCheckout,
 } from "../src/lib/production-readiness";
+
+const paidLaunchDecisionEnv = {
+  DENOMINATED_STRIPE_BRANDING_CONFIRMED: "true",
+  DENOMINATED_LEGAL_SIGNOFF: "true",
+  DENOMINATED_OPERATOR_NAME: "Denominated test operator",
+  DENOMINATED_LEGAL_EFFECTIVE_DATE: "2026-07-10",
+  DENOMINATED_TAX_SIGNOFF: "true",
+  DENOMINATED_SUPPORT_EMAIL: "support@example.test",
+  NEXT_PUBLIC_SUPPORT_URL: "https://example.test/support",
+};
 
 test("paid launch readiness reports missing provider env vars", () => {
   const checks = getProductionReadinessChecks({});
@@ -36,10 +47,68 @@ test("paid launch readiness passes environment checks when providers are configu
     DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
     RESEND_API_KEY: "re_123",
     NEXT_PUBLIC_APP_URL: "https://denominated.app",
+    ...paidLaunchDecisionEnv,
   };
 
   assert.equal(getMissingPaidLaunchEnvVars(env).length, 0);
   assert.equal(isPaidLaunchReady(env), true);
+});
+
+test("paid launch readiness stays false until business decisions are explicit", () => {
+  const env = {
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_live_123",
+    CLERK_SECRET_KEY: "sk_live_123",
+    CONVEX_DEPLOYMENT: "prod:denominated",
+    NEXT_PUBLIC_CONVEX_URL: "https://convex.example.test",
+    CLERK_JWT_ISSUER_DOMAIN: "https://clerk.example.test",
+    STRIPE_SECRET_KEY: "sk_live_123",
+    STRIPE_PRO_MONTHLY_PRICE_ID: "price_monthly",
+    STRIPE_PRO_ANNUAL_PRICE_ID: "price_annual",
+    STRIPE_LIFETIME_PRICE_ID: "price_lifetime",
+    STRIPE_WEBHOOK_SECRET: "whsec_123",
+    DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
+    RESEND_API_KEY: "re_123",
+    NEXT_PUBLIC_APP_URL: "https://denominated.example.test",
+  };
+
+  assert.equal(isPaidLaunchReady(env), false);
+  assert.deepEqual(getMissingPaidLaunchEnvVars(env), [
+    "DENOMINATED_STRIPE_BRANDING_CONFIRMED",
+    "DENOMINATED_LEGAL_SIGNOFF",
+    "DENOMINATED_OPERATOR_NAME",
+    "DENOMINATED_LEGAL_EFFECTIVE_DATE",
+    "DENOMINATED_TAX_SIGNOFF",
+    "DENOMINATED_SUPPORT_EMAIL",
+    "NEXT_PUBLIC_SUPPORT_URL",
+  ]);
+});
+
+test("Production checkout fails closed while Preview checkout stays testable", () => {
+  assert.equal(
+    shouldBlockProductionPaidCheckout({ VERCEL_ENV: "production" }),
+    true,
+  );
+  assert.equal(shouldBlockProductionPaidCheckout({ VERCEL_ENV: "preview" }), false);
+  assert.equal(
+    shouldBlockProductionPaidCheckout({
+      VERCEL_ENV: "production",
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_live_123",
+      CLERK_SECRET_KEY: "sk_live_123",
+      CONVEX_DEPLOYMENT: "prod:denominated",
+      NEXT_PUBLIC_CONVEX_URL: "https://convex.example.test",
+      CLERK_JWT_ISSUER_DOMAIN: "https://clerk.example.test",
+      STRIPE_SECRET_KEY: "sk_live_123",
+      STRIPE_PRO_MONTHLY_PRICE_ID: "price_monthly",
+      STRIPE_PRO_ANNUAL_PRICE_ID: "price_annual",
+      STRIPE_LIFETIME_PRICE_ID: "price_lifetime",
+      STRIPE_WEBHOOK_SECRET: "whsec_123",
+      DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
+      RESEND_API_KEY: "re_123",
+      NEXT_PUBLIC_APP_URL: "https://denominated.example.test",
+      ...paidLaunchDecisionEnv,
+    }),
+    false,
+  );
 });
 
 test("paid preview readiness keeps checkout disabled until verification starts", () => {

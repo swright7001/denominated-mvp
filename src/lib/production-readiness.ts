@@ -102,6 +102,41 @@ const manualLaunchChecks = [
   },
 ];
 
+const requiredPaidLaunchDecisionGroups = [
+  {
+    id: "stripe-branding",
+    label: "Stripe customer-facing branding confirmed",
+    envVars: ["DENOMINATED_STRIPE_BRANDING_CONFIRMED"],
+    details:
+      "Checkout and Billing Portal must show Denominated branding and an accurate customer support path.",
+  },
+  {
+    id: "legal-signoff",
+    label: "Paid legal policies approved",
+    envVars: [
+      "DENOMINATED_LEGAL_SIGNOFF",
+      "DENOMINATED_OPERATOR_NAME",
+      "DENOMINATED_LEGAL_EFFECTIVE_DATE",
+    ],
+    details:
+      "The operator identity, effective date, and owner or professional legal approval must be recorded before live checkout.",
+  },
+  {
+    id: "tax-signoff",
+    label: "Tax and accounting decision approved",
+    envVars: ["DENOMINATED_TAX_SIGNOFF"],
+    details:
+      "The owner or tax professional must record the Stripe Tax and accounting decision before live checkout.",
+  },
+  {
+    id: "support",
+    label: "Paid customer support configured",
+    envVars: ["DENOMINATED_SUPPORT_EMAIL", "NEXT_PUBLIC_SUPPORT_URL"],
+    details:
+      "Paid users need a published support email and URL for refunds, cancellations, and account access.",
+  },
+];
+
 const paidPreviewVerificationChecks = [
   {
     id: "preview-deployment",
@@ -167,19 +202,55 @@ function getProviderEnvChecks(env: Env): ReadinessCheck[] {
   });
 }
 
+function isAffirmative(value: string | undefined) {
+  return value?.trim().toLowerCase() === "true";
+}
+
+function getPaidLaunchDecisionChecks(env: Env): ReadinessCheck[] {
+  return requiredPaidLaunchDecisionGroups.map((group) => {
+    const missingEnvVars = group.envVars.filter((key) => {
+      if (
+        key === "DENOMINATED_STRIPE_BRANDING_CONFIRMED" ||
+        key === "DENOMINATED_LEGAL_SIGNOFF" ||
+        key === "DENOMINATED_TAX_SIGNOFF"
+      ) {
+        return !isAffirmative(env[key]);
+      }
+
+      return !env[key]?.trim();
+    });
+
+    return {
+      id: group.id,
+      label: group.label,
+      status: missingEnvVars.length === 0 ? "ready" : "missing",
+      details: group.details,
+      missingEnvVars,
+    };
+  });
+}
+
 export function getProductionReadinessChecks(env: Env = process.env) {
   const manualChecks: ReadinessCheck[] = manualLaunchChecks.map((check) => ({
     ...check,
     status: "manual",
   }));
 
-  return [...getProviderEnvChecks(env), ...manualChecks];
+  return [
+    ...getProviderEnvChecks(env),
+    ...getPaidLaunchDecisionChecks(env),
+    ...manualChecks,
+  ];
 }
 
 export function isPaidLaunchReady(env: Env = process.env) {
   return getProductionReadinessChecks(env).every(
     (check) => check.status !== "missing",
   );
+}
+
+export function shouldBlockProductionPaidCheckout(env: Env = process.env) {
+  return env.VERCEL_ENV === "production" && !isPaidLaunchReady(env);
 }
 
 export function getMissingPaidLaunchEnvVars(env: Env = process.env) {

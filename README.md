@@ -49,6 +49,8 @@ npm run lint
 - Documents the future Stripe checkout plan in `docs/stripe-checkout-plan.md`.
 - Documents the paid V2 Preview verification gate in
   `docs/paid-v2-preview-runbook.md`.
+- Documents the fail-closed paid Production release gate in
+  `docs/paid-production-launch-gate.md`.
 - Documents the free public launch checklist in
   `docs/free-launch-checklist.md`.
 - Uses the provided Denominated logo and UI references from `public/brand`.
