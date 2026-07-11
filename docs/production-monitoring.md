@@ -73,6 +73,9 @@ dedicated paging/error provider when traffic or backend complexity warrants it.
   only when fallback repeats across checks or persists for more than 15 minutes.
 - Clerk returns a hidden 404 for protected API routes when no session exists.
   This is expected access control, not an application outage.
+- Paid Preview intentionally uses Clerk development keys and therefore emits
+  Clerk's development-key console warning. This is expected only on Preview;
+  the same warning in Production is a launch blocker covered by DEN-85.
 - Duplicate Stripe webhook deliveries are expected. Convex persistence is
   idempotent; investigate only signature failures, persistence errors, or an
   entitlement that does not converge.
