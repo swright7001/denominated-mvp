@@ -293,6 +293,11 @@ function SignedInAccountBackedExperience({ email }: { email: string }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSigningOut, setIsSigningOut] = useState(false);
+
+  if (account === undefined || savedScenarios === undefined) {
+    return <AccountLoadingState />;
+  }
+
   const planTier = account?.planTier ?? "freeAccount";
   const plan = getPlanEntitlements(planTier);
   const savedScenarioCount = savedScenarios?.length ?? 0;
