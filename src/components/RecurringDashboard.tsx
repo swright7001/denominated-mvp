@@ -155,6 +155,7 @@ function LocalRecurringDashboard() {
               email={email}
               preferences={preferences}
               onToggle={updatePreference}
+              accountBacked={false}
             />
           </div>
         </div>
@@ -283,6 +284,7 @@ function SignedInAccountRecurringDashboard({ email }: { email: string }) {
               email={account?.email ?? email}
               preferences={preferences}
               onToggle={updatePreference}
+              accountBacked
             />
           </div>
         </div>
@@ -615,10 +617,12 @@ function EmailPreferencesPanel({
   email,
   preferences,
   onToggle,
+  accountBacked,
 }: {
   email: string;
   preferences: EmailPreferences;
   onToggle: (key: keyof EmailPreferences) => void;
+  accountBacked: boolean;
 }) {
   const options: Array<{
     key: keyof EmailPreferences;
@@ -654,14 +658,14 @@ function EmailPreferencesPanel({
           <Mail size={20} />
         </div>
         <div>
-          <p className="eyebrow mb-3">Email foundation</p>
+          <p className="eyebrow mb-3">Email reports</p>
           <h2 className="text-2xl font-medium text-[#efe6da]">
             {email ? "Education preferences" : "No email saved yet"}
           </h2>
           <p className="mt-2 text-sm leading-6 text-[#b9ab9a]">
             {email
-              ? `Placeholder account: ${email}`
-              : "Save a scenario to add an email and start the recurring-use foundation."}
+              ? `${accountBacked ? "Account email" : "Local preview email"}: ${email}`
+              : "Save a scenario to add an email and start receiving purchasing-power reports."}
           </p>
         </div>
       </div>
@@ -694,8 +698,9 @@ function EmailPreferencesPanel({
         ))}
       </div>
       <p className="mt-4 text-xs leading-5 text-[#8f8172]">
-        Phone/SMS is not required. These settings are local placeholders until
-        auth and email infrastructure are connected.
+        Phone/SMS is not required. {accountBacked
+          ? "These preferences are saved to your Denominated account."
+          : "These settings stay on this device until you sign in."}
       </p>
     </section>
   );
