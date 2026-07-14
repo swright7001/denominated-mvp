@@ -4,7 +4,7 @@ export const siteConfig = {
   title: "Denominated | Measure life in purchasing power",
   description:
     "A consumer purchasing-power calculator for comparing everyday expenses in dollars and Bitcoin over time.",
-  url: "https://denominated-mvp.vercel.app",
+  url: "https://getdenominated.com",
   ogImage: "/brand/logo.png",
 };
 

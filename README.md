@@ -4,7 +4,7 @@ Denominated is a consumer purchasing-power calculator. It helps people compare e
 
 Core message: **More expensive in dollars. Cheaper in Bitcoin.**
 
-Production URL: [https://denominated-mvp.vercel.app](https://denominated-mvp.vercel.app)
+Production URL: [https://getdenominated.com](https://getdenominated.com)
 
 ## Stack
 
@@ -84,7 +84,7 @@ Bitcoin's USD spot price from CoinGecko's `/simple/price` endpoint with
 - Add a Denominated tab/link from the Hard Money Hustlers guest site.
 - Add shareable scenario URLs.
 - Harden live BTC pricing with stronger observability and provider fallback.
-- Decide custom domain strategy.
+- Finish provider cutover and custom-domain smoke testing for the future paid launch.
 - Add optional saved scenarios, email reports, auth, and premium features later.
 
 ## Disclaimer
