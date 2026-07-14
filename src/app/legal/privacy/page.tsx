@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Layout } from "@/components/Layout";
 import { DATA_SOURCE_CAVEAT, SUPPORT_CONTACT_NOTE } from "@/lib/legal";
+import {
+  getLegalPolicyConfig,
+  getPrivacyPolicyIntro,
+} from "@/lib/legal-policy";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -52,6 +56,8 @@ const sections = [
 ];
 
 export default function PrivacyPage() {
+  const policy = getLegalPolicyConfig();
+
   return (
     <Layout>
       <section className="container py-12 md:py-16">
@@ -61,9 +67,7 @@ export default function PrivacyPage() {
             Privacy Notice
           </h1>
           <p className="mt-5 text-lg leading-8 text-[#b9ab9a]">
-            Denominated collects and processes only the information needed to
-            run the product, support accounts, manage billing, and deliver
-            opted-in purchasing-power updates.
+            {getPrivacyPolicyIntro(policy)}
           </p>
         </div>
 

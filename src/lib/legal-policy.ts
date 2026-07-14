@@ -48,6 +48,14 @@ export function getRefundWindowCopy(config: LegalPolicyConfig | null) {
   return `Refund requests may be submitted within ${config.refundWindowDays} ${unit} of the initial purchase. Approval is subject to this policy and applicable law; contact support with the account email and charge details.`;
 }
 
+export function getPrivacyPolicyIntro(config: LegalPolicyConfig | null) {
+  if (!config) {
+    return "Paid checkout remains unavailable until the operator and policy effective date are approved and published. The free calculator privacy disclosures remain in effect.";
+  }
+
+  return `Effective ${config.effectiveDate}. This privacy notice explains how ${config.operatorName}, the operator of Denominated, processes information used to provide the service.`;
+}
+
 function parseRefundWindowDays(value: string | undefined) {
   const normalized = value?.trim() ?? "";
 
