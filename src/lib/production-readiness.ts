@@ -129,9 +129,12 @@ const requiredPaidLaunchDecisionGroups = [
   {
     id: "tax-signoff",
     label: "Tax and accounting decision approved",
-    envVars: ["DENOMINATED_TAX_SIGNOFF"],
+    envVars: [
+      "DENOMINATED_TAX_SIGNOFF",
+      "DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED",
+    ],
     details:
-      "The owner or tax professional must record the Stripe Tax and accounting decision before live checkout.",
+      "The owner or tax professional must record the Stripe Tax and accounting decision, including whether Checkout automatic tax is enabled, before live checkout.",
   },
   {
     id: "support",
@@ -301,6 +304,11 @@ function getPaidLaunchDecisionChecks(env: Env): ReadinessCheck[] {
         key === "DENOMINATED_TAX_SIGNOFF"
       ) {
         return !isAffirmative(env[key]);
+      }
+
+      if (key === "DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED") {
+        const value = env[key]?.trim().toLowerCase();
+        return value !== "true" && value !== "false";
       }
 
       if (key === "DENOMINATED_LEGAL_EFFECTIVE_DATE") {

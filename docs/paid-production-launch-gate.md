@@ -18,6 +18,7 @@ be the literal value `true`.
 | `DENOMINATED_GOVERNING_JURISDICTION` | Approved governing jurisdiction displayed in the Terms. |
 | `DENOMINATED_REFUND_WINDOW_DAYS` | Approved initial-purchase refund request window from `0` through `365` days. |
 | `DENOMINATED_TAX_SIGNOFF` | The owner or tax professional has recorded the Stripe Tax, registration, and bookkeeping decision. |
+| `DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED` | Explicit `true` or `false` decision for automatic tax on API-created Stripe Checkout Sessions. |
 | `DENOMINATED_SUPPORT_EMAIL` | Monitored customer support email for billing, refunds, and account access. |
 | `NEXT_PUBLIC_SUPPORT_URL` | Published customer support URL configured in both the app and Stripe. |
 | `DENOMINATED_EMAIL_FROM` | Verified customer-facing Resend sender, such as `Denominated <reports@approved-domain>`. |
@@ -49,3 +50,10 @@ Production readiness validates provider values, not only their presence:
 
 Never copy test-mode Stripe price IDs, webhook secrets, or test Clerk/Convex
 credentials into Production.
+
+Stripe Tax account activation is not sufficient by itself. Before setting the
+automatic-tax decision, confirm the Denominated products' tax code, each
+Price's tax behavior, required registrations, customer-location collection,
+and the bookkeeping/reconciliation workflow. Current test-mode products and
+Prices must not be treated as classified merely because Stripe Tax is enabled
+in the Dashboard.

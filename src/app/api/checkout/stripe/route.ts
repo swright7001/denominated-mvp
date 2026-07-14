@@ -9,6 +9,7 @@ import {
   getCheckoutAccountConflict,
   getCheckoutPriceId,
   getMissingAuthenticatedCheckoutEnvVars,
+  getStripeAutomaticTaxConfig,
   isPaidCheckoutEnabled,
   paidCheckoutEnabledEnvVar,
   parseCheckoutPlanId,
@@ -163,6 +164,7 @@ export async function POST(request: Request) {
   const origin = resolveRequestAppOrigin({ requestUrl: request.url });
   const priceId = getCheckoutPriceId(plan);
   const customerId = account?.stripeCustomerId;
+  const automaticTax = getStripeAutomaticTaxConfig();
   const session = await stripe.checkout.sessions.create({
     mode: plan.mode,
     ...(customerId
@@ -170,6 +172,7 @@ export async function POST(request: Request) {
       : { customer_email: accountEmail }),
     client_reference_id: account?._id ?? userId,
     line_items: [{ price: priceId, quantity: 1 }],
+    ...(automaticTax ? { automatic_tax: automaticTax } : {}),
     metadata: {
       ...plan.metadata,
       account_email: accountEmail,

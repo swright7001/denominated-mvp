@@ -18,6 +18,7 @@ const paidLaunchDecisionEnv = {
   DENOMINATED_GOVERNING_JURISDICTION: "Test jurisdiction",
   DENOMINATED_REFUND_WINDOW_DAYS: "14",
   DENOMINATED_TAX_SIGNOFF: "true",
+  DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED: "false",
   DENOMINATED_SUPPORT_EMAIL: "support@example.test",
   NEXT_PUBLIC_SUPPORT_URL: "https://example.test/support",
 };
@@ -145,9 +146,46 @@ test("paid launch readiness stays false until business decisions are explicit", 
     "DENOMINATED_GOVERNING_JURISDICTION",
     "DENOMINATED_REFUND_WINDOW_DAYS",
     "DENOMINATED_TAX_SIGNOFF",
+    "DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED",
     "DENOMINATED_SUPPORT_EMAIL",
     "NEXT_PUBLIC_SUPPORT_URL",
   ]);
+});
+
+test("paid launch readiness requires an explicit Stripe automatic-tax decision", () => {
+  const baseEnv = {
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_live_123",
+    CLERK_SECRET_KEY: "sk_live_123",
+    CONVEX_DEPLOYMENT: "prod:denominated",
+    NEXT_PUBLIC_CONVEX_URL: "https://convex.example.test",
+    CLERK_JWT_ISSUER_DOMAIN: "https://clerk.example.test",
+    STRIPE_SECRET_KEY: "sk_live_123",
+    STRIPE_PRO_MONTHLY_PRICE_ID: "price_monthly",
+    STRIPE_PRO_ANNUAL_PRICE_ID: "price_annual",
+    STRIPE_LIFETIME_PRICE_ID: "price_lifetime",
+    STRIPE_WEBHOOK_SECRET: "whsec_123",
+    DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET: "sync_123",
+    RESEND_API_KEY: "re_123",
+    DENOMINATED_EMAIL_FROM: "Denominated <reports@example.test>",
+    NEXT_PUBLIC_APP_URL: "https://denominated.example.test",
+    ...paidLaunchDecisionEnv,
+  };
+
+  assert.equal(isPaidLaunchReady(baseEnv), true);
+  assert.equal(
+    isPaidLaunchReady({
+      ...baseEnv,
+      DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED: "yes",
+    }),
+    false,
+  );
+  assert.deepEqual(
+    getMissingPaidLaunchEnvVars({
+      ...baseEnv,
+      DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED: "",
+    }),
+    ["DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED"],
+  );
 });
 
 test("Production checkout fails closed while Preview checkout stays testable", () => {

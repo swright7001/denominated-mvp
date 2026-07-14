@@ -18,6 +18,8 @@ export type CheckoutAccountState = {
   subscriptionStatus?: SubscriptionStatus;
 };
 export const paidCheckoutEnabledEnvVar = "DENOMINATED_ENABLE_PAID_CHECKOUT";
+export const stripeAutomaticTaxEnabledEnvVar =
+  "DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED";
 
 export const checkoutPlans: Record<CheckoutPlanId, CheckoutPlan> = {
   proMonthly: {
@@ -107,6 +109,22 @@ export function isPaidCheckoutEnabled(
   env: Record<string, string | undefined> = process.env,
 ) {
   return env[paidCheckoutEnabledEnvVar] === "true";
+}
+
+export function getStripeAutomaticTaxConfig(
+  env: Record<string, string | undefined> = process.env,
+) {
+  const value = env[stripeAutomaticTaxEnabledEnvVar]?.trim().toLowerCase();
+
+  if (value === "true") {
+    return { enabled: true } as const;
+  }
+
+  if (value === "false") {
+    return { enabled: false } as const;
+  }
+
+  return null;
 }
 
 export function getCheckoutAccountConflict(

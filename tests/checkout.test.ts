@@ -6,9 +6,11 @@ import {
   getCheckoutPriceId,
   getMissingAuthenticatedCheckoutEnvVars,
   getMissingCheckoutEnvVars,
+  getStripeAutomaticTaxConfig,
   isPaidCheckoutEnabled,
   parseCheckoutPlanId,
   paidCheckoutEnabledEnvVar,
+  stripeAutomaticTaxEnabledEnvVar,
 } from "../src/lib/checkout";
 
 test("parseCheckoutPlanId accepts known checkout plans only", () => {
@@ -78,6 +80,28 @@ test("paid checkout requires an explicit launch flag", () => {
       [paidCheckoutEnabledEnvVar]: "false",
     }),
     false,
+  );
+});
+
+test("Stripe automatic tax accepts only an explicit boolean decision", () => {
+  assert.deepEqual(
+    getStripeAutomaticTaxConfig({
+      [stripeAutomaticTaxEnabledEnvVar]: "true",
+    }),
+    { enabled: true },
+  );
+  assert.deepEqual(
+    getStripeAutomaticTaxConfig({
+      [stripeAutomaticTaxEnabledEnvVar]: " FALSE ",
+    }),
+    { enabled: false },
+  );
+  assert.equal(getStripeAutomaticTaxConfig({}), null);
+  assert.equal(
+    getStripeAutomaticTaxConfig({
+      [stripeAutomaticTaxEnabledEnvVar]: "yes",
+    }),
+    null,
   );
 });
 
