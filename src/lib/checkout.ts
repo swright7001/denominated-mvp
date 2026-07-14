@@ -12,6 +12,8 @@ export type CheckoutPlan = {
   metadata: Record<string, string>;
 };
 
+export const paidCheckoutEnabledEnvVar = "DENOMINATED_ENABLE_PAID_CHECKOUT";
+
 export const checkoutPlans: Record<CheckoutPlanId, CheckoutPlan> = {
   proMonthly: {
     id: "proMonthly",
@@ -82,4 +84,10 @@ export function getMissingCheckoutEnvVars(
   env: Record<string, string | undefined> = process.env,
 ) {
   return ["STRIPE_SECRET_KEY", plan.priceEnvVar].filter((key) => !env[key]);
+}
+
+export function isPaidCheckoutEnabled(
+  env: Record<string, string | undefined> = process.env,
+) {
+  return env[paidCheckoutEnabledEnvVar] === "true";
 }
