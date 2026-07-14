@@ -5,10 +5,25 @@ import {
   getCheckoutPlan,
   getCheckoutPriceId,
   getMissingCheckoutEnvVars,
+  isPaidCheckoutEnabled,
+  paidCheckoutEnabledEnvVar,
   parseCheckoutPlanId,
 } from "@/lib/checkout";
 
 export async function POST(request: Request) {
+  if (!isPaidCheckoutEnabled()) {
+    return NextResponse.json(
+      {
+        code: "PAID_CHECKOUT_DISABLED",
+        error:
+          "Paid checkout is not enabled for the free public launch. The calculator remains available.",
+        requiredEnvVar: paidCheckoutEnabledEnvVar,
+        setupRequired: true,
+      },
+      { status: 503 },
+    );
+  }
+
   const payload = (await request.json().catch(() => null)) as {
     planId?: unknown;
     accountEmail?: unknown;
