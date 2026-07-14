@@ -17,7 +17,6 @@ export type CheckoutAccountState = {
   planTier?: Exclude<PlanTier, "noAccount">;
   subscriptionStatus?: SubscriptionStatus;
 };
-
 export const paidCheckoutEnabledEnvVar = "DENOMINATED_ENABLE_PAID_CHECKOUT";
 
 export const checkoutPlans: Record<CheckoutPlanId, CheckoutPlan> = {
@@ -104,7 +103,6 @@ export function getMissingAuthenticatedCheckoutEnvVars(
     ...getMissingCheckoutEnvVars(plan, env),
   ].filter((key, index, keys) => !env[key] && keys.indexOf(key) === index);
 }
-
 export function isPaidCheckoutEnabled(
   env: Record<string, string | undefined> = process.env,
 ) {

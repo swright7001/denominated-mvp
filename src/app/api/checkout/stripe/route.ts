@@ -46,7 +46,6 @@ export async function POST(request: Request) {
       { status: 503 },
     );
   }
-
   const payload = (await request.json().catch(() => null)) as {
     planId?: unknown;
     accountEmail?: unknown;

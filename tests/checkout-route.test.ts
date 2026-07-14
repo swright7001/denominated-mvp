@@ -1,0 +1,35 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { POST } from "../src/app/api/checkout/stripe/route";
+
+test("free Production rejects checkout before parsing the request", async () => {
+  const previousFlag = process.env.DENOMINATED_ENABLE_PAID_CHECKOUT;
+  delete process.env.DENOMINATED_ENABLE_PAID_CHECKOUT;
+
+  try {
+    for (const body of ["not-json", JSON.stringify({ planId: "proMonthly" })]) {
+      const response = await POST(
+        new Request("https://getdenominated.com/api/checkout/stripe", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body,
+        }),
+      );
+      const payload = (await response.json()) as {
+        code: string;
+        error: string;
+      };
+
+      assert.equal(response.status, 503);
+      assert.equal(payload.code, "PAID_CHECKOUT_DISABLED");
+      assert.match(payload.error, /free public launch/);
+      assert.match(payload.error, /calculator remains available/);
+    }
+  } finally {
+    if (previousFlag === undefined) {
+      delete process.env.DENOMINATED_ENABLE_PAID_CHECKOUT;
+    } else {
+      process.env.DENOMINATED_ENABLE_PAID_CHECKOUT = previousFlag;
+    }
+  }
+});
