@@ -1,28 +1,33 @@
-import test from "node:test";
 import assert from "node:assert/strict";
-import { absoluteUrl, resolveRequestAppOrigin } from "../src/lib/site";
+import test from "node:test";
+import {
+  absoluteUrl,
+  resolveRequestAppOrigin,
+  siteConfig,
+} from "../src/lib/site";
 
-test("absoluteUrl builds canonical production URLs", () => {
+test("uses the production custom domain for public metadata URLs", () => {
+  assert.equal(siteConfig.url, "https://getdenominated.com");
   assert.equal(
-    absoluteUrl("/plans"),
-    "https://denominated-mvp.vercel.app/plans",
+    absoluteUrl("/calculator"),
+    "https://getdenominated.com/calculator",
   );
 });
 
 test("resolveRequestAppOrigin uses configured app URL only for matching hosts", () => {
   assert.equal(
     resolveRequestAppOrigin({
-      requestUrl: "https://denominated-mvp.vercel.app/api/checkout/stripe",
-      configuredAppUrl: "https://denominated-mvp.vercel.app",
+      requestUrl: "https://getdenominated.com/api/checkout/stripe",
+      configuredAppUrl: "https://getdenominated.com",
     }),
-    "https://denominated-mvp.vercel.app",
+    "https://getdenominated.com",
   );
 
   assert.equal(
     resolveRequestAppOrigin({
       requestUrl:
         "https://denominated-preview-swright.vercel.app/api/checkout/stripe",
-      configuredAppUrl: "https://denominated-mvp.vercel.app",
+      configuredAppUrl: "https://getdenominated.com",
     }),
     "https://denominated-preview-swright.vercel.app",
   );
