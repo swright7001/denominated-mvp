@@ -24,11 +24,15 @@ import { SignupPrompt } from "./SignupPrompt";
 type CalculatorExperienceProps = {
   initialScenario?: ScenarioInput;
   hasSharedScenario?: boolean;
+  realAccountsEnabled?: boolean;
+  isSignedIn?: boolean;
 };
 
 export function CalculatorExperience({
   initialScenario = defaultScenario,
   hasSharedScenario = false,
+  realAccountsEnabled = false,
+  isSignedIn = false,
 }: CalculatorExperienceProps) {
   const [scenario, setScenario] = useState<ScenarioInput>(initialScenario);
   const [btcPriceStatus, setBtcPriceStatus] = useState<BTCPriceLoadState>({
@@ -81,6 +85,8 @@ export function CalculatorExperience({
   }, []);
 
   useEffect(() => {
+    if (isSignedIn) return;
+
     const hasSignupEmail = window.localStorage.getItem(signupEmailKey);
     const hasDismissedPrompt = window.localStorage.getItem(
       signupPromptDismissedKey,
@@ -95,7 +101,7 @@ export function CalculatorExperience({
     }, 1400);
 
     return () => window.clearTimeout(promptTimer);
-  }, []);
+  }, [isSignedIn]);
 
   return (
     <div className="container py-10">
@@ -137,7 +143,10 @@ export function CalculatorExperience({
                   plain enough for everyday people.
                 </p>
                 <div className="grid gap-3 sm:flex sm:flex-row sm:flex-wrap">
-                  <SaveScenarioButton scenario={scenario} />
+                  <SaveScenarioButton
+                    scenario={scenario}
+                    realAccountsEnabled={realAccountsEnabled}
+                  />
                   <CopyTweetButton scenario={scenario} result={result} />
                   <CopyScenarioLinkButton scenario={scenario} />
                 </div>
@@ -150,6 +159,7 @@ export function CalculatorExperience({
       <SignupPrompt
         isOpen={isSoftSignupPromptOpen}
         scenario={scenario}
+        realAccountsEnabled={realAccountsEnabled}
         onClose={() => setIsSoftSignupPromptOpen(false)}
       />
     </div>

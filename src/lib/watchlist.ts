@@ -87,7 +87,7 @@ function createSavedScenarioId() {
   return `saved-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function isSavedScenario(value: unknown): value is SavedScenario {
+export function isSavedScenario(value: unknown): value is SavedScenario {
   if (!value || typeof value !== "object") return false;
 
   const candidate = value as Partial<SavedScenario>;
