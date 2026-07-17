@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Layout } from "@/components/Layout";
 import { WatchlistExperience } from "@/components/WatchlistExperience";
+import { isClerkConfigured } from "@/lib/auth";
+import { isConvexConfigured } from "@/lib/convex";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -21,7 +23,9 @@ export const metadata: Metadata = {
 export default function WatchlistPage() {
   return (
     <Layout>
-      <WatchlistExperience />
+      <WatchlistExperience
+        realAccountsEnabled={isClerkConfigured() && isConvexConfigured()}
+      />
     </Layout>
   );
 }

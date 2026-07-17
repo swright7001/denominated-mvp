@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { Check, Mail, X } from "lucide-react";
 import {
   defaultEmailPreferences,
@@ -26,12 +27,14 @@ export function SignupPrompt({
   onClose,
   onSaved,
   persistDismissalOnContinue = true,
+  realAccountsEnabled = false,
 }: {
   isOpen: boolean;
   scenario?: ScenarioInput;
   onClose: () => void;
   onSaved?: () => void;
   persistDismissalOnContinue?: boolean;
+  realAccountsEnabled?: boolean;
 }) {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -99,7 +102,7 @@ export function SignupPrompt({
           <X size={18} />
         </button>
 
-        {signedUp ? (
+        {signedUp && !realAccountsEnabled ? (
           <div>
             <div className="mb-5 grid h-12 w-12 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
               <Check size={22} />
@@ -123,6 +126,51 @@ export function SignupPrompt({
             >
               Continue
             </button>
+          </div>
+        ) : realAccountsEnabled ? (
+          <div>
+            <div className="mb-5 grid h-12 w-12 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+              <Mail size={22} />
+            </div>
+            <p className="eyebrow mb-3">{saveFirstScenarioCopy.eyebrow}</p>
+            <h2
+              id="signup-prompt-title"
+              className="pr-8 text-2xl font-medium text-[#efe6da]"
+            >
+              {saveFirstScenarioCopy.title}
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-[#b9ab9a]">
+              {saveFirstScenarioCopy.body}
+            </p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {saveFirstScenarioCopy.features.map((feature) => (
+                <p
+                  key={feature}
+                  className="rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-3 text-xs leading-5 text-[#d9ccbd]"
+                >
+                  {feature}
+                </p>
+              ))}
+            </div>
+            <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
+              <Link
+                className="copper-button rounded-md px-4 py-3 text-center font-semibold"
+                href="/sign-up"
+              >
+                {saveFirstScenarioCopy.primaryCta}
+              </Link>
+              <button
+                type="button"
+                className="outline-button rounded-md px-4 py-3 text-[#f0a36f]"
+                onClick={continueWithoutAccount}
+              >
+                {saveFirstScenarioCopy.secondaryCta}
+              </button>
+            </div>
+            <p className="mt-4 text-xs leading-5 text-[#b9ab9a]">
+              Email is required when you create an account. Phone number is not
+              required. {saveFirstScenarioCopy.footnote}
+            </p>
           </div>
         ) : (
           <form onSubmit={submitSignup}>
