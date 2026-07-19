@@ -21,6 +21,11 @@ be the literal value `true`.
 | `DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED` | Explicit `true` or `false` decision for automatic tax on API-created Stripe Checkout Sessions. |
 | `DENOMINATED_SUPPORT_EMAIL` | Monitored customer support email for billing, refunds, and account access. |
 | `NEXT_PUBLIC_SUPPORT_URL` | Published customer support URL configured in both the app and Stripe. |
+| `DENOMINATED_SUPPORT_EMAIL_FROM` | Verified Resend sender exactly matching `support@getdenominated.com`. |
+| `DENOMINATED_SUPPORT_RECEIVING_EMAIL` | Private Resend-managed receiving address used by the forwarding rule. |
+| `DENOMINATED_SUPPORT_ADMIN_EMAILS` | Verified Clerk emails allowed to access the private support inbox. |
+| `RESEND_WEBHOOK_SECRET` | Signing secret for the `email.received` webhook at `/api/webhooks/resend`. |
+| `DENOMINATED_SUPPORT_INBOX_SECRET` | Matching Vercel and Convex service secret for support storage operations. |
 | `DENOMINATED_EMAIL_FROM` | Verified customer-facing Resend sender, such as `Denominated <reports@approved-domain>`. |
 
 These values do not replace the provider variables reported by

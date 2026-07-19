@@ -50,6 +50,17 @@ export const subscriptionStatusValidator = v.union(
   v.literal("unknown"),
 );
 
+export const supportThreadStatusValidator = v.union(
+  v.literal("open"),
+  v.literal("closed"),
+);
+
+export const supportMessageStatusValidator = v.union(
+  v.literal("processing"),
+  v.literal("sent"),
+  v.literal("failed"),
+);
+
 export default defineSchema({
   accounts: defineTable({
     ownerTokenIdentifier: v.string(),
@@ -150,4 +161,45 @@ export default defineSchema({
     "kind",
     "periodKey",
   ]),
+
+  supportThreads: defineTable({
+    senderEmail: v.string(),
+    senderName: v.optional(v.string()),
+    subject: v.string(),
+    subjectKey: v.string(),
+    status: supportThreadStatusValidator,
+    latestInboundMessageId: v.optional(v.string()),
+    lastMessageAt: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_senderEmail_and_subjectKey", ["senderEmail", "subjectKey"])
+    .index("by_status_and_lastMessageAt", ["status", "lastMessageAt"]),
+
+  supportMessages: defineTable({
+    threadId: v.id("supportThreads"),
+    direction: v.union(v.literal("inbound"), v.literal("outbound")),
+    status: supportMessageStatusValidator,
+    eventId: v.optional(v.string()),
+    requestId: v.optional(v.string()),
+    providerEmailId: v.optional(v.string()),
+    messageId: v.optional(v.string()),
+    sender: v.string(),
+    recipient: v.string(),
+    subject: v.string(),
+    textBody: v.string(),
+    attachmentCount: v.number(),
+    failureCode: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_eventId", ["eventId"])
+    .index("by_requestId", ["requestId"])
+    .index("by_providerEmailId", ["providerEmailId"])
+    .index("by_threadId_and_createdAt", ["threadId", "createdAt"])
+    .index("by_threadId_and_direction_and_createdAt", [
+      "threadId",
+      "direction",
+      "createdAt",
+    ]),
 });

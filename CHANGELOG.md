@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Added a private, owner-only support inbox backed by Resend Receiving and
+  Convex, with verified inbound webhooks, threaded replies, and open/closed
+  conversation states.
+- Added fail-closed production-readiness checks for the verified Resend sender,
+  private receiving address, webhook signing secret, support service secret,
+  and administrator allowlist.
+
+### Notes
+
+- The inbox remains hidden until its Resend, Clerk, Vercel, and Convex settings
+  are complete.
+- Paid checkout remains disabled.
+
 ## 0.2.0 - 2026-07-19
 
 ### Added

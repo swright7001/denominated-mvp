@@ -32,3 +32,15 @@ test("scenario presets expose public reads only", () => {
   assert.equal(presetsSource.includes("export const remove"), false);
   assert.equal(presetsSource.includes("mutation("), false);
 });
+
+test("support inbox writes require a server secret and admin reads require auth", () => {
+  const supportSource = readFileSync(
+    join(repoRoot, "convex/supportInbox.ts"),
+    "utf8",
+  );
+
+  assert.match(supportSource, /assertSupportSecret\(args\.syncSecret\)/);
+  assert.match(supportSource, /await requireSupportAdmin\(ctx, args\.adminSecret\)/);
+  assert.match(supportSource, /ctx\.auth\.getUserIdentity\(\)/);
+  assert.match(supportSource, /\.take\(maxMessages\)/);
+});

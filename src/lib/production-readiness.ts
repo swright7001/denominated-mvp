@@ -1,4 +1,10 @@
 import { getSupportContact } from "./support";
+import { isValidEmail, normalizeEmail } from "./account";
+import {
+  parseAdminEmails,
+  parseMailboxAddress,
+} from "./support-inbox";
+import { publicSupportEmail } from "./support";
 import { isValidEmailFrom } from "./weekly-report-email";
 
 export type ReadinessStatus = "ready" | "missing" | "manual";
@@ -143,9 +149,14 @@ const requiredPaidLaunchDecisionGroups = [
       "DENOMINATED_SUPPORT_EMAIL",
       "DENOMINATED_SUPPORT_EMAIL_VERIFIED",
       "NEXT_PUBLIC_SUPPORT_URL",
+      "DENOMINATED_SUPPORT_EMAIL_FROM",
+      "DENOMINATED_SUPPORT_RECEIVING_EMAIL",
+      "DENOMINATED_SUPPORT_ADMIN_EMAILS",
+      "RESEND_WEBHOOK_SECRET",
+      "DENOMINATED_SUPPORT_INBOX_SECRET",
     ],
     details:
-      "Paid users need a published support email and URL for refunds, cancellations, and account access.",
+      "Paid users need a published support address plus a verified Resend receiving and reply workflow.",
   },
 ];
 
@@ -336,6 +347,26 @@ function getPaidLaunchDecisionChecks(env: Env): ReadinessCheck[] {
         key === "NEXT_PUBLIC_SUPPORT_URL"
       ) {
         return !getSupportContact(env);
+      }
+
+      if (key === "DENOMINATED_SUPPORT_EMAIL_FROM") {
+        return parseMailboxAddress(env[key] ?? "").email !== publicSupportEmail;
+      }
+
+      if (key === "DENOMINATED_SUPPORT_RECEIVING_EMAIL") {
+        return !isValidEmail(normalizeEmail(env[key] ?? ""));
+      }
+
+      if (key === "DENOMINATED_SUPPORT_ADMIN_EMAILS") {
+        return parseAdminEmails(env[key]).length === 0;
+      }
+
+      if (key === "RESEND_WEBHOOK_SECRET") {
+        return !env[key]?.trim().startsWith("whsec_");
+      }
+
+      if (key === "DENOMINATED_SUPPORT_INBOX_SECRET") {
+        return (env[key]?.trim().length ?? 0) < 32;
       }
 
       return !env[key]?.trim();

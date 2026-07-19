@@ -82,6 +82,14 @@ cached for six hours and treated as stale after 48 hours.
   `DENOMINATED_SUPPORT_EMAIL_VERIFIED=true` before the private support mail link
   is published. The public feedback and private security paths remain available
   without those variables.
+- The private operator inbox at `/support/inbox` uses Resend Receiving and
+  requires `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET`,
+  `DENOMINATED_SUPPORT_EMAIL_FROM`, `DENOMINATED_SUPPORT_RECEIVING_EMAIL`,
+  `DENOMINATED_SUPPORT_ADMIN_EMAILS`, and a matching
+  `DENOMINATED_SUPPORT_INBOX_SECRET` in Vercel and Convex.
+- Forward `support@getdenominated.com` to the Resend-managed receiving address;
+  never publish that receiving address. Configure the Resend webhook at
+  `/api/webhooks/resend` for `email.received` only.
 
 ## Smoke Test Checklist
 

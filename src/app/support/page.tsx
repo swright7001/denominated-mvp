@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { Bug, LifeBuoy, LockKeyhole } from "lucide-react";
 import { Layout } from "@/components/Layout";
@@ -6,6 +7,10 @@ import {
   getConfiguredSupportEmail,
   publicSupportEmail,
 } from "@/lib/support";
+import {
+  getSupportInboxConfig,
+  isSupportAdminEmail,
+} from "@/lib/support-inbox";
 
 export const metadata: Metadata = {
   title: "Support and Contact",
@@ -13,8 +18,14 @@ export const metadata: Metadata = {
     "Contact Denominated about the calculator, account access, product feedback, or a private security report.",
 };
 
-export default function SupportPage() {
+export default async function SupportPage() {
   const supportEmail = getConfiguredSupportEmail();
+  const inboxConfig = getSupportInboxConfig();
+  const user = inboxConfig ? await currentUser() : null;
+  const primaryEmail = user?.primaryEmailAddress;
+  const canOpenInbox =
+    primaryEmail?.verification?.status === "verified" &&
+    isSupportAdminEmail(primaryEmail.emailAddress, inboxConfig!);
 
   return (
     <Layout>
@@ -27,6 +38,14 @@ export default function SupportPage() {
           Choose the path that fits your question. Never send passwords,
           verification codes, payment details, or API keys.
         </p>
+        {canOpenInbox ? (
+          <Link
+            href="/support/inbox"
+            className="outline-button mt-6 inline-flex rounded-md px-4 py-3 text-sm font-semibold text-[#f0a36f]"
+          >
+            Open private support inbox
+          </Link>
+        ) : null}
 
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
           <SupportOption

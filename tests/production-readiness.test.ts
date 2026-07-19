@@ -22,6 +22,12 @@ const paidLaunchDecisionEnv = {
   DENOMINATED_SUPPORT_EMAIL: "support@getdenominated.com",
   DENOMINATED_SUPPORT_EMAIL_VERIFIED: "true",
   NEXT_PUBLIC_SUPPORT_URL: "https://example.test/support",
+  DENOMINATED_SUPPORT_EMAIL_FROM:
+    "Denominated Support <support@getdenominated.com>",
+  DENOMINATED_SUPPORT_RECEIVING_EMAIL: "support@denominated.resend.app",
+  DENOMINATED_SUPPORT_ADMIN_EMAILS: "owner@example.test",
+  RESEND_WEBHOOK_SECRET: "whsec_support_123",
+  DENOMINATED_SUPPORT_INBOX_SECRET: "support_sync_secret_at_least_32_chars",
 };
 
 test("paid launch readiness reports missing provider env vars", () => {
@@ -152,6 +158,11 @@ test("paid launch readiness stays false until business decisions are explicit", 
     "DENOMINATED_SUPPORT_EMAIL",
     "DENOMINATED_SUPPORT_EMAIL_VERIFIED",
     "NEXT_PUBLIC_SUPPORT_URL",
+    "DENOMINATED_SUPPORT_EMAIL_FROM",
+    "DENOMINATED_SUPPORT_RECEIVING_EMAIL",
+    "DENOMINATED_SUPPORT_ADMIN_EMAILS",
+    "RESEND_WEBHOOK_SECRET",
+    "DENOMINATED_SUPPORT_INBOX_SECRET",
   ]);
 });
 

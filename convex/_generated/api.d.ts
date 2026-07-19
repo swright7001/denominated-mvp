@@ -13,6 +13,7 @@ import type * as billing from "../billing.js";
 import type * as emailDeliveries from "../emailDeliveries.js";
 import type * as presets from "../presets.js";
 import type * as savedScenarios from "../savedScenarios.js";
+import type * as supportInbox from "../supportInbox.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   emailDeliveries: typeof emailDeliveries;
   presets: typeof presets;
   savedScenarios: typeof savedScenarios;
+  supportInbox: typeof supportInbox;
 }>;
 
 /**
