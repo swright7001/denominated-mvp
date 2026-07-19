@@ -7,6 +7,7 @@ import {
   getMissingAuthenticatedCheckoutEnvVars,
   getMissingCheckoutEnvVars,
   getStripeAutomaticTaxConfig,
+  getStripeTaxCheckoutConfig,
   isPaidCheckoutEnabled,
   parseCheckoutPlanId,
   paidCheckoutEnabledEnvVar,
@@ -102,6 +103,47 @@ test("Stripe automatic tax accepts only an explicit boolean decision", () => {
       [stripeAutomaticTaxEnabledEnvVar]: "yes",
     }),
     null,
+  );
+});
+
+test("automatic tax collects and persists the customer billing location", () => {
+  const taxEnabled = {
+    [stripeAutomaticTaxEnabledEnvVar]: "true",
+  };
+
+  assert.deepEqual(
+    getStripeTaxCheckoutConfig(
+      getCheckoutPlan("proMonthly"),
+      "cus_existing",
+      taxEnabled,
+    ),
+    {
+      automatic_tax: { enabled: true },
+      billing_address_collection: "required",
+      customer_update: { address: "auto" },
+    },
+  );
+  assert.deepEqual(
+    getStripeTaxCheckoutConfig(
+      getCheckoutPlan("lifetime"),
+      undefined,
+      taxEnabled,
+    ),
+    {
+      automatic_tax: { enabled: true },
+      billing_address_collection: "required",
+      customer_creation: "always",
+    },
+  );
+  assert.deepEqual(
+    getStripeTaxCheckoutConfig(getCheckoutPlan("proAnnual"), undefined, {
+      [stripeAutomaticTaxEnabledEnvVar]: "false",
+    }),
+    { automatic_tax: { enabled: false } },
+  );
+  assert.deepEqual(
+    getStripeTaxCheckoutConfig(getCheckoutPlan("proAnnual"), undefined, {}),
+    {},
   );
 });
 

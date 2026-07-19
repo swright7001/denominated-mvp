@@ -10,6 +10,8 @@
   packaging matches what is available on day one.
 - Made Resend readiness conditional on the email-report feature flag instead
   of blocking the core paid checkout launch.
+- When automatic tax is approved, Checkout now collects a billing address and
+  persists it for existing customers so Stripe can calculate tax reliably.
 
 ### Security
 
