@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Layout } from "@/components/Layout";
 import { RecurringDashboard } from "@/components/RecurringDashboard";
+import { isClerkConfigured } from "@/lib/auth";
+import { isConvexConfigured } from "@/lib/convex";
 
 export const metadata: Metadata = {
   title: "Personal Purchasing-Power Dashboard",
@@ -16,7 +18,9 @@ export const metadata: Metadata = {
 export default function DashboardPage() {
   return (
     <Layout>
-      <RecurringDashboard />
+      <RecurringDashboard
+        realAccountsEnabled={isClerkConfigured() && isConvexConfigured()}
+      />
     </Layout>
   );
 }

@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import {
   Area,
@@ -12,14 +12,19 @@ import {
   YAxis,
 } from "recharts";
 import { formatBTC, formatUSD } from "@/lib/calculations";
+import { comparisonChartInitialDimension } from "@/lib/chart-layout";
 import { ScenarioResult } from "@/lib/types";
 
 export function BTCComparisonChart({ result }: { result: ScenarioResult }) {
   return (
     <section className="panel min-w-0 rounded-lg p-5 sm:p-7">
       <p className="eyebrow mb-5">Cost over time</p>
-      <div className="h-80 w-full min-w-0">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-80 min-h-80 w-full min-w-0">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          initialDimension={comparisonChartInitialDimension}
+        >
           <ComposedChart
             data={result.yearlyData}
             margin={{ top: 8, right: 0, bottom: 0, left: 0 }}

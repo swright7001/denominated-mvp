@@ -1,0 +1,55 @@
+name: Product feedback
+description: Suggest an improvement to the Denominated consumer experience.
+title: "[Feedback]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Denominated is an educational purchasing-power tool, not a trading product. Please describe the real-life job you are trying to accomplish.
+  - type: input
+    id: page
+    attributes:
+      label: Relevant page or feature
+      placeholder: Calculator, examples, watchlist, dashboard, or another area
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to understand or accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: friction
+    attributes:
+      label: What is difficult today?
+    validations:
+      required: true
+  - type: textarea
+    id: improvement
+    attributes:
+      label: Suggested improvement
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: Pixel 10, Chrome 142
+  - type: dropdown
+    id: account_state
+    attributes:
+      label: Account state
+      options:
+        - Signed out
+        - Signed in with a free account
+        - Signed in with Pro
+        - Signed in with Lifetime
+        - Not relevant
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Optional screenshots
+      description: Remove names, email addresses, payment details, and other sensitive information before attaching media.

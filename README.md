@@ -15,7 +15,8 @@ Production URL: [https://getdenominated.com](https://getdenominated.com)
 - Vercel-ready structure
 - Vercel Web Analytics and Speed Insights
 - Server-side BTC/USD price route backed by CoinGecko
-- Placeholder API layer for future consumer price, auth, email, and Stripe work
+- Clerk authentication and Convex account-backed saved scenarios
+- Setup-safe Stripe and email foundations for later paid rollout
 
 ## Local Setup
 
@@ -32,20 +33,22 @@ Open [http://localhost:3000](http://localhost:3000).
 npm run dev
 npm run build
 npm run lint
+npm test
 ```
 
-## MVP Notes
+## Free Launch Notes
 
-- Uses local state only.
+- Keeps the calculator, examples, education, and sharing available without an account.
 - Fetches BTC/USD spot price server-side from CoinGecko when available.
-- Requires no login.
+- Uses Clerk and Convex for account-backed saved scenarios and plan entitlements.
 - Implements no client-side third-party API calls.
-- Implements no live payments; Stripe checkout plumbing is setup-safe and
-  requires environment variables before it can create sessions.
+- Keeps public paid checkout disabled until the separate paid launch.
 - Includes placeholder future API functions in `src/lib/api.ts`.
-- Includes a local account foundation at `/account`; production auth is planned
-  with Clerk in `docs/account-auth-foundation.md`.
+- Includes account, watchlist, dashboard, support, and product walkthrough routes.
 - Documents the future Stripe checkout plan in `docs/stripe-checkout-plan.md`.
+- Documents multi-currency architecture in
+  `docs/multi-currency-purchasing-power.md`; the selector remains disabled until
+  its provider, persistence, and migration phases ship together.
 - Uses the provided Denominated logo and UI references from `public/brand`.
 
 ## Live BTC Price Data
@@ -68,6 +71,10 @@ Bitcoin's USD spot price from CoinGecko's `/simple/price` endpoint with
 - Analytics data appears in Vercel when the project-level analytics features are enabled.
 - Baseline security headers are configured in `next.config.ts`.
 - SEO metadata, Open Graph metadata, `robots.txt`, and `sitemap.xml` are configured for the current production URL.
+- `DENOMINATED_SUPPORT_EMAIL` must equal `support@getdenominated.com` and
+  `DENOMINATED_SUPPORT_EMAIL_VERIFIED=true` before the private support mail link
+  is published. The public feedback and private security paths remain available
+  without those variables.
 
 ## Smoke Test Checklist
 
@@ -76,16 +83,19 @@ Bitcoin's USD spot price from CoinGecko's `/simple/price` endpoint with
 - Calculator inputs update result cards, opportunity summary, share card, and chart.
 - Copy tweet button shows a copied state.
 - Examples page links to scenario detail pages.
+- Dashboard, account, and watchlist use the same persisted Convex plan tier.
+- Product walkthrough controls and text-only transcript work with a keyboard.
+- Support page reaches public feedback and private security channels.
 - Learn page and disclaimer are visible.
 - Mobile layout has no obvious overlap or broken assets.
 
 ## Roadmap
 
 - Add a Denominated tab/link from the Hard Money Hustlers guest site.
-- Add shareable scenario URLs.
 - Harden live BTC pricing with stronger observability and provider fallback.
 - Finish provider cutover and custom-domain smoke testing for the future paid launch.
-- Add optional saved scenarios, email reports, auth, and premium features later.
+- Implement the staged multi-currency roadmap behind a disabled feature flag.
+- Complete verified support-email forwarding and paid billing operations.
 
 ## Disclaimer
 

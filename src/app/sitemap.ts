@@ -9,6 +9,8 @@ const staticRoutes = [
   "/examples",
   "/learn",
   "/plans",
+  "/support",
+  "/walkthrough",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
