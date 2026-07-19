@@ -25,6 +25,7 @@ test("toConvexSavedScenarioInput preserves local saved scenario baseline data", 
     clientId: "saved-local-1",
     scenario: {
       itemName: "Tesla Model 3",
+      currencyCode: "USD",
       currentItemPriceUSD: 41000,
       currentBTCPriceUSD: 80000,
       years: 5,
@@ -35,6 +36,7 @@ test("toConvexSavedScenarioInput preserves local saved scenario baseline data", 
     savedAt: "2026-06-22T12:00:00.000Z",
     baselineBTCPriceUSD: 80000,
     baselineItemCostBTC: 0.5125,
+    baselineCurrencyCode: "USD",
     sourceType: "custom",
   });
 });
@@ -50,6 +52,7 @@ test("toConvexPresetInput strips UI-only fields and keeps source metadata", () =
       slug: "tesla-model-3",
       scenario: {
         itemName: "Tesla Model 3",
+        currencyCode: "USD",
         currentItemPriceUSD: 41000,
         currentBTCPriceUSD: 80000,
         years: 5,

@@ -1,5 +1,11 @@
+import {
+  ArrowRight,
+  BadgeDollarSign,
+  ShieldCheck,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
-import { ArrowRight, BadgeDollarSign, ShieldCheck, TrendingUp, Users } from "lucide-react";
 import { BTCPriceStatus } from "@/components/BTCPriceStatus";
 import { Layout } from "@/components/Layout";
 import { PresetScenarioGrid } from "@/components/PresetScenarioGrid";
@@ -7,8 +13,12 @@ import { ProductWalkthrough } from "@/components/ProductWalkthrough";
 import { DISCLAIMER } from "@/components/Footer";
 import { getBTCPrice } from "@/lib/btc-price";
 import { calculateScenario, formatBTC, formatUSD } from "@/lib/calculations";
-import { applyBTCPriceToScenario, applyBTCPriceToScenarios } from "@/lib/live-scenarios";
+import {
+  applyBTCPriceToScenario,
+  applyBTCPriceToScenarios,
+} from "@/lib/live-scenarios";
 import { defaultScenario, scenarios } from "@/lib/scenarios";
+import { TrackedLink } from "@/components/TrackedLink";
 
 export const dynamic = "force-dynamic";
 
@@ -39,23 +49,43 @@ export default async function Home() {
             Measure life in purchasing power.
           </p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-            <Link
+            <TrackedLink
+              analyticsEvent={{
+                event: "cta_clicked",
+                cta: "hero_run_scenario",
+              }}
               href="/calculator"
               className="copper-button inline-flex items-center justify-center gap-3 rounded-md px-6 py-4 font-semibold"
             >
               Run a Scenario <ArrowRight size={19} />
-            </Link>
-            <Link
+            </TrackedLink>
+            <TrackedLink
+              analyticsEvent={{
+                event: "cta_clicked",
+                cta: "hero_view_examples",
+              }}
               href="/examples"
               className="outline-button inline-flex items-center justify-center rounded-md px-6 py-4"
             >
               View Examples
-            </Link>
+            </TrackedLink>
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-3">
-            <MiniProof icon={<BadgeDollarSign />} title="Purchasing power first" copy="Value in what matters, not inflated dollars." />
-            <MiniProof icon={<ShieldCheck />} title="Transparent inputs" copy="Use simple assumptions you can change." />
-            <MiniProof icon={<Users />} title="Built for real life" copy="For families, savers, and everyday decisions." />
+            <MiniProof
+              icon={<BadgeDollarSign />}
+              title="Purchasing power first"
+              copy="Value in what matters, not inflated dollars."
+            />
+            <MiniProof
+              icon={<ShieldCheck />}
+              title="Transparent inputs"
+              copy="Use simple assumptions you can change."
+            />
+            <MiniProof
+              icon={<Users />}
+              title="Built for real life"
+              copy="For families, savers, and everyday decisions."
+            />
           </div>
         </div>
         <div className="panel rounded-lg p-5">
@@ -112,17 +142,29 @@ export default async function Home() {
       <section className="container py-8">
         <div className="mb-8 text-center">
           <p className="eyebrow">Popular examples</p>
-          <h2 className="mt-3 text-3xl text-[#efe6da]">Real-life costs, not trading screens</h2>
+          <h2 className="mt-3 text-3xl text-[#efe6da]">
+            Real-life costs, not trading screens
+          </h2>
           <p className="mt-3 text-[#b9ab9a]">
             Explore common expenses through a purchasing-power lens.
           </p>
         </div>
-        <PresetScenarioGrid scenarios={pricedScenarios} limit={6} />
+        <PresetScenarioGrid
+          scenarios={pricedScenarios}
+          limit={6}
+          analyticsSurface="home"
+        />
       </section>
 
       <section className="container grid gap-6 py-12 md:grid-cols-3">
-        <InfoPanel title="How it works" copy="Enter today's cost, today's Bitcoin price, a time horizon, and simple annual assumptions. Denominated compares the same expense in dollars and BTC." />
-        <InfoPanel title="Why purchasing power matters" copy="A price can rise in dollars while falling against a harder benchmark. That helps explain why a bigger dollar number does not always mean better value." />
+        <InfoPanel
+          title="How it works"
+          copy="Enter today's cost, today's Bitcoin price, a time horizon, and simple annual assumptions. Denominated compares the same expense in dollars and BTC."
+        />
+        <InfoPanel
+          title="Why purchasing power matters"
+          copy="A price can rise in dollars while falling against a harder benchmark. That helps explain why a bigger dollar number does not always mean better value."
+        />
         <InfoPanel title="Disclaimer" copy={DISCLAIMER} />
       </section>
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Share2 } from "lucide-react";
 import { buildTweet } from "@/lib/calculations";
 import { ScenarioInput, ScenarioResult } from "@/lib/types";
+import { trackProductEvent } from "@/lib/product-analytics";
 
 export function CopyTweetButton({
   scenario,
@@ -31,6 +32,7 @@ export function CopyTweetButton({
     }
 
     setCopied(true);
+    trackProductEvent({ event: "result_copied", format: "tweet" });
     window.setTimeout(() => setCopied(false), 3000);
   }
 

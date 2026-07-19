@@ -1,5 +1,5 @@
 import type { BTCPriceResult } from "@/lib/btc-price";
-import { formatUSD } from "@/lib/calculations";
+import { formatCurrency } from "@/lib/currency";
 
 export function BTCPriceStatus({
   btcPrice,
@@ -26,11 +26,13 @@ export function BTCPriceStatus({
       <p className="font-medium text-[#efe6da]">{label}</p>
       <p className="mt-1">
         {btcPrice.status === "fallback"
-          ? `Live pricing is unavailable, so examples are using ${formatUSD(
-              btcPrice.priceUSD,
+          ? `Live pricing is unavailable, so examples are using ${formatCurrency(
+              btcPrice.price,
+              btcPrice.currencyCode,
             )} BTC for now.`
-          : `Examples are using ${formatUSD(
-              btcPrice.priceUSD,
+          : `Examples are using ${formatCurrency(
+              btcPrice.price,
+              btcPrice.currencyCode,
             )} BTC from ${btcPrice.provider}${formatUpdatedAt(
               btcPrice.lastUpdatedAt,
             )}.`}

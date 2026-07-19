@@ -7,7 +7,8 @@ import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { api } from "../../convex/_generated/api";
 import { toConvexSavedScenarioInput } from "@/lib/convex-storage";
-import { getAccountPlanLabel } from "@/lib/entitlements";
+import { getAccountPlanLabel, isProEntitled } from "@/lib/entitlements";
+import { BillingPortalButton } from "./BillingPortalButton";
 import {
   parseSavedScenarios,
   WATCHLIST_STORAGE_KEY,
@@ -240,6 +241,15 @@ function SignedInAccountExperience({ email }: { email: string }) {
             Run a Scenario
           </Link>
         </div>
+        {account && isProEntitled(account.planTier) ? (
+          <div className="mt-5 border-t border-[rgba(239,230,218,0.14)] pt-5">
+            <p className="text-sm leading-6 text-[#b9ab9a]">
+              Manage your subscription, payment method, and invoices securely
+              through Stripe.
+            </p>
+            <BillingPortalButton />
+          </div>
+        ) : null}
       </section>
     </AccountShell>
   );

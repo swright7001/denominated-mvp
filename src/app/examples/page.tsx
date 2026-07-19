@@ -28,7 +28,7 @@ export default async function ExamplesPage() {
   const btcPrice = await getBTCPrice();
   const pricedScenarios = applyBTCPriceToScenarios(
     scenarios,
-    btcPrice.priceUSD,
+    btcPrice.price,
   );
 
   return (
@@ -50,7 +50,10 @@ export default async function ExamplesPage() {
           </div>
         </div>
         <BTCPriceStatus btcPrice={btcPrice} className="mb-6" />
-        <PresetScenarioGrid scenarios={pricedScenarios} />
+        <PresetScenarioGrid
+          scenarios={pricedScenarios}
+          analyticsSurface="examples"
+        />
       </section>
     </Layout>
   );

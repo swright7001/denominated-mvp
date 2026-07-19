@@ -49,3 +49,13 @@ test("save-first-scenario copy includes an escape hatch", () => {
     "Continue without account",
   );
 });
+
+test("conversion copy remains accurate when paid checkout is enabled", () => {
+  const allCopy = moments
+    .map((moment) => JSON.stringify(getProConversionCopy(moment)))
+    .join(" ")
+    .toLowerCase();
+
+  assert.equal(allCopy.includes("no checkout"), false);
+  assert.equal(allCopy.includes("no payment is collected"), false);
+});

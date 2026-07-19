@@ -1,6 +1,8 @@
 export const signupEmailKey = "denominated.signupEmail.v1";
 export const signupPromptShownKey = "denominated.signupPromptShown.v1";
 export const signupPromptDismissedKey = "denominated.signupPromptDismissed.v1";
+export const purchasingPowerCommitmentAcceptedKey =
+  "denominated.purchasingPowerCommitmentAccepted.v1";
 export const emailPreferencesKey = "denominated.emailPreferences.v1";
 export const accountChangedEvent = "denominated-account-changed";
 
@@ -63,6 +65,18 @@ export function getStoredAccountEmail(storage: Pick<Storage, "getItem">) {
   const value = storage.getItem(signupEmailKey);
 
   return value && isValidEmail(value) ? normalizeEmail(value) : "";
+}
+
+export function hasAcceptedPurchasingPowerCommitment(
+  storage: Pick<Storage, "getItem">,
+) {
+  return storage.getItem(purchasingPowerCommitmentAcceptedKey) === "true";
+}
+
+export function acceptPurchasingPowerCommitment(
+  storage: Pick<Storage, "setItem">,
+) {
+  storage.setItem(purchasingPowerCommitmentAcceptedKey, "true");
 }
 
 export function saveLocalAccountEmail(

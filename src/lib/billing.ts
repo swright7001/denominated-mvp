@@ -1,0 +1,417 @@
+import type Stripe from "stripe";
+import { isValidEmail, normalizeEmail } from "./account";
+import type { PlanTier } from "./entitlements";
+
+type BillingPlanTier = Exclude<PlanTier, "noAccount">;
+
+export type SubscriptionStatus =
+  | "active"
+  | "trialing"
+  | "past_due"
+  | "canceled"
+  | "incomplete"
+  | "incomplete_expired"
+  | "unpaid"
+  | "paused"
+  | "unknown";
+
+export type BillingSnapshot = {
+  convexAccountId?: string;
+  planTier?: BillingPlanTier;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  stripePriceId?: string;
+  subscriptionStatus?: SubscriptionStatus;
+  currentPeriodEnd?: string;
+  cancelAtPeriodEnd?: boolean;
+  lifetimePurchasedAt?: string;
+  billingUpdatedAt?: string;
+};
+
+export type BillingStatusNotice = {
+  title: string;
+  body: string;
+};
+
+export type BillingWebhookAction =
+  | "grant-lifetime"
+  | "sync-subscription"
+  | "sync-invoice"
+  | "mark-payment-issue"
+  | "ignore";
+
+export type BillingWebhookResult = {
+  action: BillingWebhookAction;
+  planTier?: PlanTier;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  note: string;
+};
+
+export type StripeBillingSnapshot = Omit<
+  BillingSnapshot,
+  "billingUpdatedAt" | "planTier"
+> & {
+  planTier: BillingPlanTier;
+  billingUpdatedAt: string;
+  email?: string;
+  stripeEventId: string;
+  stripeEventType: string;
+  lastWebhookAction: BillingWebhookAction;
+};
+
+export const billingPortalTestModeEnvVar =
+  "DENOMINATED_ENABLE_LOCAL_BILLING_TESTS";
+export const stripeWebhookSyncSecretEnvVar =
+  "DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET";
+
+export function resolveBillingPlanTier(
+  snapshot: BillingSnapshot | null | undefined,
+): PlanTier {
+  if (!snapshot) return "freeAccount";
+
+  if (snapshot.lifetimePurchasedAt || snapshot.planTier === "lifetime") {
+    return "lifetime";
+  }
+
+  if (
+    snapshot.subscriptionStatus === "active" ||
+    snapshot.subscriptionStatus === "trialing" ||
+    snapshot.planTier === "pro"
+  ) {
+    return "pro";
+  }
+
+  return "freeAccount";
+}
+
+export function getBillingStatusNotice({
+  planTier,
+  subscriptionStatus,
+}: {
+  planTier: PlanTier;
+  subscriptionStatus?: SubscriptionStatus;
+}): BillingStatusNotice | null {
+  if (
+    planTier === "lifetime" ||
+    subscriptionStatus === undefined ||
+    subscriptionStatus === "active" ||
+    subscriptionStatus === "trialing"
+  ) {
+    return null;
+  }
+
+  if (subscriptionStatus === "past_due" || subscriptionStatus === "unpaid") {
+    return {
+      title: "Payment needs attention",
+      body: "Your latest Pro payment did not go through, so this account is using Free Account access for now. The calculator, examples, Learn, and sharing remain available while you update billing.",
+    };
+  }
+
+  if (
+    subscriptionStatus === "incomplete" ||
+    subscriptionStatus === "incomplete_expired"
+  ) {
+    return {
+      title: "Pro setup is incomplete",
+      body: "Stripe could not finish this Pro subscription. Free Account access remains available, and you can return to billing when you are ready to try again.",
+    };
+  }
+
+  if (subscriptionStatus === "canceled") {
+    return {
+      title: "Pro subscription ended",
+      body: "This account has returned to Free Account access. Your free calculator, examples, Learn, and sharing tools remain available.",
+    };
+  }
+
+  if (subscriptionStatus === "paused") {
+    return {
+      title: "Pro access is paused",
+      body: "This account is using Free Account access while the subscription is paused. You can keep using the free tools and review billing whenever you are ready.",
+    };
+  }
+
+  return null;
+}
+
+export function getMissingBillingEnvVars(
+  env: Record<string, string | undefined> = process.env,
+) {
+  return ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"].filter(
+    (key) => !env[key],
+  );
+}
+
+export function getMissingBillingPersistenceEnvVars(
+  env: Record<string, string | undefined> = process.env,
+) {
+  return [
+    ...getMissingBillingEnvVars(env),
+    "NEXT_PUBLIC_CONVEX_URL",
+    stripeWebhookSyncSecretEnvVar,
+  ].filter((key) => !env[key]);
+}
+
+export function getMissingBillingPortalAuthEnvVars(
+  env: Record<string, string | undefined> = process.env,
+) {
+  return [
+    "CLERK_SECRET_KEY",
+    "CLERK_JWT_ISSUER_DOMAIN",
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_CONVEX_URL",
+    "STRIPE_SECRET_KEY",
+  ].filter((key) => !env[key]);
+}
+
+export function isBillingPortalLocalTestEnabled(
+  env: Record<string, string | undefined> = process.env,
+) {
+  return env[billingPortalTestModeEnvVar] === "true";
+}
+
+export function isBillingPortalLocalTestRequest({
+  requestUrl,
+  env = process.env,
+}: {
+  requestUrl: string;
+  env?: Record<string, string | undefined>;
+}) {
+  if (!isBillingPortalLocalTestEnabled(env)) return false;
+
+  try {
+    const { hostname } = new URL(requestUrl);
+
+    return (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "::1" ||
+      hostname === "[::1]"
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function mapStripeEventToBillingResult(
+  event: Pick<Stripe.Event, "type" | "data">,
+): BillingWebhookResult {
+  switch (event.type) {
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const tier = parseWebhookTier(session.metadata?.entitlement_tier);
+
+      if (tier === "lifetime") {
+        return {
+          action: "grant-lifetime",
+          planTier: "lifetime",
+          stripeCustomerId: getStripeId(session.customer),
+          note: "Lifetime checkout completed; persist lifetime ownership for this user.",
+        };
+      }
+
+      return {
+        action: "sync-subscription",
+        planTier: "pro",
+        stripeCustomerId: getStripeId(session.customer),
+        stripeSubscriptionId: getStripeId(session.subscription),
+        note: "Pro checkout completed; persist subscription/customer linkage.",
+      };
+    }
+    case "customer.subscription.created":
+    case "customer.subscription.updated":
+    case "customer.subscription.deleted": {
+      const subscription = event.data.object as Stripe.Subscription;
+
+      return {
+        action: "sync-subscription",
+        planTier:
+          subscription.status === "active" || subscription.status === "trialing"
+            ? "pro"
+            : "freeAccount",
+        stripeCustomerId: getStripeId(subscription.customer),
+        stripeSubscriptionId: subscription.id,
+        note: "Subscription changed; refresh billing snapshot and entitlement tier.",
+      };
+    }
+    case "invoice.payment_succeeded": {
+      const invoice = event.data.object as Stripe.Invoice;
+
+      return {
+        action: "sync-invoice",
+        planTier: "pro",
+        stripeCustomerId: getStripeId(invoice.customer),
+        stripeSubscriptionId: getStripeId(invoice.parent?.subscription_details?.subscription),
+        note: "Invoice paid; keep Pro active and update billing timestamp.",
+      };
+    }
+    case "invoice.payment_failed": {
+      const invoice = event.data.object as Stripe.Invoice;
+
+      return {
+        action: "mark-payment-issue",
+        stripeCustomerId: getStripeId(invoice.customer),
+        stripeSubscriptionId: getStripeId(invoice.parent?.subscription_details?.subscription),
+        note: "Invoice failed; mark billing issue without blocking the free calculator.",
+      };
+    }
+    default:
+      return {
+        action: "ignore",
+        note: "Event acknowledged; no billing mutation is needed.",
+      };
+  }
+}
+
+export function mapStripeEventToBillingSnapshot(
+  event: Pick<Stripe.Event, "id" | "type" | "data" | "created">,
+  receivedAt = new Date(),
+): StripeBillingSnapshot | null {
+  const result = mapStripeEventToBillingResult(event);
+
+  if (result.action === "ignore") {
+    return null;
+  }
+
+  const billingUpdatedAt = receivedAt.toISOString();
+  const base = {
+    stripeEventId: event.id,
+    stripeEventType: event.type,
+    lastWebhookAction: result.action,
+    billingUpdatedAt,
+  };
+
+  switch (event.type) {
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const email = normalizeOptionalEmail(
+        session.metadata?.account_email ??
+          session.customer_details?.email ??
+          session.customer_email,
+      );
+
+      if (result.action === "grant-lifetime") {
+        return {
+          ...base,
+          planTier: "lifetime",
+          convexAccountId: normalizeOptionalString(
+            session.metadata?.convex_account_id,
+          ),
+          email,
+          stripeCustomerId: result.stripeCustomerId,
+          stripePriceId: session.metadata?.stripe_price_id,
+          lifetimePurchasedAt: toIsoFromUnix(event.created) ?? billingUpdatedAt,
+        };
+      }
+
+      return {
+        ...base,
+        planTier: "pro",
+        convexAccountId: normalizeOptionalString(
+          session.metadata?.convex_account_id,
+        ),
+        email,
+        stripeCustomerId: result.stripeCustomerId,
+        stripeSubscriptionId: result.stripeSubscriptionId,
+        stripePriceId: session.metadata?.stripe_price_id,
+        subscriptionStatus: "unknown",
+      };
+    }
+    case "customer.subscription.created":
+    case "customer.subscription.updated":
+    case "customer.subscription.deleted": {
+      const subscription = event.data.object as Stripe.Subscription;
+      const status = normalizeSubscriptionStatus(subscription.status);
+
+      return {
+        ...base,
+        planTier:
+          status === "active" || status === "trialing" ? "pro" : "freeAccount",
+        stripeCustomerId: result.stripeCustomerId,
+        stripeSubscriptionId: result.stripeSubscriptionId,
+        stripePriceId: subscription.items.data[0]?.price.id,
+        subscriptionStatus: status,
+        currentPeriodEnd: toIsoFromUnix(
+          (subscription as Stripe.Subscription & { current_period_end?: number })
+            .current_period_end,
+        ),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      };
+    }
+    case "invoice.payment_succeeded": {
+      const invoice = event.data.object as Stripe.Invoice;
+
+      return {
+        ...base,
+        planTier: "pro",
+        email: normalizeOptionalEmail(invoice.customer_email),
+        stripeCustomerId: result.stripeCustomerId,
+        stripeSubscriptionId: result.stripeSubscriptionId,
+        subscriptionStatus: "active",
+      };
+    }
+    case "invoice.payment_failed": {
+      const invoice = event.data.object as Stripe.Invoice;
+
+      return {
+        ...base,
+        planTier: "freeAccount",
+        email: normalizeOptionalEmail(invoice.customer_email),
+        stripeCustomerId: result.stripeCustomerId,
+        stripeSubscriptionId: result.stripeSubscriptionId,
+        subscriptionStatus: "past_due",
+      };
+    }
+    default:
+      return null;
+  }
+}
+
+function parseWebhookTier(value: string | null | undefined): PlanTier | null {
+  if (value === "pro" || value === "lifetime") return value;
+  return null;
+}
+
+function getStripeId(value: string | { id: string } | null | undefined) {
+  if (!value) return undefined;
+  return typeof value === "string" ? value : value.id;
+}
+
+function normalizeSubscriptionStatus(
+  value: Stripe.Subscription.Status | undefined,
+): SubscriptionStatus {
+  if (
+    value === "active" ||
+    value === "trialing" ||
+    value === "past_due" ||
+    value === "canceled" ||
+    value === "incomplete" ||
+    value === "incomplete_expired" ||
+    value === "unpaid" ||
+    value === "paused"
+  ) {
+    return value;
+  }
+
+  return "unknown";
+}
+
+function normalizeOptionalEmail(value: string | null | undefined) {
+  if (!value) return undefined;
+
+  const email = normalizeEmail(value);
+
+  return isValidEmail(email) ? email : undefined;
+}
+
+function normalizeOptionalString(value: string | null | undefined) {
+  const normalized = value?.trim();
+
+  return normalized ? normalized : undefined;
+}
+
+function toIsoFromUnix(value: number | null | undefined) {
+  if (typeof value !== "number") return undefined;
+  return new Date(value * 1000).toISOString();
+}

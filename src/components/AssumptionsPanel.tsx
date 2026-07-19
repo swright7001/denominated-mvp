@@ -1,4 +1,5 @@
 import { ScenarioInput } from "@/lib/types";
+import { normalizeCurrencyCode } from "@/lib/currency";
 import { EducationTooltip } from "./EducationTooltip";
 
 export function AssumptionsPanel({ scenario }: { scenario: ScenarioInput }) {
@@ -9,6 +10,12 @@ export function AssumptionsPanel({ scenario }: { scenario: ScenarioInput }) {
         <EducationTooltip text="These are inputs for exploring purchasing power. They are not forecasts." />
       </div>
       <dl className="grid gap-4 text-sm sm:grid-cols-2">
+        <div>
+          <dt className="muted">Local currency</dt>
+          <dd className="text-[#efe6da]">
+            {normalizeCurrencyCode(scenario.currencyCode)}
+          </dd>
+        </div>
         <div>
           <dt className="muted">Time horizon</dt>
           <dd className="text-[#efe6da]">{scenario.years} years</dd>

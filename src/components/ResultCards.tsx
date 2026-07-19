@@ -1,4 +1,5 @@
-import { formatBTC, formatUSD, getChangeCopy } from "@/lib/calculations";
+import { formatBTC, getChangeCopy } from "@/lib/calculations";
+import { formatCurrency, normalizeCurrencyCode } from "@/lib/currency";
 import { ScenarioInput, ScenarioResult } from "@/lib/types";
 
 export function ResultCards({
@@ -10,6 +11,7 @@ export function ResultCards({
 }) {
   const changeLabel =
     result.btcCostChangePercent < 0 ? "You'll pay less" : "You'll pay more";
+  const currencyCode = normalizeCurrencyCode(scenario.currencyCode);
 
   return (
     <section className="panel min-w-0 rounded-lg p-5 sm:p-7">
@@ -21,13 +23,13 @@ export function ResultCards({
           suffix="BTC"
         />
         <MetricCard
-          label="Future USD price"
-          value={formatUSD(result.futureItemPriceUSD)}
+          label={`Future ${currencyCode} price`}
+          value={formatCurrency(result.futureItemPriceUSD, currencyCode)}
           sub={`in ${scenario.years} years`}
         />
         <MetricCard
           label="Future BTC price"
-          value={formatUSD(result.futureBTCPriceUSD)}
+          value={formatCurrency(result.futureBTCPriceUSD, currencyCode)}
           sub={`in ${scenario.years} years`}
         />
         <MetricCard

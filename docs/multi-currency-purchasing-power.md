@@ -1,7 +1,7 @@
 # Multi-currency purchasing-power design
 
-Status: Approved implementation design for DEN-122. This document does not
-enable a currency selector by itself.
+Status: Implemented behind `DENOMINATED_ENABLE_MULTI_CURRENCY`. Production
+activation remains a rollout decision after Preview and mobile QA.
 
 ## Product model
 
@@ -102,15 +102,18 @@ names, entered prices, email addresses, or saved-goal details to analytics.
 - mobile browser checks for long currency labels and formatted values
 - provider outage and weekend-staleness walkthroughs
 
-## Implementation breakdown
+## Implemented scope
 
-1. Add the `CurrencyCode` domain model, USD migration readers, and feature flag.
-2. Add the ECB reference-rate adapter, cache policy, status metadata, and tests.
-3. Add locale-aware numeric parsing and formatting helpers.
-4. Add the calculator currency control and manual-conversion confirmation.
-5. Carry currency through Convex storage, URLs, share cards, watchlists, and
-   recurring reports.
-6. Add regional preset-source labeling, analytics, rollout checks, and final QA.
+1. The `CurrencyCode` domain model, USD migration readers, and feature flag are
+   implemented.
+2. The ECB adapter, cache policy, status metadata, and provider tests are
+   implemented.
+3. Locale-aware parsing and formatting are implemented.
+4. The calculator selector and manual-value conversion confirmation are
+   implemented.
+5. Currency is carried through Convex storage, URLs, share cards, watchlists,
+   snapshots, and weekly reports.
+6. Analytics records only bounded currency/provider/surface metadata.
 
 ## Non-goals
 

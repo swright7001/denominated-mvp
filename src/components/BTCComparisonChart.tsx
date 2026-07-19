@@ -11,11 +11,19 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatBTC, formatUSD } from "@/lib/calculations";
+import { formatBTC } from "@/lib/calculations";
+import { formatCurrency, normalizeCurrencyCode } from "@/lib/currency";
 import { comparisonChartInitialDimension } from "@/lib/chart-layout";
-import { ScenarioResult } from "@/lib/types";
+import { ScenarioInput, ScenarioResult } from "@/lib/types";
 
-export function BTCComparisonChart({ result }: { result: ScenarioResult }) {
+export function BTCComparisonChart({
+  scenario,
+  result,
+}: {
+  scenario: ScenarioInput;
+  result: ScenarioResult;
+}) {
+  const currencyCode = normalizeCurrencyCode(scenario.currencyCode);
   return (
     <section className="panel min-w-0 rounded-lg p-5 sm:p-7">
       <p className="eyebrow mb-5">Cost over time</p>
@@ -45,7 +53,9 @@ export function BTCComparisonChart({ result }: { result: ScenarioResult }) {
               stroke="#b9ab9a"
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => formatUSD(Number(value), true)}
+              tickFormatter={(value) =>
+                formatCurrency(Number(value), currencyCode, true)
+              }
             />
             <YAxis
               yAxisId="btc"
@@ -64,8 +74,8 @@ export function BTCComparisonChart({ result }: { result: ScenarioResult }) {
                 color: "#efe6da",
               }}
               formatter={(value, name) =>
-                name === "USD cost"
-                  ? [formatUSD(Number(value)), name]
+                name === `${currencyCode} cost`
+                  ? [formatCurrency(Number(value), currencyCode), name]
                   : [`${formatBTC(Number(value))} BTC`, name]
               }
             />
@@ -73,7 +83,7 @@ export function BTCComparisonChart({ result }: { result: ScenarioResult }) {
             <Bar
               yAxisId="usd"
               dataKey="usdCost"
-              name="USD cost"
+              name={`${currencyCode} cost`}
               fill="#a55f38"
               radius={[4, 4, 0, 0]}
             />

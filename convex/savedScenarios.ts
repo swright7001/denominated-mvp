@@ -5,7 +5,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
-import { scenarioInputValidator } from "./schema";
+import { currencyCodeValidator, scenarioInputValidator } from "./schema";
 
 const savedScenarioInputFields = {
   clientId: v.optional(v.string()),
@@ -13,6 +13,7 @@ const savedScenarioInputFields = {
   savedAt: v.string(),
   baselineBTCPriceUSD: v.number(),
   baselineItemCostBTC: v.number(),
+  baselineCurrencyCode: v.optional(currencyCodeValidator),
   sourceType: v.optional(v.union(v.literal("custom"), v.literal("preset"))),
   presetSlug: v.optional(v.string()),
   sourceName: v.optional(v.string()),
@@ -79,6 +80,12 @@ export const save = mutation({
       if (existing) {
         await ctx.db.patch(existing._id, {
           ...args,
+          scenario: {
+            ...args.scenario,
+            currencyCode: args.scenario.currencyCode ?? "USD",
+          },
+          baselineCurrencyCode:
+            args.baselineCurrencyCode ?? args.scenario.currencyCode ?? "USD",
           sourceType: args.sourceType ?? "custom",
           updatedAt: now,
         });
@@ -103,6 +110,12 @@ export const save = mutation({
     return await ctx.db.insert("savedScenarios", {
       ownerTokenIdentifier,
       ...args,
+      scenario: {
+        ...args.scenario,
+        currencyCode: args.scenario.currencyCode ?? "USD",
+      },
+      baselineCurrencyCode:
+        args.baselineCurrencyCode ?? args.scenario.currencyCode ?? "USD",
       sourceType: args.sourceType ?? "custom",
       createdAt: now,
       updatedAt: now,
@@ -174,6 +187,14 @@ export const importLocalWatchlist = mutation({
       if (existing) {
         await ctx.db.patch(existing._id, {
           ...savedScenario,
+          scenario: {
+            ...savedScenario.scenario,
+            currencyCode: savedScenario.scenario.currencyCode ?? "USD",
+          },
+          baselineCurrencyCode:
+            savedScenario.baselineCurrencyCode ??
+            savedScenario.scenario.currencyCode ??
+            "USD",
           sourceType: savedScenario.sourceType ?? "custom",
           updatedAt: now,
         });
@@ -183,6 +204,14 @@ export const importLocalWatchlist = mutation({
           await ctx.db.insert("savedScenarios", {
             ownerTokenIdentifier,
             ...savedScenario,
+            scenario: {
+              ...savedScenario.scenario,
+              currencyCode: savedScenario.scenario.currencyCode ?? "USD",
+            },
+            baselineCurrencyCode:
+              savedScenario.baselineCurrencyCode ??
+              savedScenario.scenario.currencyCode ??
+              "USD",
             sourceType: savedScenario.sourceType ?? "custom",
             createdAt: now,
             updatedAt: now,

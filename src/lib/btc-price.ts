@@ -1,3 +1,15 @@
+import {
+  defaultCurrencyCode,
+  normalizeCurrencyCode,
+  type CurrencyCode,
+} from "./currency";
+import {
+  convertUsdReferencePrice,
+  getFiatReferenceRates,
+  type FiatRateObservation,
+  type FiatRateStatus,
+} from "./fiat-rates";
+
 const COINGECKO_SIMPLE_PRICE_URL =
   "https://api.coingecko.com/api/v3/simple/price";
 
@@ -14,13 +26,21 @@ export const BTC_PRICE_VERCEL_CDN_CACHE_CONTROL = `public, max-age=${BTC_PRICE_R
 export type BTCPriceResult = {
   status: "live" | "fallback";
   provider: "CoinGecko";
+  currencyCode: CurrencyCode;
+  price: number;
   priceUSD: number;
+  fallbackPrice: number;
   fallbackPriceUSD: number;
   fetchedAt: string;
   lastUpdatedAt: string | null;
   stale: boolean;
   staleAfterSeconds: number;
   sourceUrl: string;
+  fiatRateStatus?: FiatRateStatus;
+  fiatRateProvider?: "European Central Bank";
+  fiatRateObservedAt?: string;
+  fiatRateSourceUrl?: string;
+  manualPriceRequired?: boolean;
   error?: string;
 };
 
@@ -36,12 +56,17 @@ type BTCPriceFetch = typeof fetch;
 type GetBTCPriceOptions = {
   fetcher?: BTCPriceFetch;
   fetchedAt?: Date;
+  currencyCode?: CurrencyCode;
+  fiatRateFetcher?: () => Promise<FiatRateObservation>;
 };
 
 export async function getBTCPrice({
   fetcher = fetch,
   fetchedAt = new Date(),
+  currencyCode = defaultCurrencyCode,
+  fiatRateFetcher = () => getFiatReferenceRates({ fetchedAt }),
 }: GetBTCPriceOptions = {}): Promise<BTCPriceResult> {
+  const normalizedCurrency = normalizeCurrencyCode(currencyCode);
   const requestUrl = new URL(COINGECKO_SIMPLE_PRICE_URL);
   requestUrl.searchParams.set("ids", "bitcoin");
   requestUrl.searchParams.set("vs_currencies", "usd");
@@ -69,9 +94,11 @@ export async function getBTCPrice({
       throw new Error(`CoinGecko responded with ${response.status}`);
     }
 
-    return parseCoinGeckoBTCPrice(await response.json(), fetchedAt);
+    const usdPrice = parseCoinGeckoBTCPrice(await response.json(), fetchedAt);
+    return await localizeBTCPrice(usdPrice, normalizedCurrency, fiatRateFetcher);
   } catch (error) {
-    return buildFallbackBTCPrice(getErrorMessage(error), fetchedAt);
+    const fallback = buildFallbackBTCPrice(getErrorMessage(error), fetchedAt);
+    return await localizeBTCPrice(fallback, normalizedCurrency, fiatRateFetcher);
   } finally {
     clearTimeout(timeout);
   }
@@ -95,7 +122,10 @@ export function parseCoinGeckoBTCPrice(
   return {
     status: "live",
     provider: "CoinGecko",
+    currencyCode: "USD",
+    price: priceUSD,
     priceUSD,
+    fallbackPrice: BTC_PRICE_FALLBACK_USD,
     fallbackPriceUSD: BTC_PRICE_FALLBACK_USD,
     fetchedAt: fetchedAt.toISOString(),
     lastUpdatedAt: lastUpdatedAt?.toISOString() ?? null,
@@ -115,7 +145,10 @@ export function buildFallbackBTCPrice(
   return {
     status: "fallback",
     provider: "CoinGecko",
+    currencyCode: "USD",
+    price: BTC_PRICE_FALLBACK_USD,
     priceUSD: BTC_PRICE_FALLBACK_USD,
+    fallbackPrice: BTC_PRICE_FALLBACK_USD,
     fallbackPriceUSD: BTC_PRICE_FALLBACK_USD,
     fetchedAt: fetchedAt.toISOString(),
     lastUpdatedAt: null,
@@ -132,12 +165,66 @@ export function buildBTCPriceLogEvent(price: BTCPriceResult) {
     provider: price.provider,
     status: price.status,
     stale: price.stale,
+    currencyCode: price.currencyCode,
+    price: price.price,
     priceUSD: price.priceUSD,
     fetchedAt: price.fetchedAt,
     lastUpdatedAt: price.lastUpdatedAt,
     staleAfterSeconds: price.staleAfterSeconds,
     sourceUrl: price.sourceUrl,
-    error: price.error,
+    fiatRateStatus: price.fiatRateStatus,
+    fiatRateObservedAt: price.fiatRateObservedAt,
+    manualPriceRequired: price.manualPriceRequired,
+    errorCode: price.error ? "provider_unavailable" : undefined,
+  };
+}
+
+export async function localizeBTCPrice(
+  usdPrice: BTCPriceResult,
+  currencyCode: CurrencyCode,
+  fiatRateFetcher: () => Promise<FiatRateObservation>,
+): Promise<BTCPriceResult> {
+  if (currencyCode === "USD") return usdPrice;
+
+  const fiatRates = await fiatRateFetcher();
+  const unavailable = fiatRates.status === "fallback" && fiatRates.error;
+
+  if (unavailable) {
+    return {
+      ...usdPrice,
+      currencyCode,
+      fiatRateStatus: "manual",
+      fiatRateProvider: fiatRates.provider,
+      fiatRateObservedAt: fiatRates.observedAt,
+      fiatRateSourceUrl: fiatRates.sourceUrl,
+      manualPriceRequired: true,
+      stale: true,
+      error: [usdPrice.error, fiatRates.error].filter(Boolean).join("; "),
+    };
+  }
+
+  const price = convertUsdReferencePrice(
+    usdPrice.priceUSD,
+    currencyCode,
+    fiatRates.ratesPerEUR,
+  );
+  const fallbackPrice = convertUsdReferencePrice(
+    usdPrice.fallbackPriceUSD,
+    currencyCode,
+    fiatRates.ratesPerEUR,
+  );
+
+  return {
+    ...usdPrice,
+    currencyCode,
+    price,
+    fallbackPrice,
+    fiatRateStatus: fiatRates.status,
+    fiatRateProvider: fiatRates.provider,
+    fiatRateObservedAt: fiatRates.observedAt,
+    fiatRateSourceUrl: fiatRates.sourceUrl,
+    stale: usdPrice.stale || fiatRates.stale,
+    error: [usdPrice.error, fiatRates.error].filter(Boolean).join("; ") || undefined,
   };
 }
 

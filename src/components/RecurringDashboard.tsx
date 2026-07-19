@@ -3,7 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import {
   CalendarDays,
   Check,
@@ -22,8 +22,8 @@ import {
   signupEmailKey,
   type EmailPreferences,
 } from "@/lib/account";
-import type { BTCPriceResult } from "@/lib/btc-price";
-import { calculateScenario, formatBTC, formatUSD } from "@/lib/calculations";
+import { calculateScenario, formatBTC } from "@/lib/calculations";
+import { formatCurrency, normalizeCurrencyCode } from "@/lib/currency";
 import {
   getMockPlanTierFromStorage,
   isProEntitled,
@@ -45,6 +45,7 @@ import {
   WATCHLIST_STORAGE_KEY,
   watchlistChangedEvent,
 } from "@/lib/watchlist";
+import { useBTCPrices } from "@/lib/use-btc-prices";
 import { DISCLAIMER } from "./Footer";
 import { ProUpgradePromptFromCopy } from "./ProUpgradePrompt";
 
@@ -85,17 +86,20 @@ function LocalRecurringDashboard() {
     getPlanTierSnapshot,
     getServerPlanTierSnapshot,
   );
-  const btcPrice = useLiveBTCPrice();
-  const currentBTCPriceUSD =
-    btcPrice.data?.priceUSD ??
-    savedScenarios[0]?.scenario.currentBTCPriceUSD ??
-    80000;
+  const btcPrices = useBTCPrices(savedScenarios);
   const impacts = useMemo(
     () =>
-      savedScenarios.map((savedScenario) =>
-        calculateScenarioImpact(savedScenario, currentBTCPriceUSD),
-      ),
-    [currentBTCPriceUSD, savedScenarios],
+      savedScenarios.map((savedScenario) => {
+        const currencyCode = normalizeCurrencyCode(
+          savedScenario.scenario.currencyCode,
+        );
+        return calculateScenarioImpact(
+          savedScenario,
+          btcPrices[currencyCode]?.price ??
+            savedScenario.scenario.currentBTCPriceUSD,
+        );
+      }),
+    [btcPrices, savedScenarios],
   );
   const hasProAccess = isProEntitled(planTier);
 
@@ -138,8 +142,6 @@ function LocalRecurringDashboard() {
             <DailySnapshot
               impacts={impacts}
               savedCount={savedScenarios.length}
-              currentBTCPriceUSD={currentBTCPriceUSD}
-              btcPriceStatus={btcPrice.status}
             />
             <RecentScenarioChanges impacts={impacts} />
             <SavedScenarioSummary savedScenarios={savedScenarios} />
@@ -148,7 +150,7 @@ function LocalRecurringDashboard() {
             <WeeklyReportPreview
               savedScenarios={savedScenarios}
               impacts={impacts}
-              currentBTCPriceUSD={currentBTCPriceUSD}
+              usdBTCPrice={btcPrices.USD?.price ?? 80000}
             />
             <EmailPreferencesPanel
               email={email}
@@ -209,23 +211,26 @@ function SignedInAccountRecurringDashboard({ email }: { email: string }) {
   const updateEmailPreferences = useMutation(
     api.accounts.updateEmailPreferences,
   );
-  const btcPrice = useLiveBTCPrice();
   const savedScenarios = useMemo(
     () => (savedScenarioDocs ?? []).map(toSavedScenario),
     [savedScenarioDocs],
   );
+  const btcPrices = useBTCPrices(savedScenarios);
   const preferences = account?.emailPreferences ?? defaultEmailPreferences;
   const planTier: PlanTier = account?.planTier ?? "freeAccount";
-  const currentBTCPriceUSD =
-    btcPrice.data?.priceUSD ??
-    savedScenarios[0]?.scenario.currentBTCPriceUSD ??
-    80000;
   const impacts = useMemo(
     () =>
-      savedScenarios.map((savedScenario) =>
-        calculateScenarioImpact(savedScenario, currentBTCPriceUSD),
-      ),
-    [currentBTCPriceUSD, savedScenarios],
+      savedScenarios.map((savedScenario) => {
+        const currencyCode = normalizeCurrencyCode(
+          savedScenario.scenario.currencyCode,
+        );
+        return calculateScenarioImpact(
+          savedScenario,
+          btcPrices[currencyCode]?.price ??
+            savedScenario.scenario.currentBTCPriceUSD,
+        );
+      }),
+    [btcPrices, savedScenarios],
   );
   const hasProAccess = isProEntitled(planTier);
 
@@ -268,8 +273,6 @@ function SignedInAccountRecurringDashboard({ email }: { email: string }) {
             <DailySnapshot
               impacts={impacts}
               savedCount={savedScenarios.length}
-              currentBTCPriceUSD={currentBTCPriceUSD}
-              btcPriceStatus={btcPrice.status}
             />
             <RecentScenarioChanges impacts={impacts} />
             <SavedScenarioSummary savedScenarios={savedScenarios} />
@@ -278,7 +281,7 @@ function SignedInAccountRecurringDashboard({ email }: { email: string }) {
             <WeeklyReportPreview
               savedScenarios={savedScenarios}
               impacts={impacts}
-              currentBTCPriceUSD={currentBTCPriceUSD}
+              usdBTCPrice={btcPrices.USD?.price ?? 80000}
             />
             <EmailPreferencesPanel
               email={account?.email ?? email}
@@ -316,25 +319,25 @@ function SignedInAccountRecurringDashboard({ email }: { email: string }) {
 }
 
 function toSavedScenario(doc: Doc<"savedScenarios">): SavedScenario {
+  const currencyCode = normalizeCurrencyCode(doc.scenario.currencyCode);
   return {
     id: doc._id,
-    scenario: doc.scenario,
+    scenario: { ...doc.scenario, currencyCode },
     savedAt: doc.savedAt,
     baselineBTCPriceUSD: doc.baselineBTCPriceUSD,
     baselineItemCostBTC: doc.baselineItemCostBTC,
+    baselineCurrencyCode: normalizeCurrencyCode(
+      doc.baselineCurrencyCode ?? currencyCode,
+    ),
   };
 }
 
 function DailySnapshot({
   impacts,
   savedCount,
-  currentBTCPriceUSD,
-  btcPriceStatus,
 }: {
   impacts: ScenarioImpact[];
   savedCount: number;
-  currentBTCPriceUSD: number;
-  btcPriceStatus: "loading" | "ready" | "error";
 }) {
   const biggestImpact = getBiggestImpact(impacts);
 
@@ -362,8 +365,12 @@ function DailySnapshot({
               : "Save a scenario to see today&apos;s BTC-term movement."}
           </h2>
           <p className="mt-3 text-sm leading-6 text-[#b9ab9a]">
-            BTC price used: {formatUSD(currentBTCPriceUSD)}
-            {btcPriceStatus === "loading" ? " while live price loads." : "."}{" "}
+            {biggestImpact
+              ? `BTC price used: ${formatCurrency(
+                  biggestImpact.currentBTCPriceUSD,
+                  biggestImpact.currencyCode,
+                )}. `
+              : ""}
             {savedCount > 0
               ? "This compares today's BTC price against your saved baseline."
               : "Run a calculator scenario and save it to start a daily snapshot."}
@@ -465,7 +472,10 @@ function SavedScenarioSummary({
                   {savedScenario.scenario.itemName}
                 </p>
                 <p className="mt-2 text-sm text-[#b9ab9a]">
-                  {formatUSD(savedScenario.scenario.currentItemPriceUSD)} ={" "}
+                  {formatCurrency(
+                    savedScenario.scenario.currentItemPriceUSD,
+                    normalizeCurrencyCode(savedScenario.scenario.currencyCode),
+                  )} ={" "}
                   <span className="text-[#f0a36f]">
                     {formatBTC(result.currentItemCostBTC)} BTC
                   </span>
@@ -482,11 +492,11 @@ function SavedScenarioSummary({
 function WeeklyReportPreview({
   savedScenarios,
   impacts,
-  currentBTCPriceUSD,
+  usdBTCPrice,
 }: {
   savedScenarios: SavedScenario[];
   impacts: ScenarioImpact[];
-  currentBTCPriceUSD: number;
+  usdBTCPrice: number;
 }) {
   const reportDate = new Intl.DateTimeFormat("en-US", {
     month: "long",
@@ -496,7 +506,7 @@ function WeeklyReportPreview({
   const biggestImpact = getBiggestImpact(impacts);
   const pricedExamples = applyBTCPriceToScenarios(
     scenarios.slice(0, 3),
-    currentBTCPriceUSD,
+    usdBTCPrice,
   );
 
   return (
@@ -511,7 +521,7 @@ function WeeklyReportPreview({
             Cost-of-life report
           </h2>
           <p className="mt-2 text-sm text-[#b9ab9a]">
-            {reportDate} at {formatUSD(currentBTCPriceUSD)} BTC
+            {reportDate} at {formatCurrency(usdBTCPrice, "USD")} BTC
           </p>
         </div>
       </div>
@@ -594,6 +604,10 @@ function EmailPreferencesPanel({
   onToggle: (key: keyof EmailPreferences) => void | Promise<void>;
   accountBacked: boolean;
 }) {
+  const [reportStatus, setReportStatus] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+  const [reportMessage, setReportMessage] = useState("");
   const options: Array<{
     key: keyof EmailPreferences;
     label: string;
@@ -621,6 +635,35 @@ function EmailPreferencesPanel({
     },
   ];
 
+  async function sendWeeklyReport() {
+    setReportStatus("sending");
+    setReportMessage("");
+
+    try {
+      const response = await fetch("/api/email/weekly-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+
+      if (!response.ok) {
+        setReportStatus("error");
+        setReportMessage(
+          payload?.error ?? "The weekly report could not be sent right now.",
+        );
+        return;
+      }
+
+      setReportStatus("sent");
+      setReportMessage("This week's report was sent to your account email.");
+    } catch {
+      setReportStatus("error");
+      setReportMessage("The weekly report could not be sent right now.");
+    }
+  }
+
   return (
     <section className="panel rounded-lg p-5 sm:p-7">
       <div className="mb-5 flex items-start gap-4">
@@ -639,6 +682,32 @@ function EmailPreferencesPanel({
           </p>
         </div>
       </div>
+      {accountBacked ? (
+        <div className="mb-5 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
+          <p className="font-medium text-[#efe6da]">Send this week&apos;s report</p>
+          <p className="mt-1 text-sm leading-6 text-[#b9ab9a]">
+            Pro and Lifetime accounts can request one purchasing-power report
+            per week.
+          </p>
+          <button
+            type="button"
+            className="outline-button mt-3 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-medium text-[#f0a36f]"
+            disabled={!preferences.weeklyReport || reportStatus === "sending"}
+            onClick={sendWeeklyReport}
+          >
+            {reportStatus === "sending" ? "Sending..." : "Email this report"}
+          </button>
+          {reportMessage ? (
+            <p
+              className={`mt-3 text-sm leading-6 ${
+                reportStatus === "sent" ? "text-[#f0a36f]" : "text-[#b9ab9a]"
+              }`}
+            >
+              {reportMessage}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       <div className="space-y-3">
         {options.map((option) => (
           <button
@@ -741,40 +810,6 @@ function DashboardSignInState() {
       </section>
     </div>
   );
-}
-
-function useLiveBTCPrice() {
-  const [state, setState] = useState<{
-    status: "loading" | "ready" | "error";
-    data?: BTCPriceResult;
-  }>({ status: "loading" });
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadBTCPrice() {
-      try {
-        const response = await fetch("/api/prices/bitcoin", {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) throw new Error("Live BTC price request failed");
-
-        const data = (await response.json()) as BTCPriceResult;
-        setState({ status: "ready", data });
-      } catch {
-        if (!controller.signal.aborted) {
-          setState({ status: "error" });
-        }
-      }
-    }
-
-    loadBTCPrice();
-
-    return () => controller.abort();
-  }, []);
-
-  return state;
 }
 
 function subscribeToWatchlist(onStoreChange: () => void) {

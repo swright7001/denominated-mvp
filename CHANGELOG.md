@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.2.0 - 2026-07-19
+
+### Added
+
+- Added USD, EUR, GBP, CHF, and JPY purchasing-power scenarios behind the
+  `DENOMINATED_ENABLE_MULTI_CURRENCY` rollout flag, using official ECB daily
+  reference rates and explicit stale/manual fallback states.
+- Added Stripe Checkout, webhook entitlement persistence, Billing Portal,
+  legal-policy, weekly report, monitoring, analytics, and paid-readiness
+  foundations.
+- Added account billing status, localized saved scenarios and reports, and a
+  signed-in weekly-report request flow for eligible accounts.
+
+### Security
+
+- Kept checkout fail-closed unless both the paid launch flag and every
+  production provider, support, legal, and tax readiness gate pass.
+- Restricted billing entitlement writes to the verified Stripe webhook path
+  and removed client-writable preset mutations.
+- Required the verified branded support alias before exposing customer support
+  contact details or declaring paid launch readiness.
+
+### Notes
+
+- The public calculator remains free and does not require an account.
+- Production paid checkout remains disabled until live provider verification
+  and owner-approved legal and tax facts are recorded.
+- Existing saved scenarios and share links without a currency migrate to USD.
+
 ## 0.1.3 - 2026-07-18
 
 ### Added

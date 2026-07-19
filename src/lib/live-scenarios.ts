@@ -2,20 +2,20 @@ import type { Scenario, ScenarioInput } from "./types";
 
 export function applyBTCPriceToScenario<T extends ScenarioInput>(
   scenario: T,
-  btcPriceUSD: number,
+  btcPrice: number,
 ): T {
   return {
     ...scenario,
-    currentBTCPriceUSD: normalizeBTCPrice(btcPriceUSD, scenario.currentBTCPriceUSD),
+    currentBTCPriceUSD: normalizeBTCPrice(btcPrice, scenario.currentBTCPriceUSD),
   };
 }
 
 export function applyBTCPriceToScenarios<T extends Scenario>(
   scenarios: T[],
-  btcPriceUSD: number,
+  btcPrice: number,
 ) {
   return scenarios.map((scenario) =>
-    applyBTCPriceToScenario(scenario, btcPriceUSD),
+    applyBTCPriceToScenario(scenario, btcPrice),
   );
 }
 

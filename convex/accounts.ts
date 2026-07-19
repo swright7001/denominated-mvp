@@ -7,8 +7,6 @@ import {
 } from "./_generated/server";
 import {
   emailPreferencesValidator,
-  planTierValidator,
-  subscriptionStatusValidator,
 } from "./schema";
 
 const defaultEmailPreferences = {
@@ -95,40 +93,6 @@ export const updateEmailPreferences = mutation({
 
     await ctx.db.patch(account._id, {
       emailPreferences: args.preferences,
-      updatedAt: Date.now(),
-    });
-
-    return account._id;
-  },
-});
-
-export const updateBillingSnapshot = mutation({
-  args: {
-    planTier: planTierValidator,
-    stripeCustomerId: v.optional(v.string()),
-    stripeSubscriptionId: v.optional(v.string()),
-    stripePriceId: v.optional(v.string()),
-    subscriptionStatus: v.optional(subscriptionStatusValidator),
-    currentPeriodEnd: v.optional(v.string()),
-    cancelAtPeriodEnd: v.optional(v.boolean()),
-    lifetimePurchasedAt: v.optional(v.string()),
-    billingUpdatedAt: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const ownerTokenIdentifier = await requireOwnerTokenIdentifier(ctx);
-    const account = await ctx.db
-      .query("accounts")
-      .withIndex("by_ownerTokenIdentifier", (q) =>
-        q.eq("ownerTokenIdentifier", ownerTokenIdentifier),
-      )
-      .unique();
-
-    if (!account) {
-      throw new Error("Create an account before updating billing state.");
-    }
-
-    await ctx.db.patch(account._id, {
-      ...args,
       updatedAt: Date.now(),
     });
 

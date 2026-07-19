@@ -1,4 +1,5 @@
 import { ScenarioInput } from "./types";
+import { normalizeCurrencyCode } from "./currency";
 
 type ScenarioSearchParams =
   | string
@@ -14,6 +15,7 @@ export function scenarioToSearchParams(scenario: ScenarioInput) {
   const params = new URLSearchParams();
 
   params.set("item", scenario.itemName);
+  params.set("currency", normalizeCurrencyCode(scenario.currencyCode));
   params.set("price", String(scenario.currentItemPriceUSD));
   params.set("btc", String(scenario.currentBTCPriceUSD));
   params.set("years", String(scenario.years));
@@ -50,6 +52,7 @@ export function parseScenarioSearchParams(
 
   return {
     itemName: cleanText(params.get("item")) ?? fallback.itemName,
+    currencyCode: normalizeCurrencyCode(params.get("currency")),
     currentItemPriceUSD:
       cleanNumber(params.get("price")) ?? fallback.currentItemPriceUSD,
     currentBTCPriceUSD:

@@ -12,8 +12,17 @@ export const purchaseTypeValidator = v.union(
   v.literal("monthly"),
 );
 
+export const currencyCodeValidator = v.union(
+  v.literal("USD"),
+  v.literal("EUR"),
+  v.literal("GBP"),
+  v.literal("CHF"),
+  v.literal("JPY"),
+);
+
 export const scenarioInputValidator = v.object({
   itemName: v.string(),
+  currencyCode: v.optional(currencyCodeValidator),
   currentItemPriceUSD: v.number(),
   currentBTCPriceUSD: v.number(),
   years: v.number(),
@@ -57,7 +66,33 @@ export default defineSchema({
     billingUpdatedAt: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_ownerTokenIdentifier", ["ownerTokenIdentifier"]),
+  })
+    .index("by_ownerTokenIdentifier", ["ownerTokenIdentifier"])
+    .index("by_email", ["email"])
+    .index("by_stripeCustomerId", ["stripeCustomerId"]),
+
+  billingSnapshots: defineTable({
+    convexAccountId: v.optional(v.id("accounts")),
+    stripeCustomerId: v.optional(v.string()),
+    email: v.optional(v.string()),
+    planTier: planTierValidator,
+    stripeSubscriptionId: v.optional(v.string()),
+    stripePriceId: v.optional(v.string()),
+    subscriptionStatus: v.optional(subscriptionStatusValidator),
+    currentPeriodEnd: v.optional(v.string()),
+    cancelAtPeriodEnd: v.optional(v.boolean()),
+    lifetimePurchasedAt: v.optional(v.string()),
+    billingUpdatedAt: v.string(),
+    stripeEventId: v.string(),
+    stripeEventType: v.string(),
+    lastWebhookAction: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_convexAccountId", ["convexAccountId"])
+    .index("by_stripeCustomerId", ["stripeCustomerId"])
+    .index("by_email", ["email"])
+    .index("by_stripeEventId", ["stripeEventId"]),
 
   savedScenarios: defineTable({
     ownerTokenIdentifier: v.string(),
@@ -66,6 +101,7 @@ export default defineSchema({
     savedAt: v.string(),
     baselineBTCPriceUSD: v.number(),
     baselineItemCostBTC: v.number(),
+    baselineCurrencyCode: v.optional(currencyCodeValidator),
     sourceType: v.union(v.literal("custom"), v.literal("preset")),
     presetSlug: v.optional(v.string()),
     sourceName: v.optional(v.string()),
@@ -94,4 +130,24 @@ export default defineSchema({
   })
     .index("by_slug", ["slug"])
     .index("by_category", ["category"]),
+
+  emailDeliveries: defineTable({
+    ownerTokenIdentifier: v.string(),
+    kind: v.literal("weekly-report"),
+    periodKey: v.string(),
+    status: v.union(
+      v.literal("processing"),
+      v.literal("sent"),
+      v.literal("failed"),
+    ),
+    attempts: v.number(),
+    providerMessageId: v.optional(v.string()),
+    failureCode: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_ownerTokenIdentifier_and_kind_and_periodKey", [
+    "ownerTokenIdentifier",
+    "kind",
+    "periodKey",
+  ]),
 });

@@ -9,6 +9,7 @@ export const defaultScenario: Scenario = {
   image: "/scenarios/tesla-model-3.png",
   imageAlternates: ["/scenarios/alternates/tesla-model-3-card.png"],
   currentItemPriceUSD: 41000,
+  currencyCode: "USD",
   currentBTCPriceUSD: 80000,
   years: 5,
   itemInflationRate: 4,

@@ -9,6 +9,7 @@ import {
   buildFallbackBTCPrice,
   getBTCPrice,
   parseCoinGeckoBTCPrice,
+  localizeBTCPrice,
 } from "../src/lib/btc-price";
 
 test("parseCoinGeckoBTCPrice maps a valid CoinGecko response", () => {
@@ -94,6 +95,27 @@ test("getBTCPrice maps a provider response with injected fetch", async () => {
   assert.equal(result.stale, false);
 });
 
+test("BTC price localizes through official EUR-base cross rates", async () => {
+  const usdPrice = parseCoinGeckoBTCPrice(
+    { bitcoin: { usd: 110000, last_updated_at: 1784354400 } },
+    new Date("2026-07-18T12:00:00.000Z"),
+  );
+  const localized = await localizeBTCPrice(usdPrice, "GBP", async () => ({
+    ratesPerEUR: { USD: 1.1, EUR: 1, GBP: 0.85, CHF: 0.95, JPY: 180 },
+    observedAt: "2026-07-17",
+    fetchedAt: "2026-07-18T12:00:00.000Z",
+    status: "live",
+    provider: "European Central Bank",
+    sourceUrl: "https://data-api.ecb.europa.eu",
+    stale: false,
+  }));
+
+  assert.equal(localized.currencyCode, "GBP");
+  assert.ok(Math.abs(localized.price - 85000) < 1e-10);
+  assert.equal(localized.fiatRateStatus, "live");
+  assert.equal(localized.manualPriceRequired, undefined);
+});
+
 test("buildBTCPriceLogEvent returns structured route log data", () => {
   const price = buildFallbackBTCPrice(
     "network unavailable",
@@ -103,7 +125,8 @@ test("buildBTCPriceLogEvent returns structured route log data", () => {
 
   assert.equal(event.event, "btc_price_lookup");
   assert.equal(event.status, "fallback");
-  assert.equal(event.error, "network unavailable");
+  assert.equal(event.errorCode, "provider_unavailable");
+  assert.equal("error" in event, false);
 });
 
 test("BTC cache control separates browser and CDN caching", () => {

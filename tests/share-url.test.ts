@@ -11,7 +11,7 @@ test("scenarioToShareUrl encodes calculator state", () => {
 
   assert.equal(
     url,
-    "https://denominated.test/calculator?item=Tesla+Model+3&price=41000&btc=80000&years=5&inflation=4&growth=15&type=one-time",
+    "https://denominated.test/calculator?item=Tesla+Model+3&currency=USD&price=41000&btc=80000&years=5&inflation=4&growth=15&type=one-time",
   );
 });
 
@@ -22,7 +22,8 @@ test("parseScenarioSearchParams restores a shared scenario", () => {
   );
 
   assert.deepEqual(scenario, {
-    itemName: "Rent",
+      itemName: "Rent",
+      currencyCode: "USD",
     currentItemPriceUSD: 1589,
     currentBTCPriceUSD: 90000,
     years: 7,

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link2 } from "lucide-react";
 import { scenarioToShareUrl } from "@/lib/share-url";
 import { ScenarioInput } from "@/lib/types";
+import { trackProductEvent } from "@/lib/product-analytics";
 
 export function CopyScenarioLinkButton({
   scenario,
@@ -29,6 +30,7 @@ export function CopyScenarioLinkButton({
     }
 
     setCopied(true);
+    trackProductEvent({ event: "result_copied", format: "scenario_link" });
     window.setTimeout(() => setCopied(false), 3000);
   }
 

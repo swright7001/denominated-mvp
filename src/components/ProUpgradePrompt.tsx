@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Lock, Sparkles } from "lucide-react";
 import type { ProConversionCopy } from "@/lib/pro-copy";
+import { TrackedLink } from "./TrackedLink";
 
 type ProUpgradePromptProps = {
   eyebrow?: string;
@@ -20,7 +20,7 @@ export function ProUpgradePrompt({
   features = [],
   primaryCta = "Compare Plans",
   secondaryCta = "Run a Free Scenario",
-  footnote = "Pro and Lifetime are planned upgrade tiers. No payment is collected in this MVP.",
+  footnote = "The free calculator stays open. Paid access adds recurring tracking tools.",
   compact = false,
 }: ProUpgradePromptProps) {
   return (
@@ -51,18 +51,26 @@ export function ProUpgradePrompt({
       ) : null}
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-        <Link
+        <TrackedLink
+          analyticsEvent={{
+            event: "cta_clicked",
+            cta: "upgrade_compare_plans",
+          }}
           className="copper-button inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-semibold"
           href="/plans"
         >
           {primaryCta}
-        </Link>
-        <Link
+        </TrackedLink>
+        <TrackedLink
+          analyticsEvent={{
+            event: "cta_clicked",
+            cta: "upgrade_run_free_scenario",
+          }}
           className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-sm text-[#f0a36f]"
           href="/calculator"
         >
           {secondaryCta}
-        </Link>
+        </TrackedLink>
       </div>
       <p className="mt-4 text-xs leading-5 text-[#8f8172]">{footnote}</p>
     </section>

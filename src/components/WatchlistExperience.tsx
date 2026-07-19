@@ -3,12 +3,16 @@
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { ArrowRight, BookmarkPlus, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
-import type { BTCPriceResult } from "@/lib/btc-price";
-import { formatBTC, formatUSD } from "@/lib/calculations";
+import { formatBTC } from "@/lib/calculations";
+import {
+  formatCurrency,
+  normalizeCurrencyCode,
+} from "@/lib/currency";
+import { useBTCPrices } from "@/lib/use-btc-prices";
 import {
   getMockPlanTierFromStorage,
   isProEntitled,
@@ -52,7 +56,7 @@ function LocalWatchlistExperience() {
     getWatchlistSnapshot,
     getServerWatchlistSnapshot,
   );
-  const btcPrice = useWatchlistBTCPrice();
+  const btcPrices = useBTCPrices(savedScenarios);
   const planTier = useSyncExternalStore(
     subscribeToPlanTier,
     getPlanTierSnapshot,
@@ -116,7 +120,7 @@ function LocalWatchlistExperience() {
                 key={savedScenario.id}
                 savedScenario={savedScenario}
               currentBTCPriceUSD={
-                btcPrice.data?.priceUSD ??
+                btcPrices[normalizeCurrencyCode(savedScenario.scenario.currencyCode)]?.price ??
                 savedScenario.scenario.currentBTCPriceUSD
               }
               onDelete={() => deleteSavedScenario(savedScenario.id)}
@@ -156,11 +160,11 @@ function SignedInAccountWatchlistExperience() {
   const account = useQuery(api.accounts.getViewerAccount);
   const removeSavedScenarioMutation = useMutation(api.savedScenarios.remove);
   const renameSavedScenarioMutation = useMutation(api.savedScenarios.rename);
-  const btcPrice = useWatchlistBTCPrice();
   const savedScenarios = useMemo(
     () => (savedScenarioDocs ?? []).map(toSavedScenario),
     [savedScenarioDocs],
   );
+  const btcPrices = useBTCPrices(savedScenarios);
   const planTier: PlanTier = account?.planTier ?? "freeAccount";
   const hasProAccess = isProEntitled(planTier);
   const visibleSavedScenarios = hasProAccess
@@ -214,7 +218,7 @@ function SignedInAccountWatchlistExperience() {
                 key={savedScenario.id}
                 savedScenario={savedScenario}
                 currentBTCPriceUSD={
-                  btcPrice.data?.priceUSD ??
+                  btcPrices[normalizeCurrencyCode(savedScenario.scenario.currencyCode)]?.price ??
                   savedScenario.scenario.currentBTCPriceUSD
                 }
                 onDelete={() => deleteSavedScenario(savedScenario.id)}
@@ -236,12 +240,17 @@ function SignedInAccountWatchlistExperience() {
 }
 
 function toSavedScenario(doc: Doc<"savedScenarios">): SavedScenario {
+  const currencyCode = normalizeCurrencyCode(doc.scenario.currencyCode);
+
   return {
     id: doc._id,
-    scenario: doc.scenario,
+    scenario: { ...doc.scenario, currencyCode },
     savedAt: doc.savedAt,
     baselineBTCPriceUSD: doc.baselineBTCPriceUSD,
     baselineItemCostBTC: doc.baselineItemCostBTC,
+    baselineCurrencyCode: normalizeCurrencyCode(
+      doc.baselineCurrencyCode ?? currencyCode,
+    ),
   };
 }
 
@@ -311,6 +320,7 @@ function WatchlistCard({
     day: "numeric",
     year: "numeric",
   }).format(new Date(savedScenario.savedAt));
+  const currencyCode = normalizeCurrencyCode(savedScenario.scenario.currencyCode);
 
   function submitRename() {
     onRename(draftName);
@@ -378,8 +388,8 @@ function WatchlistCard({
 
       <dl className="mt-6 grid gap-3 sm:grid-cols-2">
         <WatchlistMetric
-          label="Current USD cost"
-          value={formatUSD(savedScenario.scenario.currentItemPriceUSD)}
+          label={`Current ${currencyCode} cost`}
+          value={formatCurrency(savedScenario.scenario.currentItemPriceUSD, currencyCode)}
         />
         <WatchlistMetric
           label="Current BTC cost"
@@ -391,7 +401,7 @@ function WatchlistCard({
         />
         <WatchlistMetric
           label="BTC price used"
-          value={formatUSD(currentBTCPriceUSD)}
+          value={formatCurrency(currentBTCPriceUSD, currencyCode)}
         />
       </dl>
 
@@ -408,8 +418,8 @@ function WatchlistCard({
           from the saved baseline.
         </p>
         <p className="mt-3 text-xs uppercase tracking-[0.14em] text-[#8f8172]">
-          Compared with {formatUSD(impact.priorBTCPriceUSD)} BTC on {savedDate};
-          current comparison uses {formatUSD(impact.currentBTCPriceUSD)} BTC.
+          Compared with {formatCurrency(impact.priorBTCPriceUSD, currencyCode)} BTC on {savedDate};
+          current comparison uses {formatCurrency(impact.currentBTCPriceUSD, currencyCode)} BTC.
         </p>
       </div>
 
@@ -421,7 +431,7 @@ function WatchlistCard({
           <span className="text-[#efe6da]">
             {formatBTC(savedScenario.baselineItemCostBTC)} BTC
           </span>{" "}
-          at {formatUSD(savedScenario.baselineBTCPriceUSD)} BTC.
+          at {formatCurrency(savedScenario.baselineBTCPriceUSD, currencyCode)} BTC.
         </p>
       </div>
 
@@ -518,36 +528,4 @@ function WatchlistSignInState() {
       </section>
     </div>
   );
-}
-
-function useWatchlistBTCPrice() {
-  const [state, setState] = useState<{
-    status: "loading" | "ready" | "error";
-    data?: BTCPriceResult;
-  }>({ status: "loading" });
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadBTCPrice() {
-      try {
-        const response = await fetch("/api/prices/bitcoin", {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) throw new Error("Live BTC price request failed");
-
-        const data = (await response.json()) as BTCPriceResult;
-        setState({ status: "ready", data });
-      } catch {
-        if (!controller.signal.aborted) setState({ status: "error" });
-      }
-    }
-
-    loadBTCPrice();
-
-    return () => controller.abort();
-  }, []);
-
-  return state;
 }
