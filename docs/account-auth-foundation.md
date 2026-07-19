@@ -8,6 +8,15 @@ Clerk is the selected production auth provider because it is available through
 the Vercel Marketplace, supports Next.js App Router, and can provide a clean
 email-first signup path without requiring phone numbers.
 
+Clerk is now installed as `@clerk/nextjs` and wired conditionally:
+
+- `src/app/layout.tsx` wraps the app in `ClerkProvider` when Clerk env vars are
+  present.
+- `middleware.ts` protects account, billing, dashboard, watchlist, checkout,
+  and billing API surfaces when Clerk is configured.
+- `/sign-in` and `/sign-up` render Clerk components when configured, and a
+  setup fallback when not configured.
+
 Expected future env vars:
 
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
@@ -47,10 +56,10 @@ Account page until real billing exists.
 
 When production auth is added:
 
-1. Install Clerk through Vercel Marketplace.
-2. Add Clerk provider and middleware.
-3. Replace local email reads with Clerk user identity.
-4. Migrate saved scenarios from local storage to Convex per signed-in user.
+1. Configure Clerk through Vercel Marketplace or equivalent env setup.
+2. Replace local email reads with Clerk user identity.
+3. Migrate saved scenarios from local storage to Convex per signed-in user.
+4. Remove or hide local mock plan controls outside development.
 5. Keep local calculator access available for unauthenticated users.
 6. Keep `PlanTier` resolution centralized through `src/lib/entitlements.ts`.
 

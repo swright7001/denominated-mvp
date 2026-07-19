@@ -14,7 +14,8 @@ Production URL: [https://getdenominated.com](https://getdenominated.com)
 - Recharts
 - Vercel-ready structure
 - Vercel Web Analytics and Speed Insights
-- Server-side BTC/USD price route backed by CoinGecko
+- Server-side BTC price route backed by CoinGecko with official ECB fiat
+  reference rates
 - Clerk authentication and Convex account-backed saved scenarios
 - Setup-safe Stripe and email foundations for later paid rollout
 
@@ -42,13 +43,13 @@ npm test
 - Fetches BTC/USD spot price server-side from CoinGecko when available.
 - Uses Clerk and Convex for account-backed saved scenarios and plan entitlements.
 - Implements no client-side third-party API calls.
-- Keeps public paid checkout disabled until the separate paid launch.
+- Keeps public paid checkout fail-closed until the explicit paid launch flag
+  and production-readiness checks both pass.
 - Includes placeholder future API functions in `src/lib/api.ts`.
 - Includes account, watchlist, dashboard, support, and product walkthrough routes.
 - Documents the future Stripe checkout plan in `docs/stripe-checkout-plan.md`.
-- Documents multi-currency architecture in
-  `docs/multi-currency-purchasing-power.md`; the selector remains disabled until
-  its provider, persistence, and migration phases ship together.
+- Implements USD, EUR, GBP, CHF, and JPY calculation, persistence, sharing, and
+  report support behind `DENOMINATED_ENABLE_MULTI_CURRENCY=true`.
 - Uses the provided Denominated logo and UI references from `public/brand`.
 
 ## Live BTC Price Data
@@ -57,11 +58,17 @@ The calculator calls `/api/prices/bitcoin`, a Next.js route handler that fetches
 Bitcoin's USD spot price from CoinGecko's `/simple/price` endpoint with
 `include_last_updated_at=true`.
 
+For EUR, GBP, CHF, and JPY, the server crosses that USD reference through the
+European Central Bank's official daily EUR-base rates. These are educational
+reference values, not executable FX quotes. Successful ECB observations are
+cached for six hours and treated as stale after 48 hours.
+
 - Provider: CoinGecko
 - Server cache: 60 seconds
 - Stale threshold: 5 minutes after CoinGecko's reported `last_updated_at`
 - Fallback: `$80,000`, still editable in the calculator
 - Optional server-only env var: `COINGECKO_API_KEY`
+- Rollout env var: `DENOMINATED_ENABLE_MULTI_CURRENCY=true`
 
 ## Production Notes
 
@@ -94,7 +101,7 @@ Bitcoin's USD spot price from CoinGecko's `/simple/price` endpoint with
 - Add a Denominated tab/link from the Hard Money Hustlers guest site.
 - Harden live BTC pricing with stronger observability and provider fallback.
 - Finish provider cutover and custom-domain smoke testing for the future paid launch.
-- Implement the staged multi-currency roadmap behind a disabled feature flag.
+- Complete Preview and mobile QA before enabling multi-currency in Production.
 - Complete verified support-email forwarding and paid billing operations.
 
 ## Disclaimer

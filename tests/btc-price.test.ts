@@ -125,7 +125,8 @@ test("buildBTCPriceLogEvent returns structured route log data", () => {
 
   assert.equal(event.event, "btc_price_lookup");
   assert.equal(event.status, "fallback");
-  assert.equal(event.error, "network unavailable");
+  assert.equal(event.errorCode, "provider_unavailable");
+  assert.equal("error" in event, false);
 });
 
 test("BTC cache control separates browser and CDN caching", () => {

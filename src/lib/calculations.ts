@@ -66,5 +66,7 @@ In ${input.years} years, it could cost ${formatBTC(result.futureItemCostBTC)} BT
 
 That means it became ${Math.abs(result.btcCostChangePercent).toFixed(1)}% ${direction} in Bitcoin terms.
 
-That's purchasing power.`;
+That's purchasing power.
+
+Educational only. Assumptions, not guarantees.`;
 }

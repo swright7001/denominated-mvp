@@ -2,8 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   defaultEmailPreferences,
+  acceptPurchasingPowerCommitment,
   emailPreferencesKey,
   getStoredAccountEmail,
+  hasAcceptedPurchasingPowerCommitment,
+  purchasingPowerCommitmentAcceptedKey,
   saveLocalAccountEmail,
   signupEmailKey,
   signupPromptDismissedKey,
@@ -55,4 +58,18 @@ test("getStoredAccountEmail returns only valid normalized email", () => {
     "user@example.com",
   );
   assert.equal(getStoredAccountEmail(storage({ [signupEmailKey]: "bad" })), "");
+});
+
+test("purchasing-power commitment persists local acceptance", () => {
+  const localStorage = storage();
+
+  assert.equal(hasAcceptedPurchasingPowerCommitment(localStorage), false);
+
+  acceptPurchasingPowerCommitment(localStorage);
+
+  assert.equal(
+    localStorage.getItem(purchasingPowerCommitmentAcceptedKey),
+    "true",
+  );
+  assert.equal(hasAcceptedPurchasingPowerCommitment(localStorage), true);
 });

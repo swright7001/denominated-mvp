@@ -604,6 +604,10 @@ function EmailPreferencesPanel({
   onToggle: (key: keyof EmailPreferences) => void | Promise<void>;
   accountBacked: boolean;
 }) {
+  const [reportStatus, setReportStatus] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+  const [reportMessage, setReportMessage] = useState("");
   const options: Array<{
     key: keyof EmailPreferences;
     label: string;
@@ -631,6 +635,35 @@ function EmailPreferencesPanel({
     },
   ];
 
+  async function sendWeeklyReport() {
+    setReportStatus("sending");
+    setReportMessage("");
+
+    try {
+      const response = await fetch("/api/email/weekly-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+
+      if (!response.ok) {
+        setReportStatus("error");
+        setReportMessage(
+          payload?.error ?? "The weekly report could not be sent right now.",
+        );
+        return;
+      }
+
+      setReportStatus("sent");
+      setReportMessage("This week's report was sent to your account email.");
+    } catch {
+      setReportStatus("error");
+      setReportMessage("The weekly report could not be sent right now.");
+    }
+  }
+
   return (
     <section className="panel rounded-lg p-5 sm:p-7">
       <div className="mb-5 flex items-start gap-4">
@@ -649,6 +682,32 @@ function EmailPreferencesPanel({
           </p>
         </div>
       </div>
+      {accountBacked ? (
+        <div className="mb-5 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
+          <p className="font-medium text-[#efe6da]">Send this week&apos;s report</p>
+          <p className="mt-1 text-sm leading-6 text-[#b9ab9a]">
+            Pro and Lifetime accounts can request one purchasing-power report
+            per week.
+          </p>
+          <button
+            type="button"
+            className="outline-button mt-3 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-medium text-[#f0a36f]"
+            disabled={!preferences.weeklyReport || reportStatus === "sending"}
+            onClick={sendWeeklyReport}
+          >
+            {reportStatus === "sending" ? "Sending..." : "Email this report"}
+          </button>
+          {reportMessage ? (
+            <p
+              className={`mt-3 text-sm leading-6 ${
+                reportStatus === "sent" ? "text-[#f0a36f]" : "text-[#b9ab9a]"
+              }`}
+            >
+              {reportMessage}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       <div className="space-y-3">
         {options.map((option) => (
           <button

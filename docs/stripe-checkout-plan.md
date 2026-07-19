@@ -6,7 +6,15 @@ free.
 
 Checkout plumbing now exists behind `/api/checkout/stripe`, but it is not live
 until Stripe environment variables and real account identity are configured.
-Billing settings and payment fulfillment are not implemented in this MVP.
+
+Paid checkout is also protected by `DENOMINATED_ENABLE_PAID_CHECKOUT`. Keep that
+flag unset for the free public launch.
+Billing state, webhook persistence, and the authenticated billing portal now
+exist as paid V2 Preview plumbing, but they remain unverified until the Preview
+runbook passes with Stripe test-mode payments.
+
+For the paid V2 Preview verification sequence, see
+`docs/paid-v2-preview-runbook.md`.
 
 ## Product And Price Structure
 
@@ -61,6 +69,7 @@ Recommended user billing fields:
 | Field | Purpose |
 | --- | --- |
 | `planTier` | `freeAccount`, `pro`, or `lifetime` |
+| `convexAccountId` | Convex account identifier from checkout metadata |
 | `stripeCustomerId` | Stripe customer identifier |
 | `stripeSubscriptionId` | Active or most recent Pro subscription |
 | `stripePriceId` | Current Pro monthly/annual price or Lifetime price |
@@ -144,6 +153,8 @@ Handle Stripe webhooks server-side and verify signatures with
 
 For Lifetime, `checkout.session.completed` should be enough to grant access,
 but storing the related PaymentIntent and invoice data is useful for support.
+Checkout webhooks should match the Convex account id from Stripe metadata first,
+then fall back to Stripe customer id and email.
 
 ## Cancellation And Failed Payment Behavior
 
@@ -187,6 +198,8 @@ Recommended setup:
 7. Verify entitlement resolution returns `pro` and `lifetime`.
 8. Verify cancellation, failed payment, and Lifetime override behavior.
 9. Repeat in Vercel Preview before Production.
+10. Keep `DENOMINATED_ENABLE_PAID_CHECKOUT=true` out of Production until the
+    paid V2 Preview runbook has passed.
 
 ## Vercel Environment Variables
 
@@ -197,6 +210,8 @@ Expected future env vars:
 | `STRIPE_SECRET_KEY` | Server only | Create checkout sessions and verify Stripe state |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Client safe | Stripe client initialization if needed |
 | `STRIPE_WEBHOOK_SECRET` | Server only | Verify webhook signatures |
+| `DENOMINATED_STRIPE_WEBHOOK_SYNC_SECRET` | Server only, also set in Convex | Authorize the verified Next.js webhook route to persist billing snapshots in Convex |
+| `DENOMINATED_ENABLE_PAID_CHECKOUT` | Server only | Explicitly enables paid Checkout Session creation when set to `true` |
 | `STRIPE_PRO_MONTHLY_PRICE_ID` | Server only | Pro monthly Checkout line item |
 | `STRIPE_PRO_ANNUAL_PRICE_ID` | Server only | Pro annual Checkout line item |
 | `STRIPE_LIFETIME_PRICE_ID` | Server only | Lifetime Checkout line item |
@@ -221,24 +236,27 @@ Before production checkout:
 
 ## Implementation Boundaries
 
-Implemented as setup-safe plumbing:
+Implemented as setup-safe paid V2 plumbing:
 
-- `/api/checkout/stripe` validates plan ID and local account email.
+- `/api/checkout/stripe` requires Clerk auth, Convex account lookup, the
+  explicit paid checkout flag, and Stripe price configuration before creating
+  Checkout Sessions.
 - `/plans` can start Pro monthly, Pro annual, or Lifetime checkout.
 - Missing Stripe env vars return a setup-required response instead of creating
   a fake payment.
+- `/api/webhooks/stripe` verifies the Stripe signature and persists normalized
+  billing snapshots through Convex.
+- `/api/billing/portal` opens the Stripe Billing Portal for the authenticated
+  account's stored Stripe customer. The email-based portal test helper is
+  restricted to localhost only.
 
-Do implement later:
+Do implement or verify before Production:
 
-- Webhook signature verification.
-- Server-side billing state.
-- Entitlement resolution from real auth/payment state.
-- Billing success/cancel screens.
-- Billing support states.
-
-Still not implemented:
-
-- Billing portal.
+- Full Clerk/Convex/Stripe Preview environment configuration.
+- Stripe test-mode Pro monthly, cancellation, failed-payment, and Lifetime
+  verification on Preview.
+- Billing success/cancel polish and support states.
+- Final pricing, refund, support, tax/accounting, and legal approval.
 - B2B billing.
 - SMS billing.
 - Crypto payments.

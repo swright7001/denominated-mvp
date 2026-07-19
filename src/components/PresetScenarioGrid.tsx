@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   BriefcaseBusiness,
@@ -17,6 +19,7 @@ import { formatBTC } from "@/lib/calculations";
 import { formatCurrency, normalizeCurrencyCode } from "@/lib/currency";
 import { calculateScenario } from "@/lib/calculations";
 import { Scenario } from "@/lib/types";
+import { trackProductEvent } from "@/lib/product-analytics";
 
 const icons = {
   BriefcaseBusiness,
@@ -36,9 +39,11 @@ const icons = {
 export function PresetScenarioGrid({
   scenarios,
   limit,
+  analyticsSurface,
 }: {
   scenarios: Scenario[];
   limit?: number;
+  analyticsSurface: "home" | "examples";
 }) {
   const visible = limit ? scenarios.slice(0, limit) : scenarios;
 
@@ -54,6 +59,12 @@ export function PresetScenarioGrid({
             key={scenario.slug}
             href={`/examples/${scenario.slug}`}
             className="panel group overflow-hidden rounded-lg transition hover:-translate-y-1 hover:border-[rgba(240,163,111,0.55)]"
+            onClick={() =>
+              trackProductEvent({
+                event: "preset_opened",
+                surface: analyticsSurface,
+              })
+            }
           >
             <div className="relative overflow-hidden p-5">
               <div className="absolute -right-14 -top-16 h-40 w-40 rounded-full border border-[rgba(240,163,111,0.12)] bg-[radial-gradient(circle,rgba(240,163,111,0.14),transparent_65%)] transition duration-300 group-hover:scale-110" />

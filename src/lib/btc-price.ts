@@ -175,7 +175,7 @@ export function buildBTCPriceLogEvent(price: BTCPriceResult) {
     fiatRateStatus: price.fiatRateStatus,
     fiatRateObservedAt: price.fiatRateObservedAt,
     manualPriceRequired: price.manualPriceRequired,
-    error: price.error,
+    errorCode: price.error ? "provider_unavailable" : undefined,
   };
 }
 

@@ -38,7 +38,7 @@ export const proConversionCopy: Record<
   saveLimitReached: {
     eyebrow: "Watchlist limit",
     title: "Your free saved scenario is working. Pro is for tracking more.",
-    body: "Free accounts can save one scenario. Pro and Lifetime are planned for people who want a full watchlist of real-life costs and goals.",
+    body: "Free accounts can save one scenario. Pro and Lifetime are for people who want a full watchlist of real-life costs and goals.",
     features: [
       "Unlimited saved scenarios",
       "See how saved goals change as BTC moves",
@@ -47,7 +47,7 @@ export const proConversionCopy: Record<
     ],
     primaryCta: "Compare Plans",
     secondaryCta: "Keep using calculator",
-    footnote: "The calculator and sharing stay free. No checkout is active in this MVP.",
+    footnote: "The calculator and sharing stay free. Paid access adds recurring tracking tools.",
   },
   dailySnapshot: {
     eyebrow: "Daily snapshot",
@@ -108,7 +108,7 @@ export const proConversionCopy: Record<
   fullWatchlist: {
     eyebrow: "Full watchlist",
     title: "Track more than one real-life cost.",
-    body: "Free accounts get one saved scenario. Pro and Lifetime are planned for a full watchlist that keeps cars, housing, care, tuition, and other goals in one place.",
+    body: "Free accounts get one saved scenario. Pro and Lifetime add a full watchlist that keeps cars, housing, care, tuition, and other goals in one place.",
     features: [
       "Unlimited saved scenarios",
       "BTC movement impact across all saved goals",
@@ -117,7 +117,7 @@ export const proConversionCopy: Record<
     ],
     primaryCta: "Compare Plans",
     secondaryCta: "Run a Free Scenario",
-    footnote: "No payment is collected in this MVP. The free calculator stays open.",
+    footnote: "The free calculator stays open. Paid access adds recurring tracking tools.",
   },
 };
 

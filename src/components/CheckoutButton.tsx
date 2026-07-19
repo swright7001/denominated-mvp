@@ -3,28 +3,24 @@
 import Link from "next/link";
 import { useState } from "react";
 import { CreditCard, Loader2 } from "lucide-react";
-import { getStoredAccountEmail } from "@/lib/account";
 import { getCheckoutPlan, type CheckoutPlanId } from "@/lib/checkout";
+import { trackProductEvent } from "@/lib/product-analytics";
 
 type CheckoutButtonProps = {
   planId: CheckoutPlanId;
   featured?: boolean;
 };
 
-export function CheckoutButton({ planId, featured = false }: CheckoutButtonProps) {
+export function CheckoutButton({
+  planId,
+  featured = false,
+}: CheckoutButtonProps) {
   const plan = getCheckoutPlan(planId);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [message, setMessage] = useState("");
 
   async function startCheckout() {
-    const accountEmail = getStoredAccountEmail(window.localStorage);
-
-    if (!accountEmail) {
-      setStatus("error");
-      setMessage("Create a free account before starting checkout.");
-      return;
-    }
-
+    trackProductEvent({ event: "checkout_started", plan: planId });
     setStatus("loading");
     setMessage("");
 
@@ -32,11 +28,12 @@ export function CheckoutButton({ planId, featured = false }: CheckoutButtonProps
       const response = await fetch("/api/checkout/stripe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, accountEmail }),
+        body: JSON.stringify({ planId }),
       });
       const payload = (await response.json()) as {
         url?: string;
         error?: string;
+        code?: string;
         setupRequired?: boolean;
       };
 
@@ -68,13 +65,21 @@ export function CheckoutButton({ planId, featured = false }: CheckoutButtonProps
         disabled={status === "loading"}
         onClick={startCheckout}
       >
-        {status === "loading" ? <Loader2 size={16} /> : <CreditCard size={16} />}
+        {status === "loading" ? (
+          <Loader2 size={16} />
+        ) : (
+          <CreditCard size={16} />
+        )}
         {plan.label}
       </button>
       {message ? (
         <p className="mt-2 text-xs leading-5 text-[#b9ab9a]">
           {message}{" "}
-          {message.includes("account") ? (
+          {message.includes("billing") ? (
+            <Link className="text-[#f0a36f]" href="/billing">
+              Manage billing
+            </Link>
+          ) : message.includes("account") ? (
             <Link className="text-[#f0a36f]" href="/account">
               Go to account
             </Link>
