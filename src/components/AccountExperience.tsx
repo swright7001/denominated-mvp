@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { api } from "../../convex/_generated/api";
 import { toConvexSavedScenarioInput } from "@/lib/convex-storage";
+import { getAccountPlanLabel } from "@/lib/entitlements";
 import {
   parseSavedScenarios,
   WATCHLIST_STORAGE_KEY,
@@ -208,8 +209,22 @@ function SignedInAccountExperience({ email }: { email: string }) {
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <AccountMetric label="Saved in account" value={`${savedScenarios.length}`} />
-          <AccountMetric label="Account type" value="Free" />
+          <AccountMetric
+            label="Saved in account"
+            value={`${savedScenarios.length}`}
+          />
+          <AccountMetric
+            label="Account type"
+            value={
+              account
+                ? getAccountPlanLabel({
+                    planTier: account.planTier,
+                    subscriptionStatus: account.subscriptionStatus,
+                    cancelAtPeriodEnd: account.cancelAtPeriodEnd,
+                  })
+                : "Not activated"
+            }
+          />
         </div>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">
           <Link

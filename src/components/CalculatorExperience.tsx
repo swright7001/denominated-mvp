@@ -146,6 +146,7 @@ export function CalculatorExperience({
                   <SaveScenarioButton
                     scenario={scenario}
                     realAccountsEnabled={realAccountsEnabled}
+                    isSignedIn={isSignedIn}
                   />
                   <CopyTweetButton scenario={scenario} result={result} />
                   <CopyScenarioLinkButton scenario={scenario} />

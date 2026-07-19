@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Layout } from "@/components/Layout";
 import { RecurringDashboard } from "@/components/RecurringDashboard";
 
 export const metadata: Metadata = {
@@ -13,5 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardPage() {
-  return <RecurringDashboard />;
+  return (
+    <Layout>
+      <RecurringDashboard />
+    </Layout>
+  );
 }

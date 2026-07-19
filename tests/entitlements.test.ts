@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   canSaveScenario,
+  getAccountPlanLabel,
   canUseFeature,
   getFeatureAccess,
   getMockPlanTierFromStorage,
@@ -10,6 +11,30 @@ import {
   mockPlanTierKey,
   parsePlanTier,
 } from "../src/lib/entitlements";
+
+test("account plan labels reflect durable tier and billing status", () => {
+  assert.equal(getAccountPlanLabel({ planTier: "freeAccount" }), "Free Account");
+  assert.equal(getAccountPlanLabel({ planTier: "pro" }), "Pro");
+  assert.equal(
+    getAccountPlanLabel({ planTier: "pro", subscriptionStatus: "past_due" }),
+    "Pro · payment issue",
+  );
+  assert.equal(
+    getAccountPlanLabel({ planTier: "pro", subscriptionStatus: "canceled" }),
+    "Pro · canceled",
+  );
+  assert.equal(
+    getAccountPlanLabel({ planTier: "pro", cancelAtPeriodEnd: true }),
+    "Pro · cancels at period end",
+  );
+  assert.equal(
+    getAccountPlanLabel({
+      planTier: "lifetime",
+      subscriptionStatus: "past_due",
+    }),
+    "Lifetime",
+  );
+});
 import { signupEmailKey } from "../src/lib/account";
 
 function storage(values: Record<string, string | null>) {
