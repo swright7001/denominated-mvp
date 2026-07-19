@@ -75,6 +75,7 @@ test("buildSavedScenarioImpactCopy avoids advice and handles direction", () => {
       currentBTCPriceUSD: 100000,
       priorBTCPriceUSD: 58000,
       comparisonDate: "2026-06-13T00:00:00.000Z",
+      currencyCode: "USD",
     }),
     "This is 0.4200 BTC cheaper since you saved it.",
   );
@@ -89,6 +90,7 @@ test("buildSavedScenarioImpactCopy avoids advice and handles direction", () => {
       currentBTCPriceUSD: 76000,
       priorBTCPriceUSD: 83000,
       comparisonDate: "2026-06-13T00:00:00.000Z",
+      currencyCode: "USD",
     }),
     "This costs 8.3% more in BTC terms since you saved it.",
   );

@@ -1,4 +1,5 @@
-import { formatBTC, formatUSD } from "@/lib/calculations";
+import { formatBTC } from "@/lib/calculations";
+import { formatCurrency, normalizeCurrencyCode } from "@/lib/currency";
 import { ScenarioInput, ScenarioResult } from "@/lib/types";
 
 export function OpportunityCostCard({
@@ -10,6 +11,7 @@ export function OpportunityCostCard({
 }) {
   const todayBtcFutureValue =
     result.currentItemCostBTC * result.futureBTCPriceUSD;
+  const currencyCode = normalizeCurrencyCode(scenario.currencyCode);
 
   return (
     <section className="panel rounded-lg p-5">
@@ -19,7 +21,9 @@ export function OpportunityCostCard({
         <span className="copper-text">{formatBTC(result.currentItemCostBTC)} BTC</span>.
         If that same amount of Bitcoin followed your growth assumption, it would
         represent about{" "}
-        <span className="copper-text">{formatUSD(todayBtcFutureValue)}</span> in{" "}
+        <span className="copper-text">
+          {formatCurrency(todayBtcFutureValue, currencyCode)}
+        </span> in{" "}
         {scenario.years} years.
       </p>
     </section>

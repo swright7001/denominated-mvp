@@ -1,4 +1,5 @@
 import { formatBTC } from "./calculations";
+import { normalizeCurrencyCode, type CurrencyCode } from "./currency";
 import type { SavedScenario } from "./types";
 
 export type ScenarioImpact = {
@@ -10,6 +11,7 @@ export type ScenarioImpact = {
   currentBTCPriceUSD: number;
   priorBTCPriceUSD: number;
   comparisonDate: string;
+  currencyCode: CurrencyCode;
 };
 
 export function calculateScenarioImpact(
@@ -33,6 +35,7 @@ export function calculateScenarioImpact(
     currentBTCPriceUSD: normalizedBTCPrice,
     priorBTCPriceUSD: savedScenario.baselineBTCPriceUSD,
     comparisonDate: savedScenario.savedAt,
+    currencyCode: normalizeCurrencyCode(savedScenario.scenario.currencyCode),
   };
 }
 

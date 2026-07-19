@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatUSD } from "@/lib/calculations";
+import { formatCurrency, normalizeCurrencyCode, parseCurrencyInputDraft } from "@/lib/currency";
 import {
   normalizeNumericInputDraft,
   parseNumericInputDraft,
@@ -13,6 +13,9 @@ type ScenarioFormProps = {
   value: ScenarioInput;
   btcPriceStatus: BTCPriceLoadState;
   btcPriceWasManuallyEdited: boolean;
+  multiCurrencyEnabled: boolean;
+  onCurrencyChange: (currencyCode: ScenarioInput["currencyCode"]) => void;
+  onItemPriceManualChange: () => void;
   onBTCPriceManualChange: () => void;
   onChange: (value: ScenarioInput) => void;
 };
@@ -36,6 +39,9 @@ export function ScenarioForm({
   value,
   btcPriceStatus,
   btcPriceWasManuallyEdited,
+  multiCurrencyEnabled,
+  onCurrencyChange,
+  onItemPriceManualChange,
   onBTCPriceManualChange,
   onChange,
 }: ScenarioFormProps) {
@@ -53,7 +59,10 @@ export function ScenarioForm({
   const numberUpdate = (key: NumericField, nextValue: string) => {
     setNumericDrafts((current) => ({ ...current, [key]: nextValue }));
 
-    const parsed = parseNumericInputDraft(nextValue);
+    const parsed =
+      key === "currentItemPriceUSD" || key === "currentBTCPriceUSD"
+        ? parseCurrencyInputDraft(nextValue, normalizeCurrencyCode(value.currencyCode))
+        : parseNumericInputDraft(nextValue);
     if (parsed === null) return;
 
     const minimum = fieldMinimums[key];
@@ -107,13 +116,40 @@ export function ScenarioForm({
 
         <div>
           <p className="eyebrow mb-4">2. Today&apos;s prices</p>
+          {multiCurrencyEnabled ? (
+            <div className="mb-4">
+              <label className="text-sm text-[#d9ccbd]" htmlFor="currencyCode">
+                Local currency
+              </label>
+              <select
+                id="currencyCode"
+                className="field mt-2"
+                value={normalizeCurrencyCode(value.currencyCode)}
+                onChange={(event) =>
+                  onCurrencyChange(
+                    event.target.value as ScenarioInput["currencyCode"],
+                  )
+                }
+              >
+                <option value="USD">USD - U.S. dollar</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="GBP">GBP - Pound sterling</option>
+                <option value="CHF">CHF - Swiss franc</option>
+                <option value="JPY">JPY - Japanese yen</option>
+              </select>
+              <p className="mt-2 text-xs leading-5 text-[#8f8172]">
+                Bitcoin remains the benchmark. Fiat reference rates are educational,
+                not executable exchange quotes.
+              </p>
+            </div>
+          ) : null}
           <div className="grid items-start gap-4 sm:grid-cols-2">
             <div className="grid content-start">
               <label
                 className="text-sm text-[#d9ccbd] sm:min-h-10"
                 htmlFor="currentItemPriceUSD"
               >
-                Current item price in USD
+                Current item price in {normalizeCurrencyCode(value.currencyCode)}
               </label>
               <input
                 id="currentItemPriceUSD"
@@ -122,9 +158,10 @@ export function ScenarioForm({
                 type="text"
                 value={getNumberValue("currentItemPriceUSD")}
                 onBlur={() => normalizeNumber("currentItemPriceUSD")}
-                onChange={(event) =>
-                  numberUpdate("currentItemPriceUSD", event.target.value)
-                }
+                onChange={(event) => {
+                  onItemPriceManualChange();
+                  numberUpdate("currentItemPriceUSD", event.target.value);
+                }}
                 onFocus={() => startNumberEdit("currentItemPriceUSD")}
               />
             </div>
@@ -133,7 +170,7 @@ export function ScenarioForm({
                 className="text-sm text-[#d9ccbd] sm:min-h-10"
                 htmlFor="currentBTCPriceUSD"
               >
-                Current Bitcoin price in USD
+                Current Bitcoin price in {normalizeCurrencyCode(value.currencyCode)}
               </label>
               <input
                 id="currentBTCPriceUSD"
@@ -277,19 +314,31 @@ function BTCPriceStatusNote({
       }).format(new Date(data.lastUpdatedAt))
     : "update time unavailable";
 
+  if (data.manualPriceRequired) {
+    return (
+      <span className="mt-2 block text-xs leading-5 text-[#f0a36f]">
+        The local-currency reference rate is unavailable. Enter a Bitcoin price
+        in {data.currencyCode} manually; the app will not label it as live.
+      </span>
+    );
+  }
+
   if (data.status === "fallback") {
     return (
       <span className="mt-2 block text-xs leading-5 text-[#f0a36f]">
-        CoinGecko is unavailable. Keeping your current editable BTC value;{" "}
-        {formatUSD(data.fallbackPriceUSD)} remains the fallback reference.
+        Reference pricing is unavailable. Keeping your current editable BTC value;{" "}
+        {formatCurrency(data.fallbackPrice, data.currencyCode)} remains the fallback reference.
       </span>
     );
   }
 
   return (
     <span className="mt-2 block text-xs leading-5 text-[#b9ab9a]">
-      CoinGecko live price loaded
+      CoinGecko BTC price loaded
       {data.stale ? " but may be stale" : ""}: updated {updatedAt}.
+      {data.currencyCode !== "USD" && data.fiatRateProvider
+        ? ` ${data.currencyCode} conversion uses ${data.fiatRateProvider} reference rates.`
+        : ""}
     </span>
   );
 }

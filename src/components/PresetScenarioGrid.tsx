@@ -13,7 +13,8 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { formatBTC, formatUSD } from "@/lib/calculations";
+import { formatBTC } from "@/lib/calculations";
+import { formatCurrency, normalizeCurrencyCode } from "@/lib/currency";
 import { calculateScenario } from "@/lib/calculations";
 import { Scenario } from "@/lib/types";
 
@@ -46,6 +47,7 @@ export function PresetScenarioGrid({
       {visible.map((scenario) => {
         const Icon = icons[scenario.icon as keyof typeof icons] ?? Sparkles;
         const result = calculateScenario(scenario);
+        const currencyCode = normalizeCurrencyCode(scenario.currencyCode);
 
         return (
           <Link
@@ -70,10 +72,14 @@ export function PresetScenarioGrid({
               <p className="mt-1 text-sm text-[#b9ab9a]">
                 {scenario.shortDescription}
               </p>
+              <p className="mt-2 text-xs text-[#8f8172]">
+                {scenario.sourceCountry ?? "United States"} source ·{" "}
+                {scenario.sourceCurrencyCode ?? "USD"}
+              </p>
               <div className="mt-5 flex items-end justify-between gap-3">
                 <div>
                   <p className="text-sm text-[#f0a36f]">
-                    {formatUSD(scenario.currentItemPriceUSD)} today
+                    {formatCurrency(scenario.currentItemPriceUSD, currencyCode)} today
                   </p>
                   <p className="mt-1 text-xl text-[#efe6da]">
                     {formatBTC(result.currentItemCostBTC)} BTC

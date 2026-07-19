@@ -12,8 +12,17 @@ export const purchaseTypeValidator = v.union(
   v.literal("monthly"),
 );
 
+export const currencyCodeValidator = v.union(
+  v.literal("USD"),
+  v.literal("EUR"),
+  v.literal("GBP"),
+  v.literal("CHF"),
+  v.literal("JPY"),
+);
+
 export const scenarioInputValidator = v.object({
   itemName: v.string(),
+  currencyCode: v.optional(currencyCodeValidator),
   currentItemPriceUSD: v.number(),
   currentBTCPriceUSD: v.number(),
   years: v.number(),
@@ -66,6 +75,7 @@ export default defineSchema({
     savedAt: v.string(),
     baselineBTCPriceUSD: v.number(),
     baselineItemCostBTC: v.number(),
+    baselineCurrencyCode: v.optional(currencyCodeValidator),
     sourceType: v.union(v.literal("custom"), v.literal("preset")),
     presetSlug: v.optional(v.string()),
     sourceName: v.optional(v.string()),

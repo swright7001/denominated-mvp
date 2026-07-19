@@ -1,7 +1,10 @@
+import type { CurrencyCode } from "./currency";
+
 export type PurchaseType = "one-time" | "monthly";
 
 export type ScenarioInput = {
   itemName: string;
+  currencyCode?: CurrencyCode;
   currentItemPriceUSD: number;
   currentBTCPriceUSD: number;
   years: number;
@@ -17,6 +20,8 @@ export type Scenario = ScenarioInput & {
   icon: string;
   image?: string;
   imageAlternates?: string[];
+  sourceCountry?: string;
+  sourceCurrencyCode?: CurrencyCode;
 };
 
 export type ScenarioResult = {
@@ -39,4 +44,5 @@ export type SavedScenario = {
   savedAt: string;
   baselineBTCPriceUSD: number;
   baselineItemCostBTC: number;
+  baselineCurrencyCode?: CurrencyCode;
 };

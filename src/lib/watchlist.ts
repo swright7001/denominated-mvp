@@ -1,4 +1,5 @@
 import { calculateScenario } from "./calculations";
+import { normalizeCurrencyCode, type CurrencyCode } from "./currency";
 import type { SavedScenario, ScenarioInput } from "./types";
 
 export const WATCHLIST_STORAGE_KEY = "denominated.savedScenarios.v1";
@@ -13,14 +14,16 @@ export function buildSavedScenario(
   scenario: ScenarioInput,
   options: SaveScenarioOptions = {},
 ): SavedScenario {
-  const result = calculateScenario(scenario);
+  const normalizedScenario = normalizeScenarioCurrency(scenario);
+  const result = calculateScenario(normalizedScenario);
 
   return {
     id: options.id ?? createSavedScenarioId(),
-    scenario,
+    scenario: normalizedScenario,
     savedAt: options.savedAt ?? new Date().toISOString(),
-    baselineBTCPriceUSD: scenario.currentBTCPriceUSD,
+    baselineBTCPriceUSD: normalizedScenario.currentBTCPriceUSD,
     baselineItemCostBTC: result.currentItemCostBTC,
+    baselineCurrencyCode: normalizedScenario.currencyCode,
   };
 }
 
@@ -69,10 +72,27 @@ export function parseSavedScenarios(value: string | null): SavedScenario[] {
 
     if (!Array.isArray(parsed)) return [];
 
-    return parsed.filter(isSavedScenario);
+    return parsed
+      .filter(isSavedScenario)
+      .map((savedScenario) => ({
+        ...savedScenario,
+        scenario: normalizeScenarioCurrency(savedScenario.scenario),
+        baselineCurrencyCode: normalizeCurrencyCode(
+          savedScenario.baselineCurrencyCode ?? savedScenario.scenario.currencyCode,
+        ),
+      }));
   } catch {
     return [];
   }
+}
+
+export function normalizeScenarioCurrency<T extends ScenarioInput>(
+  scenario: T,
+): T & { currencyCode: CurrencyCode } {
+  return {
+    ...scenario,
+    currencyCode: normalizeCurrencyCode(scenario.currencyCode),
+  };
 }
 
 export function serializeSavedScenarios(savedScenarios: SavedScenario[]) {

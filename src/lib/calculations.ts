@@ -1,3 +1,4 @@
+import { formatCurrency, normalizeCurrencyCode } from "./currency";
 import { ScenarioInput, ScenarioResult } from "./types";
 
 export function calculateScenario(input: ScenarioInput): ScenarioResult {
@@ -39,12 +40,7 @@ export function calculateScenario(input: ScenarioInput): ScenarioResult {
 }
 
 export function formatUSD(value: number, compact = false) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-    notation: compact && Math.abs(value) >= 1000000 ? "compact" : "standard",
-  }).format(value);
+  return formatCurrency(value, "USD", compact);
 }
 
 export function formatBTC(value: number) {
@@ -62,7 +58,9 @@ export function buildTweet(input: ScenarioInput, result: ScenarioResult) {
   const direction =
     result.btcCostChangePercent < 0 ? "cheaper" : "more expensive";
 
-  return `Today, ${input.itemName} costs ${formatBTC(result.currentItemCostBTC)} BTC.
+  const currencyCode = normalizeCurrencyCode(input.currencyCode);
+
+  return `Today, ${input.itemName} costs ${formatBTC(result.currentItemCostBTC)} BTC (${formatCurrency(input.currentItemPriceUSD, currencyCode)}).
 
 In ${input.years} years, it could cost ${formatBTC(result.futureItemCostBTC)} BTC.
 

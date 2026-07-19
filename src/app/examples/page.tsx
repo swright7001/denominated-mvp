@@ -28,7 +28,7 @@ export default async function ExamplesPage() {
   const btcPrice = await getBTCPrice();
   const pricedScenarios = applyBTCPriceToScenarios(
     scenarios,
-    btcPrice.priceUSD,
+    btcPrice.price,
   );
 
   return (

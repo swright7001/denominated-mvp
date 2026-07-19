@@ -5,11 +5,15 @@ import {
   buildBTCPriceLogEvent,
   getBTCPrice,
 } from "@/lib/btc-price";
+import { normalizeCurrencyCode } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  const price = await getBTCPrice();
+export async function GET(request: Request) {
+  const currencyCode = normalizeCurrencyCode(
+    new URL(request.url).searchParams.get("currency"),
+  );
+  const price = await getBTCPrice({ currencyCode });
   const logEvent = buildBTCPriceLogEvent(price);
 
   if (price.status === "fallback" || price.stale) {
@@ -24,6 +28,7 @@ export async function GET() {
       "CDN-Cache-Control": BTC_PRICE_CDN_CACHE_CONTROL,
       "Vercel-CDN-Cache-Control": BTC_PRICE_VERCEL_CDN_CACHE_CONTROL,
       "X-Denominated-BTC-Price-Status": price.status,
+      "X-Denominated-Currency": price.currencyCode,
     },
   });
 }

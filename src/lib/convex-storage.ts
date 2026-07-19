@@ -1,4 +1,5 @@
 import type { SavedScenario, Scenario, ScenarioInput } from "./types";
+import { normalizeScenarioCurrency } from "./watchlist";
 
 export type ConvexSavedScenarioInput = {
   clientId: string;
@@ -6,6 +7,7 @@ export type ConvexSavedScenarioInput = {
   savedAt: string;
   baselineBTCPriceUSD: number;
   baselineItemCostBTC: number;
+  baselineCurrencyCode: NonNullable<ScenarioInput["currencyCode"]>;
   sourceType: "custom" | "preset";
   presetSlug?: string;
   sourceName?: string;
@@ -27,12 +29,13 @@ export type ConvexPresetInput = {
 export function toConvexSavedScenarioInput(
   savedScenario: SavedScenario,
 ): ConvexSavedScenarioInput {
-  const scenario = savedScenario.scenario;
+  const scenario = normalizeScenarioCurrency(savedScenario.scenario);
 
   return {
     clientId: savedScenario.id,
     scenario: {
       itemName: scenario.itemName,
+      currencyCode: scenario.currencyCode,
       currentItemPriceUSD: scenario.currentItemPriceUSD,
       currentBTCPriceUSD: scenario.currentBTCPriceUSD,
       years: scenario.years,
@@ -43,6 +46,7 @@ export function toConvexSavedScenarioInput(
     savedAt: savedScenario.savedAt,
     baselineBTCPriceUSD: savedScenario.baselineBTCPriceUSD,
     baselineItemCostBTC: savedScenario.baselineItemCostBTC,
+    baselineCurrencyCode: scenario.currencyCode,
     sourceType: "custom",
   };
 }
@@ -55,16 +59,19 @@ export function toConvexPresetInput(
     sourceLastUpdatedAt?: string;
   } = {},
 ): ConvexPresetInput {
+  const normalizedScenario = normalizeScenarioCurrency(scenario);
+
   return {
     slug: scenario.slug,
     scenario: {
-      itemName: scenario.itemName,
-      currentItemPriceUSD: scenario.currentItemPriceUSD,
-      currentBTCPriceUSD: scenario.currentBTCPriceUSD,
-      years: scenario.years,
-      itemInflationRate: scenario.itemInflationRate,
-      btcGrowthRate: scenario.btcGrowthRate,
-      purchaseType: scenario.purchaseType,
+      itemName: normalizedScenario.itemName,
+      currencyCode: normalizedScenario.currencyCode,
+      currentItemPriceUSD: normalizedScenario.currentItemPriceUSD,
+      currentBTCPriceUSD: normalizedScenario.currentBTCPriceUSD,
+      years: normalizedScenario.years,
+      itemInflationRate: normalizedScenario.itemInflationRate,
+      btcGrowthRate: normalizedScenario.btcGrowthRate,
+      purchaseType: normalizedScenario.purchaseType,
     },
     shortDescription: scenario.shortDescription,
     category: scenario.category,

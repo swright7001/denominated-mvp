@@ -7,6 +7,7 @@ import { parseScenarioSearchParams } from "@/lib/share-url";
 import { absoluteUrl } from "@/lib/site";
 import { isClerkConfigured } from "@/lib/auth";
 import { isConvexConfigured } from "@/lib/convex";
+import { isMultiCurrencyEnabled } from "@/lib/feature-flags";
 
 export const metadata: Metadata = {
   title: "Bitcoin Purchasing-Power Calculator",
@@ -44,6 +45,7 @@ export default async function CalculatorPage({
         hasSharedScenario={sharedScenario !== null}
         realAccountsEnabled={realAccountsEnabled}
         isSignedIn={isSignedIn}
+        multiCurrencyEnabled={isMultiCurrencyEnabled()}
       />
     </Layout>
   );

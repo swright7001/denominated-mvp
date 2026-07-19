@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { formatBTC } from "@/lib/calculations";
+import { formatCurrency, normalizeCurrencyCode } from "@/lib/currency";
 import { ScenarioInput, ScenarioResult } from "@/lib/types";
 
 export function ShareableResultCard({
@@ -11,6 +12,7 @@ export function ShareableResultCard({
 }) {
   const direction =
     result.btcCostChangePercent < 0 ? "cheaper" : "more expensive";
+  const currencyCode = normalizeCurrencyCode(scenario.currencyCode);
 
   return (
     <div className="min-w-0 overflow-hidden rounded-lg border border-[rgba(240,163,111,0.28)] bg-[#0b0907]">
@@ -57,6 +59,11 @@ export function ShareableResultCard({
           <p className="mt-5 text-base break-words text-[#f0a36f] sm:text-lg">
             {Math.abs(result.btcCostChangePercent).toFixed(1)}% {direction} in
             Bitcoin terms.
+          </p>
+          <p className="mt-3 text-xs leading-5 text-[#b9ab9a]">
+            {formatCurrency(scenario.currentItemPriceUSD, currencyCode)} today ·{" "}
+            {formatCurrency(result.futureItemPriceUSD, currencyCode)} projected in{" "}
+            {scenario.years} years
           </p>
         </div>
       </div>

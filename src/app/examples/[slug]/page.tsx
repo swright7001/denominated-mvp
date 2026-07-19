@@ -9,7 +9,8 @@ import { BTCPriceStatus } from "@/components/BTCPriceStatus";
 import { Layout } from "@/components/Layout";
 import { ShareableResultCard } from "@/components/ShareableResultCard";
 import { getBTCPrice } from "@/lib/btc-price";
-import { calculateScenario, formatBTC, formatUSD } from "@/lib/calculations";
+import { calculateScenario, formatBTC } from "@/lib/calculations";
+import { formatCurrency, normalizeCurrencyCode } from "@/lib/currency";
 import { applyBTCPriceToScenario } from "@/lib/live-scenarios";
 import { getScenario, scenarios } from "@/lib/scenarios";
 import { absoluteUrl } from "@/lib/site";
@@ -67,10 +68,11 @@ export default async function ScenarioDetailPage({
   if (!scenario) notFound();
 
   const btcPrice = await getBTCPrice();
-  const liveScenario = applyBTCPriceToScenario(scenario, btcPrice.priceUSD);
+  const liveScenario = applyBTCPriceToScenario(scenario, btcPrice.price);
   const result = calculateScenario(liveScenario);
   const direction =
     result.btcCostChangePercent < 0 ? "cheaper" : "more expensive";
+  const currencyCode = normalizeCurrencyCode(liveScenario.currencyCode);
 
   return (
     <Layout>
@@ -109,27 +111,27 @@ export default async function ScenarioDetailPage({
             <div>
               <p className="eyebrow">Today</p>
               <p className="mt-4 text-3xl text-[#efe6da]">
-                {formatUSD(liveScenario.currentItemPriceUSD)}
+                {formatCurrency(liveScenario.currentItemPriceUSD, currencyCode)}
                 {liveScenario.purchaseType === "monthly" && " / month"} ={" "}
                 <span className="copper-text">
                   {formatBTC(result.currentItemCostBTC)} BTC
                 </span>
               </p>
               <p className="mt-2 text-[#b9ab9a]">
-                At {formatUSD(liveScenario.currentBTCPriceUSD)} BTC
+                At {formatCurrency(liveScenario.currentBTCPriceUSD, currencyCode)} BTC
               </p>
             </div>
             <div>
               <p className="eyebrow">Future</p>
               <p className="mt-4 text-3xl text-[#efe6da]">
-                {formatUSD(result.futureItemPriceUSD)}
+                {formatCurrency(result.futureItemPriceUSD, currencyCode)}
                 {liveScenario.purchaseType === "monthly" && " / month"} ={" "}
                 <span className="copper-text">
                   {formatBTC(result.futureItemCostBTC)} BTC
                 </span>
               </p>
               <p className="mt-2 text-[#b9ab9a]">
-                At {formatUSD(result.futureBTCPriceUSD)} BTC
+                At {formatCurrency(result.futureBTCPriceUSD, currencyCode)} BTC
               </p>
             </div>
           </div>
@@ -137,7 +139,7 @@ export default async function ScenarioDetailPage({
           <div className="rounded-lg border border-[rgba(240,163,111,0.32)] bg-[#2a1810]/45 p-6">
             <p className="eyebrow mb-3">The takeaway</p>
             <p className="text-2xl leading-9 text-[#efe6da]">
-              More expensive in dollars.{" "}
+              More expensive in {currencyCode}.{" "}
               <span className="copper-text">
                 {Math.abs(result.btcCostChangePercent).toFixed(1)}% {direction}
               </span>{" "}
@@ -146,8 +148,8 @@ export default async function ScenarioDetailPage({
             <p className="mt-4 leading-7 text-[#b9ab9a]">
               Today, {liveScenario.itemName} costs{" "}
               {formatBTC(result.currentItemCostBTC)} BTC. If the item rises to{" "}
-              {formatUSD(result.futureItemPriceUSD)} and Bitcoin reaches{" "}
-              {formatUSD(result.futureBTCPriceUSD)}, the same expense costs{" "}
+              {formatCurrency(result.futureItemPriceUSD, currencyCode)} and Bitcoin reaches{" "}
+              {formatCurrency(result.futureBTCPriceUSD, currencyCode)}, the same expense costs{" "}
               {formatBTC(result.futureItemCostBTC)} BTC.
             </p>
           </div>
@@ -158,7 +160,7 @@ export default async function ScenarioDetailPage({
         </aside>
       </section>
       <section className="container pb-12">
-        <BTCComparisonChart result={result} />
+        <BTCComparisonChart scenario={liveScenario} result={result} />
       </section>
     </Layout>
   );

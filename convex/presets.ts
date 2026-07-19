@@ -61,6 +61,10 @@ export const upsert = mutation({
     if (existing) {
       await ctx.db.patch(existing._id, {
         ...args,
+        scenario: {
+          ...args.scenario,
+          currencyCode: args.scenario.currencyCode ?? "USD",
+        },
         updatedAt: now,
       });
 
@@ -69,6 +73,10 @@ export const upsert = mutation({
 
     return await ctx.db.insert("scenarioPresets", {
       ...args,
+      scenario: {
+        ...args.scenario,
+        currencyCode: args.scenario.currencyCode ?? "USD",
+      },
       createdAt: now,
       updatedAt: now,
     });
