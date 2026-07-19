@@ -1,23 +1,42 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { Bitcoin, Menu, X } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 
-const navItems = [
+const primaryNavItems = [
   { href: "/", label: "Home" },
   { href: "/calculator", label: "Calculator" },
   { href: "/examples", label: "Examples" },
   { href: "/watchlist", label: "Watchlist" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/plans", label: "Plans" },
-  { href: "/sign-in", label: "Sign in" },
-  { href: "/account", label: "Account" },
   { href: "/learn", label: "Learn" },
 ];
 
-export function Navbar() {
+export function Navbar({ realAccountsEnabled = false }: { realAccountsEnabled?: boolean }) {
+  if (realAccountsEnabled) return <AuthAwareNavbar />;
+
+  return <NavbarShell accountItem={{ href: "/account", label: "Account" }} />;
+}
+
+function AuthAwareNavbar() {
+  const { isLoaded, isSignedIn } = useUser();
+  const accountItem =
+    isLoaded && isSignedIn
+      ? { href: "/account", label: "Account" }
+      : { href: "/sign-in", label: "Sign in" };
+
+  return <NavbarShell accountItem={accountItem} />;
+}
+
+function NavbarShell({
+  accountItem,
+}: {
+  accountItem: { href: string; label: string };
+}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const mobileMenuId = useId();
   const MobileMenuIcon = isMenuOpen ? X : Menu;
@@ -34,6 +53,11 @@ export function Navbar() {
   }, [isMenuOpen]);
 
   const closeMenu = () => setIsMenuOpen(false);
+  const navItems = [
+    ...primaryNavItems.slice(0, 6),
+    accountItem,
+    ...primaryNavItems.slice(6),
+  ];
 
   return (
     <header className="sticky top-0 z-30 border-b border-[rgba(240,163,111,0.16)] bg-[#090806]/90 backdrop-blur-xl">
