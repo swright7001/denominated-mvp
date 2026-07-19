@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private security report
+    url: https://github.com/swright7001/denominated-mvp/security/advisories/new
+    about: Report vulnerabilities privately. Do not open a public issue for security problems.
+  - name: Denominated support
+    url: https://getdenominated.com/support
+    about: Get help with account access, saved scenarios, or the public calculator.

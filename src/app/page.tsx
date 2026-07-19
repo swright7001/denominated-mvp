@@ -3,6 +3,7 @@ import { ArrowRight, BadgeDollarSign, ShieldCheck, TrendingUp, Users } from "luc
 import { BTCPriceStatus } from "@/components/BTCPriceStatus";
 import { Layout } from "@/components/Layout";
 import { PresetScenarioGrid } from "@/components/PresetScenarioGrid";
+import { ProductWalkthrough } from "@/components/ProductWalkthrough";
 import { DISCLAIMER } from "@/components/Footer";
 import { getBTCPrice } from "@/lib/btc-price";
 import { calculateScenario, formatBTC, formatUSD } from "@/lib/calculations";
@@ -106,6 +107,8 @@ export default async function Home() {
         </div>
       </section>
 
+      <ProductWalkthrough />
+
       <section className="container py-8">
         <div className="mb-8 text-center">
           <p className="eyebrow">Popular examples</p>
@@ -121,6 +124,25 @@ export default async function Home() {
         <InfoPanel title="How it works" copy="Enter today's cost, today's Bitcoin price, a time horizon, and simple annual assumptions. Denominated compares the same expense in dollars and BTC." />
         <InfoPanel title="Why purchasing power matters" copy="A price can rise in dollars while falling against a harder benchmark. That helps explain why a bigger dollar number does not always mean better value." />
         <InfoPanel title="Disclaimer" copy={DISCLAIMER} />
+      </section>
+
+      <section className="border-t border-[rgba(240,163,111,0.16)] py-12">
+        <div className="container flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="eyebrow">Contact</p>
+            <h2 className="mt-2 text-3xl text-[#efe6da]">Questions or feedback?</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#b9ab9a]">
+              Get account help, report a bug, suggest an improvement, or use
+              the private security channel.
+            </p>
+          </div>
+          <Link
+            href="/support"
+            className="outline-button inline-flex shrink-0 items-center justify-center rounded-md px-5 py-3 text-sm font-semibold text-[#f0a36f]"
+          >
+            Contact Denominated
+          </Link>
+        </div>
       </section>
     </Layout>
   );

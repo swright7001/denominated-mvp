@@ -1,0 +1,79 @@
+name: Bug report
+description: Report a reproducible problem with Denominated.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Denominated. Do not include passwords, verification codes, API keys, payment details, or private account data.
+  - type: input
+    id: url
+    attributes:
+      label: Page URL
+      description: Which public Denominated page showed the problem?
+      placeholder: https://getdenominated.com/calculator
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and operating system
+      placeholder: iPhone 15, iOS 19
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Safari 19
+    validations:
+      required: true
+  - type: dropdown
+    id: account_state
+    attributes:
+      label: Account state
+      options:
+        - Signed out
+        - Signed in with a free account
+        - Signed in with Pro
+        - Signed in with Lifetime
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the shortest sequence that consistently shows the problem.
+      placeholder: |
+        1. Open the calculator
+        2. Change the time horizon
+        3. Select Save scenario
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recording
+      description: Optional. Remove names, email addresses, payment details, and other sensitive information before attaching media.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed passwords, codes, payment information, and private account data from this report.
+          required: true

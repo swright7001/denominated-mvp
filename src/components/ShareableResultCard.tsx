@@ -17,10 +17,11 @@ export function ShareableResultCard({
       <div className="relative min-h-[230px] p-4 sm:p-5">
         <Image
           src="/brand/logo.png"
-          alt="Denominated branded background"
+          alt=""
           fill
           sizes="480px"
           className="object-cover opacity-18"
+          loading="eager"
         />
         <div className="relative z-10">
           <div className="mb-8 flex min-w-0 items-center gap-3">
