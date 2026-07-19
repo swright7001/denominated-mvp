@@ -95,13 +95,15 @@ function LocalWatchlistExperience() {
             prices change.
           </p>
         </div>
-        <Link
-          className="copper-button inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold"
-          href="/calculator"
-        >
-          <BookmarkPlus size={18} />
-          Save a Scenario
-        </Link>
+        {savedScenarios.length > 0 ? (
+          <Link
+            className="copper-button inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold"
+            href="/calculator"
+          >
+            Run a Scenario
+            <ArrowRight size={18} />
+          </Link>
+        ) : null}
       </div>
 
       {savedScenarios.length === 0 ? (
@@ -189,13 +191,15 @@ function SignedInAccountWatchlistExperience() {
             recalculates from stored assumptions as BTC prices change.
           </p>
         </div>
-        <Link
-          className="copper-button inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold"
-          href="/calculator"
-        >
-          <BookmarkPlus size={18} />
-          Save a Scenario
-        </Link>
+        {savedScenarioDocs && savedScenarios.length > 0 ? (
+          <Link
+            className="copper-button inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold"
+            href="/calculator"
+          >
+            Run a Scenario
+            <ArrowRight size={18} />
+          </Link>
+        ) : null}
       </div>
 
       {!savedScenarioDocs ? (

@@ -2,13 +2,13 @@ import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { isClerkConfigured } from "@/lib/auth";
 
-const middleware = isClerkConfigured()
+const proxy = isClerkConfigured()
   ? clerkMiddleware()
-  : function passThroughMiddleware() {
+  : function passThroughProxy() {
       return NextResponse.next();
     };
 
-export default middleware;
+export default proxy;
 
 export const config = {
   matcher: [

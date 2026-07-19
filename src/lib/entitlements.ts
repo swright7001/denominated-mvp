@@ -2,6 +2,17 @@ import { signupEmailKey } from "./account";
 
 export type PlanTier = "noAccount" | "freeAccount" | "pro" | "lifetime";
 
+export type SubscriptionStatus =
+  | "active"
+  | "trialing"
+  | "past_due"
+  | "canceled"
+  | "incomplete"
+  | "incomplete_expired"
+  | "unpaid"
+  | "paused"
+  | "unknown";
+
 export type FeatureKey =
   | "calculatorAccess"
   | "shareCopyResult"
@@ -132,6 +143,34 @@ export function canUseFeature(tier: PlanTier, feature: FeatureKey) {
 
 export function isProEntitled(tier: PlanTier) {
   return tier === "pro" || tier === "lifetime";
+}
+
+export function getAccountPlanLabel({
+  planTier,
+  subscriptionStatus,
+  cancelAtPeriodEnd = false,
+}: {
+  planTier: Exclude<PlanTier, "noAccount">;
+  subscriptionStatus?: SubscriptionStatus;
+  cancelAtPeriodEnd?: boolean;
+}) {
+  if (planTier === "lifetime") return "Lifetime";
+  if (planTier === "freeAccount") return "Free Account";
+
+  if (
+    subscriptionStatus === "past_due" ||
+    subscriptionStatus === "unpaid" ||
+    subscriptionStatus === "incomplete" ||
+    subscriptionStatus === "incomplete_expired"
+  ) {
+    return "Pro · payment issue";
+  }
+
+  if (subscriptionStatus === "canceled") return "Pro · canceled";
+  if (subscriptionStatus === "paused") return "Pro · paused";
+  if (cancelAtPeriodEnd) return "Pro · cancels at period end";
+
+  return "Pro";
 }
 
 export function canSaveScenario(

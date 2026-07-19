@@ -37,20 +37,20 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-[rgba(240,163,111,0.16)] bg-[#090806]/90 backdrop-blur-xl">
-      <div className="container flex h-20 items-center justify-between gap-2 sm:gap-4">
+      <div className="mx-auto flex h-20 w-[min(1440px,calc(100%-32px))] items-center justify-between gap-2 sm:gap-4">
         <Link
-          className="min-w-0"
+          className="min-w-0 shrink"
           href="/"
           aria-label="Denominated home"
           onClick={closeMenu}
         >
           <BrandMark />
         </Link>
-        <nav className="hidden items-center gap-8 text-sm text-[#d9ccbd] md:flex">
+        <nav className="hidden items-center gap-5 text-sm text-[#d9ccbd] xl:flex">
           {navItems.map((item) => (
             <Link
               key={item.href}
-              className="transition hover:text-[#f0a36f]"
+              className="whitespace-nowrap transition hover:text-[#f0a36f]"
               href={item.href}
             >
               {item.label}
@@ -58,9 +58,12 @@ export function Navbar() {
           ))}
         </nav>
         <div className="flex shrink-0 items-center gap-3">
-          <div className="hidden items-center gap-2 rounded-md border border-[rgba(240,163,111,0.32)] px-4 py-2 text-sm text-[#efe6da] sm:flex">
+          <div
+            aria-label="Bitcoin benchmark denomination"
+            className="hidden items-center gap-2 px-2 py-2 text-xs text-[#b9ab9a] sm:flex"
+          >
             <Bitcoin size={16} className="text-[#f0a36f]" />
-            BTC
+            <span className="whitespace-nowrap">BTC benchmark</span>
           </div>
           <Link
             className="outline-button hidden rounded-md px-4 py-2 text-sm text-[#f0a36f] sm:block"
@@ -72,7 +75,7 @@ export function Navbar() {
             aria-controls={mobileMenuId}
             aria-expanded={isMenuOpen}
             aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
-            className="outline-button rounded-md p-2 md:hidden"
+            className="outline-button rounded-md p-2 xl:hidden"
             type="button"
             onClick={() => setIsMenuOpen((current) => !current)}
           >
@@ -82,7 +85,7 @@ export function Navbar() {
       </div>
       <div
         id={mobileMenuId}
-        className={`container md:hidden ${
+        className={`container xl:hidden ${
           isMenuOpen ? "block" : "hidden"
         }`}
       >

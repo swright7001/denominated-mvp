@@ -107,10 +107,16 @@ export function ScenarioForm({
 
         <div>
           <p className="eyebrow mb-4">2. Today&apos;s prices</p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="text-sm text-[#d9ccbd]">
-              Current item price in USD
+          <div className="grid items-start gap-4 sm:grid-cols-2">
+            <div className="grid content-start">
+              <label
+                className="text-sm text-[#d9ccbd] sm:min-h-10"
+                htmlFor="currentItemPriceUSD"
+              >
+                Current item price in USD
+              </label>
               <input
+                id="currentItemPriceUSD"
                 className="field mt-2"
                 inputMode="decimal"
                 type="text"
@@ -121,10 +127,16 @@ export function ScenarioForm({
                 }
                 onFocus={() => startNumberEdit("currentItemPriceUSD")}
               />
-            </label>
-            <label className="text-sm text-[#d9ccbd]">
-              Current Bitcoin price in USD
+            </div>
+            <div className="grid content-start">
+              <label
+                className="text-sm text-[#d9ccbd] sm:min-h-10"
+                htmlFor="currentBTCPriceUSD"
+              >
+                Current Bitcoin price in USD
+              </label>
               <input
+                id="currentBTCPriceUSD"
                 className="field mt-2"
                 inputMode="decimal"
                 type="text"
@@ -140,7 +152,7 @@ export function ScenarioForm({
                 btcPriceStatus={btcPriceStatus}
                 btcPriceWasManuallyEdited={btcPriceWasManuallyEdited}
               />
-            </label>
+            </div>
           </div>
         </div>
 

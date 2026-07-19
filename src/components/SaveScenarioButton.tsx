@@ -22,9 +22,11 @@ import { SignupPrompt } from "./SignupPrompt";
 export function SaveScenarioButton({
   scenario,
   realAccountsEnabled = false,
+  isSignedIn = false,
 }: {
   scenario: ScenarioInput;
   realAccountsEnabled?: boolean;
+  isSignedIn?: boolean;
 }) {
   const [saved, setSaved] = useState(false);
   const [limitReached, setLimitReached] = useState(false);
@@ -40,6 +42,11 @@ export function SaveScenarioButton({
     setLimitReached(false);
 
     if (realAccountsEnabled) {
+      if (!isSignedIn) {
+        setAccountRequired(true);
+        return;
+      }
+
       await saveScenarioToAccount();
       return;
     }
@@ -86,6 +93,8 @@ export function SaveScenarioButton({
     try {
       const response = await fetch("/api/scenarios/save", {
         method: "POST",
+        cache: "no-store",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ savedScenario }),
       });
@@ -105,10 +114,7 @@ export function SaveScenarioButton({
           return;
         }
 
-        setSyncError(
-          payload?.error ??
-            "Saved scenario account sync is not ready yet. Please try again later.",
-        );
+        setSyncError(payload?.error ?? "Saved scenario storage is temporarily unavailable. Please try again.");
         return;
       }
 
