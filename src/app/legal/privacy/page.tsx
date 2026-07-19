@@ -23,11 +23,11 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: "What Denominated Collects",
-    body: "Denominated may store calculator preferences and unauthenticated scenarios in your browser. If you create an account, Denominated processes account identifiers, saved scenarios, assumptions, email preferences, and billing entitlement records needed to provide account features.",
+    body: "Denominated may store calculator preferences and unauthenticated scenarios in your browser. If you create an account, Denominated processes account identifiers, saved scenarios, assumptions, and billing entitlement records needed to provide account features.",
   },
   {
     title: "How Data Is Used",
-    body: "Data is used to run calculator scenarios, save watchlist items, manage account access, process billing, deliver opted-in reports, improve the product, and provide support.",
+    body: "Data is used to run calculator scenarios, save watchlist items, manage account access, process billing, improve the product, and provide support.",
   },
   {
     title: "Price And Scenario Inputs",
@@ -35,15 +35,15 @@ const sections = [
   },
   {
     title: "Service Providers",
-    body: "Clerk processes account authentication, Convex stores account and saved-scenario data, Stripe processes payments and billing, Resend delivers opted-in email, Vercel hosts the app and provides operational analytics, and CoinGecko supplies the reference Bitcoin price. These providers process data under their own terms and privacy notices.",
+    body: "Clerk processes account authentication, Convex stores account and saved-scenario data, Stripe processes payments and billing, Vercel hosts the app and provides operational analytics, and CoinGecko supplies the reference Bitcoin price. These providers process data under their own terms and privacy notices.",
   },
   {
     title: "Payment Data",
     body: "Stripe handles payment details. Denominated stores billing identifiers and entitlement status needed to provide paid access, but does not store raw card numbers or card security codes.",
   },
   {
-    title: "Email And Analytics",
-    body: "You can opt out of optional educational and report emails. Required account, billing, security, and service messages may still be sent. Product analytics are used to understand performance and usage; Denominated does not enable session replay by default.",
+    title: "Service Messages And Analytics",
+    body: "Account, billing, security, and support messages may be sent when needed to provide the service. Product analytics are used to understand performance and usage; Denominated does not enable session replay by default.",
   },
   {
     title: "Retention And Your Choices",
