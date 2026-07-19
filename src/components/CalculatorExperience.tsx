@@ -8,7 +8,10 @@ import {
   signupPromptShownKey,
 } from "@/lib/account";
 import { calculateScenario } from "@/lib/calculations";
-import { normalizeCurrencyCode } from "@/lib/currency";
+import {
+  normalizeCurrencyCode,
+  roundCurrencyAmount,
+} from "@/lib/currency";
 import { defaultScenario } from "@/lib/scenarios";
 import type { BTCPriceResult } from "@/lib/btc-price";
 import type { ScenarioInput } from "@/lib/types";
@@ -129,8 +132,11 @@ export function CalculatorExperience({
         return {
           ...current,
           currencyCode: nextCurrency,
-          currentItemPriceUSD: current.currentItemPriceUSD * conversionRate,
-          currentBTCPriceUSD: data.price,
+          currentItemPriceUSD: roundCurrencyAmount(
+            current.currentItemPriceUSD * conversionRate,
+            nextCurrency,
+          ),
+          currentBTCPriceUSD: roundCurrencyAmount(data.price, nextCurrency),
         };
       });
 

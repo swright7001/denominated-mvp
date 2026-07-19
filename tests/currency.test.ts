@@ -4,6 +4,7 @@ import {
   formatCurrency,
   normalizeCurrencyCode,
   parseCurrencyInputDraft,
+  roundCurrencyAmount,
 } from "../src/lib/currency";
 import { calculateScenario } from "../src/lib/calculations";
 import { defaultScenario } from "../src/lib/scenarios";
@@ -26,6 +27,12 @@ test("currency formatting preserves precision rules at display boundaries", () =
   assert.match(formatCurrency(41000.5, "USD"), /41,000\.5/);
   assert.match(formatCurrency(41000.5, "EUR"), /41\.000,5/);
   assert.equal(formatCurrency(41000.5, "JPY").includes(".5"), false);
+});
+
+test("converted input amounts round to the selected currency minor units", () => {
+  assert.equal(roundCurrencyAmount(35860.935268, "EUR"), 35860.94);
+  assert.equal(roundCurrencyAmount(56518.583296, "GBP"), 56518.58);
+  assert.equal(roundCurrencyAmount(10234.9, "JPY"), 10235);
 });
 
 test("formula parity holds when both fiat values use the same cross rate", () => {

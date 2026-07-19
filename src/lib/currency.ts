@@ -49,6 +49,14 @@ export function formatCurrency(
   }).format(value);
 }
 
+export function roundCurrencyAmount(
+  value: number,
+  currencyCode: CurrencyCode = defaultCurrencyCode,
+) {
+  const factor = 10 ** currencyMetadata[currencyCode].minorUnits;
+  return Math.round((value + Number.EPSILON) * factor) / factor;
+}
+
 export function parseCurrencyInputDraft(
   draft: string,
   currencyCode: CurrencyCode = defaultCurrencyCode,
