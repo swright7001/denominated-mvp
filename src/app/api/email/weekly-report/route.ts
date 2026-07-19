@@ -17,8 +17,19 @@ import {
   sendWeeklyReportEmail,
 } from "@/lib/weekly-report-email";
 import { getErrorKind } from "@/lib/monitoring";
+import { isEmailReportsEnabled } from "@/lib/feature-flags";
 
 export async function POST(request: Request) {
+  if (!isEmailReportsEnabled()) {
+    return NextResponse.json(
+      {
+        code: "FEATURE_DISABLED",
+        error: "Email reports are not included in the current launch.",
+      },
+      { status: 404 },
+    );
+  }
+
   const emailEnv = getWeeklyReportEmailEnv();
 
   if (!emailEnv) {

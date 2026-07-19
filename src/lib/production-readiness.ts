@@ -1,4 +1,5 @@
 import { getSupportContact } from "./support";
+import { isEmailReportsEnabled } from "./feature-flags";
 import { isValidEmailFrom } from "./weekly-report-email";
 
 export type ReadinessStatus = "ready" | "missing" | "manual";
@@ -204,29 +205,31 @@ function getProviderEnvChecks(
   env: Env,
   mode: "preview" | "production" = "preview",
 ): ReadinessCheck[] {
-  return requiredLaunchEnvGroups.map((group) => {
-    const missingEnvVars = group.envVars.filter((key) => {
-      const value = env[key]?.trim();
+  return requiredLaunchEnvGroups
+    .filter((group) => group.id !== "email" || isEmailReportsEnabled(env))
+    .map((group) => {
+      const missingEnvVars = group.envVars.filter((key) => {
+        const value = env[key]?.trim();
 
-      if (!value) {
-        return true;
-      }
+        if (!value) {
+          return true;
+        }
 
-      if (mode === "preview") {
-        return false;
-      }
+        if (mode === "preview") {
+          return false;
+        }
 
-      return !isValidProductionProviderValue(key, value);
+        return !isValidProductionProviderValue(key, value);
+      });
+
+      return {
+        id: group.id,
+        label: group.label,
+        status: missingEnvVars.length === 0 ? "ready" : "missing",
+        details: group.details,
+        missingEnvVars,
+      };
     });
-
-    return {
-      id: group.id,
-      label: group.label,
-      status: missingEnvVars.length === 0 ? "ready" : "missing",
-      details: group.details,
-      missingEnvVars,
-    };
-  });
 }
 
 function isAffirmative(value: string | undefined) {

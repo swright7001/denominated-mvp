@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.2.1 - 2026-07-19
+
+### Changed
+
+- Kept the in-app weekly cost-of-life report in Pro while deferring email
+  delivery from the initial paid launch.
+- Removed email reports from the launch plan comparison and dashboard so paid
+  packaging matches what is available on day one.
+- Made Resend readiness conditional on the email-report feature flag instead
+  of blocking the core paid checkout launch.
+
+### Security
+
+- Kept the dormant weekly-report endpoint fail-closed unless
+  `DENOMINATED_ENABLE_EMAIL_REPORTS=true` is explicitly configured.
+
+### Notes
+
+- The public calculator remains free and does not require an account.
+- Resend production setup remains deferred and no Hard Money Hustlers email
+  configuration is changed.
+
 ## 0.2.0 - 2026-07-19
 
 ### Added

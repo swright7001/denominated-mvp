@@ -21,11 +21,12 @@ be the literal value `true`.
 | `DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED` | Explicit `true` or `false` decision for automatic tax on API-created Stripe Checkout Sessions. |
 | `DENOMINATED_SUPPORT_EMAIL` | Monitored customer support email for billing, refunds, and account access. |
 | `NEXT_PUBLIC_SUPPORT_URL` | Published customer support URL configured in both the app and Stripe. |
-| `DENOMINATED_EMAIL_FROM` | Verified customer-facing Resend sender, such as `Denominated <reports@approved-domain>`. |
+| `DENOMINATED_ENABLE_EMAIL_REPORTS` | Keep unset or `false` while recurring email delivery is deferred. If enabled later, production Resend configuration becomes mandatory. |
 
 These values do not replace the provider variables reported by
 `getProductionReadinessChecks`. Production also needs live Clerk, Convex,
-Stripe, webhook, Resend, and canonical app URL configuration.
+Stripe, webhook, and canonical app URL configuration. Resend is required only
+when `DENOMINATED_ENABLE_EMAIL_REPORTS=true`.
 
 Production readiness validates provider values, not only their presence:
 
