@@ -13,6 +13,10 @@ import {
 import { getScenario, scenarios } from "../src/lib/scenarios";
 import { siteConfig } from "../src/lib/site";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 test("DEN-34 defines exactly three unique, intent-led landing pages", () => {
   assert.deepEqual(scenarioLandingSlugs.sort(), [
     "median-us-house",
@@ -41,14 +45,16 @@ test("landing metadata is canonical and uses the existing public share image", (
 
     assert.equal(metadata.alternates?.canonical, `/examples/${slug}`);
     assert.equal(metadata.openGraph?.url, `${siteConfig.url}/examples/${slug}`);
-    assert.equal(metadata.twitter?.card, "summary_large_image");
+    const twitterMetadata: unknown = metadata.twitter;
+    assert.ok(isRecord(twitterMetadata));
+    assert.equal(twitterMetadata.card, "summary_large_image");
 
-    const openGraphImages = metadata.openGraph?.images;
+    assert.ok(isRecord(metadata.openGraph));
+    const openGraphImages = metadata.openGraph.images;
     assert.ok(Array.isArray(openGraphImages));
     assert.equal(openGraphImages.length, 1);
     const image = openGraphImages[0];
-    assert.equal(typeof image, "object");
-    assert.ok(image && "url" in image);
+    assert.ok(isRecord(image));
     const imageUrl = new URL(String(image.url));
     assert.equal(imageUrl.pathname, "/api/share-image");
     assert.deepEqual([...imageUrl.searchParams.keys()], [
@@ -88,14 +94,15 @@ test("structured data is limited to WebPage and BreadcrumbList", () => {
       scenario,
       getScenarioLandingContent(slug),
     );
-    const graph = jsonLd["@graph"];
+    const graph: unknown[] = jsonLd["@graph"];
 
     assert.deepEqual(
-      graph.map((entry) => entry["@type"]),
+      graph.map((entry) => (isRecord(entry) ? entry["@type"] : undefined)),
       ["WebPage", "BreadcrumbList"],
     );
     const breadcrumb = graph[1];
-    assert.ok("itemListElement" in breadcrumb);
+    assert.ok(isRecord(breadcrumb));
+    assert.ok(Array.isArray(breadcrumb.itemListElement));
     assert.equal(breadcrumb.itemListElement.length, 3);
   });
 });
