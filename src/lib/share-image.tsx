@@ -102,12 +102,15 @@ export function ShareImage({
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div
           style={{
+            width: "100%",
             maxWidth: 1000,
+            minWidth: 0,
             color: "#efe6da",
             fontSize: titleFontSize,
             fontWeight: 650,
             lineHeight: 1.08,
             letterSpacing: "-0.025em",
+            wordBreak: "break-word",
           }}
         >
           {scenario.itemName}

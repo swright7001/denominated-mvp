@@ -27,6 +27,28 @@ test("share image route returns a cacheable social PNG", async () => {
   assert.deepEqual([...image.slice(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
 });
 
+test("share image route renders an accepted 90-character unbroken item name", async () => {
+  const itemName = "W".repeat(90);
+  const params = new URLSearchParams({
+    item: itemName,
+    currency: "USD",
+    price: "2000",
+    btc: "100000",
+    years: "5",
+    inflation: "3",
+    growth: "15",
+    type: "monthly",
+  });
+  const response = await GET(
+    new Request(`https://denominated.test/api/share-image?${params}`),
+  );
+  const image = new Uint8Array(await response.arrayBuffer());
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-type"), "image/png");
+  assert.deepEqual([...image.slice(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+});
+
 test("share image route rejects unbounded render inputs", async () => {
   const response = await GET(
     new Request(
