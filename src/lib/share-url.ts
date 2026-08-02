@@ -31,6 +31,22 @@ export function scenarioToShareUrl(scenario: ScenarioInput, origin: string) {
   return `${origin}/calculator?${params.toString()}`;
 }
 
+export function scenarioToShareImagePath(scenario: ScenarioInput) {
+  const params = scenarioToSearchParams(scenario);
+  return `/api/share-image?${params.toString()}`;
+}
+
+export function scenarioShareImageFilename(scenario: ScenarioInput) {
+  const itemSlug = scenario.itemName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 48);
+
+  return `denominated-${itemSlug || "scenario"}.png`;
+}
+
 export function parseScenarioSearchParams(
   search: ScenarioSearchParams,
   fallback: ScenarioInput,

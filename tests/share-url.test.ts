@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   parseScenarioSearchParams,
+  scenarioShareImageFilename,
+  scenarioToShareImagePath,
   scenarioToShareUrl,
 } from "../src/lib/share-url";
 import { defaultScenario } from "../src/lib/scenarios";
@@ -12,6 +14,37 @@ test("scenarioToShareUrl encodes calculator state", () => {
   assert.equal(
     url,
     "https://denominated.test/calculator?item=Tesla+Model+3&currency=USD&price=41000&btc=80000&years=5&inflation=4&growth=15&type=one-time",
+  );
+});
+
+test("scenarioToShareImagePath uses only public calculator fields", () => {
+  const path = scenarioToShareImagePath({
+    ...defaultScenario,
+    itemName: "Home care & support",
+  });
+  const url = new URL(path, "https://denominated.test");
+
+  assert.equal(url.pathname, "/api/share-image");
+  assert.deepEqual([...url.searchParams.keys()], [
+    "item",
+    "currency",
+    "price",
+    "btc",
+    "years",
+    "inflation",
+    "growth",
+    "type",
+  ]);
+  assert.equal(url.searchParams.get("item"), "Home care & support");
+});
+
+test("scenarioShareImageFilename creates a safe PNG filename", () => {
+  assert.equal(
+    scenarioShareImageFilename({
+      ...defaultScenario,
+      itemName: "Home Care / Support!",
+    }),
+    "denominated-home-care-support.png",
   );
 });
 

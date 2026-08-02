@@ -19,6 +19,7 @@ import { AssumptionsPanel } from "./AssumptionsPanel";
 import { BTCComparisonChart } from "./BTCComparisonChart";
 import { CopyScenarioLinkButton } from "./CopyScenarioLinkButton";
 import { CopyTweetButton } from "./CopyTweetButton";
+import { DownloadResultImageButton } from "./DownloadResultImageButton";
 import { OpportunityCostCard } from "./OpportunityCostCard";
 import { ResultCards } from "./ResultCards";
 import { SaveScenarioButton } from "./SaveScenarioButton";
@@ -224,10 +225,11 @@ export function CalculatorExperience({
               <div className="min-w-0">
                 <p className="eyebrow mb-3">Share your results</p>
                 <p className="mb-5 max-w-full text-sm leading-6 break-words text-[#b9ab9a]">
-                  Spread the message in a format that is easy to screenshot and
-                  plain enough for everyday people.
+                  Download a branded image for X, LinkedIn, or anywhere else,
+                  or keep using the existing copy and link options.
                 </p>
                 <div className="grid gap-3 sm:flex sm:flex-row sm:flex-wrap">
+                  <DownloadResultImageButton scenario={scenario} />
                   <SaveScenarioButton
                     scenario={scenario}
                     realAccountsEnabled={realAccountsEnabled}
