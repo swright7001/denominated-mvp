@@ -50,10 +50,10 @@ export default function LearnPage() {
     <Layout>
       <section className="container py-12">
         <p className="eyebrow">Learn</p>
-        <h1 className="mt-3 max-w-3xl text-4xl font-medium text-[#efe6da] md:text-6xl">
+        <h1 className="mt-3 max-w-3xl text-4xl font-medium text-[var(--text-primary)] md:text-6xl">
           Purchasing power, explained in plain English
         </h1>
-        <p className="mt-5 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+        <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
           Denominated is not about trading. It is about seeing how everyday
           costs look when measured against a different benchmark over time.
         </p>
@@ -61,15 +61,15 @@ export default function LearnPage() {
         <div className="mt-10 grid gap-5 md:grid-cols-2">
           {lessons.map((lesson) => (
             <article key={lesson.title} className="panel rounded-lg p-6">
-              <h2 className="text-2xl text-[#efe6da]">{lesson.title}</h2>
-              <p className="mt-4 leading-7 text-[#b9ab9a]">{lesson.copy}</p>
+              <h2 className="text-2xl text-[var(--text-primary)]">{lesson.title}</h2>
+              <p className="mt-4 leading-7 text-[var(--text-muted)]">{lesson.copy}</p>
             </article>
           ))}
         </div>
 
         <div className="panel mt-8 rounded-lg p-6">
           <p className="eyebrow mb-3">Disclaimer</p>
-          <p className="leading-7 text-[#b9ab9a]">{DISCLAIMER}</p>
+          <p className="leading-7 text-[var(--text-muted)]">{DISCLAIMER}</p>
         </div>
       </section>
     </Layout>

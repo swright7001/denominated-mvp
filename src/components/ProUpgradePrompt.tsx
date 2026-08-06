@@ -26,13 +26,13 @@ export function ProUpgradePrompt({
   return (
     <section className={`panel rounded-lg ${compact ? "p-5" : "p-6 sm:p-7"}`}>
       <div className="flex items-start gap-4">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[var(--accent-line)] bg-[var(--accent-surface)] text-[var(--accent-text)]">
           <Lock size={20} />
         </div>
         <div className="min-w-0">
           <p className="eyebrow mb-3">{eyebrow}</p>
-          <h2 className="text-2xl font-medium text-[#efe6da]">{title}</h2>
-          <p className="mt-3 text-sm leading-6 text-[#b9ab9a]">{body}</p>
+          <h2 className="text-2xl font-medium text-[var(--text-primary)]">{title}</h2>
+          <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">{body}</p>
         </div>
       </div>
 
@@ -41,9 +41,9 @@ export function ProUpgradePrompt({
           {features.map((feature) => (
             <div
               key={feature}
-              className="flex items-start gap-3 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4 text-sm leading-6 text-[#d9ccbd]"
+              className="flex items-start gap-3 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4 text-sm leading-6 text-[var(--text-secondary)]"
             >
-              <Sparkles className="mt-1 shrink-0 text-[#f0a36f]" size={15} />
+              <Sparkles className="mt-1 shrink-0 text-[var(--accent-text)]" size={15} />
               <span>{feature}</span>
             </div>
           ))}
@@ -66,13 +66,13 @@ export function ProUpgradePrompt({
             event: "cta_clicked",
             cta: "upgrade_run_free_scenario",
           }}
-          className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-sm text-[#f0a36f]"
+          className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-sm text-[var(--accent-text)]"
           href="/calculator"
         >
           {secondaryCta}
         </TrackedLink>
       </div>
-      <p className="mt-4 text-xs leading-5 text-[#8f8172]">{footnote}</p>
+      <p className="mt-4 text-xs leading-5 text-[var(--text-subtle)]">{footnote}</p>
     </section>
   );
 }

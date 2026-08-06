@@ -200,10 +200,10 @@ export default function PlansPage() {
         <div className="grid gap-8 lg:grid-cols-[0.88fr_1.12fr] lg:items-end">
           <div>
             <p className="eyebrow">Plans</p>
-            <h1 className="mt-3 max-w-4xl text-4xl font-medium text-[#efe6da] md:text-6xl">
+            <h1 className="mt-3 max-w-4xl text-4xl font-medium text-[var(--text-primary)] md:text-6xl">
               Keep the calculator free. Make tracking worth returning for.
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
               Denominated starts with a free purchasing-power calculator. Pro
               is for people who want to save real-life costs, watch them
               change, and build a personal view of purchasing power over time.
@@ -215,7 +215,7 @@ export default function PlansPage() {
               {principles.map((principle) => (
                 <div
                   key={principle}
-                  className="rounded-md border border-[rgba(240,163,111,0.18)] bg-black/20 p-4 text-sm leading-6 text-[#d9ccbd]"
+                  className="rounded-md border border-[var(--accent-line-soft)] bg-[var(--surface-soft)] p-4 text-sm leading-6 text-[var(--text-secondary)]"
                 >
                   {principle}
                 </div>
@@ -233,7 +233,7 @@ export default function PlansPage() {
                 key={tier.name}
                 className={`panel flex rounded-lg p-5 md:p-6 ${
                   tier.featured
-                    ? "border-[rgba(240,163,111,0.62)] shadow-[0_0_45px_rgba(199,119,66,0.2)]"
+                    ? "border-[var(--accent-line-strong)] shadow-[0_0_45px_rgba(199,119,66,0.2)]"
                     : ""
                 }`}
               >
@@ -241,28 +241,28 @@ export default function PlansPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="eyebrow">{tier.eyebrow}</p>
-                      <h2 className="mt-3 text-2xl font-medium text-[#efe6da]">
+                      <h2 className="mt-3 text-2xl font-medium text-[var(--text-primary)]">
                         {tier.name}
                       </h2>
                     </div>
-                    <div className="rounded-full border border-[rgba(240,163,111,0.3)] bg-black/20 p-3 text-[#f0a36f]">
+                    <div className="rounded-full border border-[var(--accent-line)] bg-[var(--surface-soft)] p-3 text-[var(--accent-text)]">
                       <Icon size={20} />
                     </div>
                   </div>
 
                   <div className="mt-6">
-                    <p className="metric text-4xl text-[#efe6da]">
+                    <p className="metric text-4xl text-[var(--text-primary)]">
                       {tier.price}
                     </p>
-                    <p className="mt-2 text-sm text-[#f0a36f]">
+                    <p className="mt-2 text-sm text-[var(--accent-text)]">
                       {tier.cadence}
                     </p>
                   </div>
 
-                  <p className="mt-6 text-lg leading-7 text-[#efe6da]">
+                  <p className="mt-6 text-lg leading-7 text-[var(--text-primary)]">
                     {tier.summary}
                   </p>
-                  <p className="mt-4 text-sm leading-6 text-[#b9ab9a]">
+                  <p className="mt-4 text-sm leading-6 text-[var(--text-muted)]">
                     {tier.body}
                   </p>
 
@@ -280,7 +280,7 @@ export default function PlansPage() {
                         className={`block rounded-md px-4 py-3 text-center text-sm font-semibold ${
                           tier.featured
                             ? "copper-button"
-                            : "outline-button text-[#f0a36f]"
+                            : "outline-button text-[var(--accent-text)]"
                         }`}
                         href={tier.href}
                       >
@@ -289,7 +289,7 @@ export default function PlansPage() {
                     )}
                     {tier.checkoutPlanIds.length > 0 ? (
                       <Link
-                        className="block rounded-md border border-[rgba(240,163,111,0.24)] px-4 py-3 text-center text-sm text-[#d9ccbd]"
+                        className="block rounded-md border border-[var(--accent-line)] px-4 py-3 text-center text-sm text-[var(--text-secondary)]"
                         href={tier.href}
                       >
                         {tier.cta}
@@ -306,11 +306,11 @@ export default function PlansPage() {
           <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="eyebrow">Feature Matrix</p>
-              <h2 className="mt-3 text-3xl font-medium text-[#efe6da] md:text-4xl">
+              <h2 className="mt-3 text-3xl font-medium text-[var(--text-primary)] md:text-4xl">
                 What belongs in each tier
               </h2>
             </div>
-            <p className="max-w-xl text-sm leading-6 text-[#b9ab9a]">
+            <p className="max-w-xl text-sm leading-6 text-[var(--text-muted)]">
               This is the current packaging plan for launch. Paid access should
               only be enabled once auth, storage, billing fulfillment, and legal
               review are production-ready.
@@ -321,7 +321,7 @@ export default function PlansPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[820px] border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[rgba(240,163,111,0.18)] text-[#efe6da]">
+                  <tr className="border-b border-[var(--accent-line-soft)] text-[var(--text-primary)]">
                     <th className="w-[31%] px-5 py-4 font-medium">Feature</th>
                     <th className="px-5 py-4 font-medium">Free</th>
                     <th className="px-5 py-4 font-medium">Free Account</th>
@@ -333,17 +333,17 @@ export default function PlansPage() {
                   {features.map((row) => (
                     <tr
                       key={row.feature}
-                      className="border-b border-[rgba(240,163,111,0.12)] last:border-b-0"
+                      className="border-b border-[var(--accent-line-soft)] last:border-b-0"
                     >
-                      <th className="px-5 py-4 font-medium text-[#efe6da]">
+                      <th className="px-5 py-4 font-medium text-[var(--text-primary)]">
                         {row.feature}
                       </th>
-                      <td className="px-5 py-4 text-[#b9ab9a]">{row.free}</td>
-                      <td className="px-5 py-4 text-[#b9ab9a]">
+                      <td className="px-5 py-4 text-[var(--text-muted)]">{row.free}</td>
+                      <td className="px-5 py-4 text-[var(--text-muted)]">
                         {row.account}
                       </td>
-                      <td className="px-5 py-4 text-[#f0a36f]">{row.pro}</td>
-                      <td className="px-5 py-4 text-[#f0a36f]">
+                      <td className="px-5 py-4 text-[var(--accent-text)]">{row.pro}</td>
+                      <td className="px-5 py-4 text-[var(--accent-text)]">
                         {row.lifetime}
                       </td>
                     </tr>
@@ -357,15 +357,15 @@ export default function PlansPage() {
         <div className="mt-10 grid gap-5 md:grid-cols-[1.1fr_0.9fr]">
           <section className="panel rounded-lg p-6">
             <div className="flex items-start gap-4">
-              <div className="rounded-full border border-[rgba(240,163,111,0.3)] bg-black/20 p-3 text-[#f0a36f]">
+              <div className="rounded-full border border-[var(--accent-line)] bg-[var(--surface-soft)] p-3 text-[var(--accent-text)]">
                 <Lock size={20} />
               </div>
               <div>
                 <p className="eyebrow">No hard gate</p>
-                <h2 className="mt-3 text-3xl font-medium text-[#efe6da]">
+                <h2 className="mt-3 text-3xl font-medium text-[var(--text-primary)]">
                   Basic purchasing-power education stays open.
                 </h2>
-                <p className="mt-4 leading-7 text-[#b9ab9a]">
+                <p className="mt-4 leading-7 text-[var(--text-muted)]">
                   The paid plan should make Denominated more useful over time.
                   It should not punish someone for running a simple scenario,
                   changing assumptions, or sharing an educational result.
@@ -376,18 +376,18 @@ export default function PlansPage() {
 
           <section className="panel rounded-lg p-6">
             <p className="eyebrow">Disclaimer</p>
-            <p className="mt-4 leading-7 text-[#b9ab9a]">{DISCLAIMER}</p>
+            <p className="mt-4 leading-7 text-[var(--text-muted)]">{DISCLAIMER}</p>
             <div className="mt-5 flex flex-wrap gap-4 text-sm">
-              <Link className="text-[#f0a36f]" href="/legal/terms">
+              <Link className="text-[var(--accent-text)]" href="/legal/terms">
                 Terms
               </Link>
-              <Link className="text-[#f0a36f]" href="/legal/privacy">
+              <Link className="text-[var(--accent-text)]" href="/legal/privacy">
                 Privacy
               </Link>
-              <Link className="text-[#f0a36f]" href="/legal/refunds">
+              <Link className="text-[var(--accent-text)]" href="/legal/refunds">
                 Refunds
               </Link>
-              <Link className="text-[#f0a36f]" href="/billing">
+              <Link className="text-[var(--accent-text)]" href="/billing">
                 Billing readiness
               </Link>
             </div>

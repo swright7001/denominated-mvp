@@ -35,22 +35,22 @@ export function BTCComparisonChart({
         >
           <ComposedChart
             data={result.yearlyData}
-            margin={{ top: 8, right: 0, bottom: 0, left: 0 }}
+            margin={{ top: 8, right: 4, bottom: 0, left: 4 }}
           >
             <CartesianGrid
-              stroke="rgba(239,230,218,0.12)"
+              stroke="var(--chart-grid)"
               strokeDasharray="3 6"
             />
             <XAxis
               dataKey="year"
-              stroke="#b9ab9a"
+              stroke="var(--chart-axis)"
               tickLine={false}
-              axisLine={{ stroke: "rgba(239,230,218,0.16)" }}
+              axisLine={{ stroke: "var(--chart-line)" }}
             />
             <YAxis
               yAxisId="usd"
-              width={44}
-              stroke="#b9ab9a"
+              width={68}
+              stroke="var(--chart-axis)"
               tickLine={false}
               axisLine={false}
               tickFormatter={(value) =>
@@ -59,32 +59,34 @@ export function BTCComparisonChart({
             />
             <YAxis
               yAxisId="btc"
-              width={48}
+              width={56}
               orientation="right"
-              stroke="#b9ab9a"
+              stroke="var(--chart-axis)"
               tickLine={false}
               axisLine={false}
               tickFormatter={(value) => `${formatBTC(Number(value))}`}
             />
             <Tooltip
               contentStyle={{
-                background: "#15110e",
-                border: "1px solid rgba(240,163,111,0.28)",
+                background: "var(--chart-tooltip)",
+                border: "1px solid var(--accent-line)",
                 borderRadius: 8,
-                color: "#efe6da",
+                color: "var(--text-primary)",
               }}
+              itemStyle={{ color: "var(--text-primary)" }}
+              labelStyle={{ color: "var(--text-primary)" }}
               formatter={(value, name) =>
                 name === `${currencyCode} cost`
                   ? [formatCurrency(Number(value), currencyCode), name]
                   : [`${formatBTC(Number(value))} BTC`, name]
               }
             />
-            <Legend />
+            <Legend wrapperStyle={{ color: "var(--text-muted)" }} />
             <Bar
               yAxisId="usd"
               dataKey="usdCost"
               name={`${currencyCode} cost`}
-              fill="#a55f38"
+              fill="var(--chart-bar)"
               radius={[4, 4, 0, 0]}
             />
             <Area
@@ -92,8 +94,8 @@ export function BTCComparisonChart({
               type="monotone"
               dataKey="btcCost"
               name="BTC cost"
-              stroke="#efe6da"
-              fill="rgba(239,230,218,0.12)"
+              stroke="var(--chart-btc)"
+              fill="var(--chart-btc-fill)"
               strokeWidth={2}
             />
           </ComposedChart>

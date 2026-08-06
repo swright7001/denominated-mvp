@@ -6,15 +6,15 @@ export const DISCLAIMER =
 
 export function Footer() {
   return (
-    <footer className="border-t border-[rgba(240,163,111,0.16)] py-10">
+    <footer className="border-t border-[var(--accent-line-soft)] py-10">
       <div className="container grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-end">
         <div className="space-y-5">
           <BrandMark />
-          <p className="max-w-2xl text-sm leading-6 text-[#b9ab9a]">
+          <p className="max-w-2xl text-sm leading-6 text-[var(--text-muted)]">
             {DISCLAIMER}
           </p>
         </div>
-        <div className="flex flex-wrap gap-4 text-sm text-[#d9ccbd] md:justify-end">
+        <div className="flex flex-wrap gap-4 text-sm text-[var(--text-secondary)] md:justify-end">
           <Link href="/calculator">Calculator</Link>
           <Link href="/examples">Examples</Link>
           <Link href="/dashboard">Dashboard</Link>

@@ -7,6 +7,7 @@ import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { isClerkConfigured, signInPath, signUpPath } from "@/lib/auth";
 import { isConvexConfigured } from "@/lib/convex";
 import { siteConfig } from "@/lib/site";
+import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -74,8 +75,13 @@ export default function RootLayout({
   const app = (
     <html
       lang="en"
+      data-theme="dark"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-full flex flex-col">
         {page}
         <Analytics />

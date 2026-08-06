@@ -10,8 +10,8 @@ export function BTCPriceStatus({
 }) {
   const tone =
     btcPrice.status === "fallback" || btcPrice.stale
-      ? "border-[#f0a36f]/30 bg-[#2a1810]/55 text-[#f0c19f]"
-      : "border-emerald-400/20 bg-emerald-400/5 text-[#d9ccbd]";
+      ? "border-[var(--accent)]/30 bg-[var(--accent-surface)] text-[var(--accent-soft-text)]"
+      : "border-emerald-400/20 bg-emerald-400/5 text-[var(--text-secondary)]";
   const label =
     btcPrice.status === "fallback"
       ? "Using fallback BTC rate"
@@ -23,7 +23,7 @@ export function BTCPriceStatus({
     <div
       className={`rounded-lg border px-4 py-3 text-sm leading-6 ${tone} ${className}`}
     >
-      <p className="font-medium text-[#efe6da]">{label}</p>
+      <p className="font-medium text-[var(--text-primary)]">{label}</p>
       <p className="mt-1">
         {btcPrice.status === "fallback"
           ? `Live pricing is unavailable, so examples are using ${formatCurrency(

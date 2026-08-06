@@ -69,7 +69,7 @@ export function DownloadResultImageButton({
               : ""}
       </p>
       {state === "error" ? (
-        <p className="mt-2 max-w-xs text-sm leading-5 text-[#efb08a]" role="alert">
+        <p className="mt-2 max-w-xs text-sm leading-5 text-[var(--accent-soft-text)]" role="alert">
           Couldn&apos;t generate the image. Check your connection and try again.
         </p>
       ) : null}

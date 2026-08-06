@@ -188,10 +188,10 @@ export function CalculatorExperience({
     <div className="container py-10">
       <div className="mb-8">
         <p className="eyebrow">Calculator</p>
-        <h1 className="mt-3 text-4xl font-medium text-[#efe6da] md:text-6xl">
+        <h1 className="mt-3 text-4xl font-medium text-[var(--text-primary)] md:text-6xl">
           Run a purchasing-power scenario
         </h1>
-        <p className="mt-4 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+        <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
           Change the price, timeline, and assumptions to see whether an expense
           gets more expensive in dollars but cheaper in Bitcoin terms.
         </p>
@@ -224,7 +224,7 @@ export function CalculatorExperience({
             <div className="grid min-w-0 gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
               <div className="min-w-0">
                 <p className="eyebrow mb-3">Share your results</p>
-                <p className="mb-5 max-w-full text-sm leading-6 break-words text-[#b9ab9a]">
+                <p className="mb-5 max-w-full text-sm leading-6 break-words text-[var(--text-muted)]">
                   Download a branded image for X, LinkedIn, or anywhere else,
                   or keep using the existing copy and link options.
                 </p>

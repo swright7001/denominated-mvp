@@ -56,7 +56,7 @@ export function BillingPortalButton() {
         Open billing portal
       </button>
       {message ? (
-        <p className="mt-3 text-sm leading-6 text-[#b9ab9a]">{message}</p>
+        <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">{message}</p>
       ) : null}
     </div>
   );

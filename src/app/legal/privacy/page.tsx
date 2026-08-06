@@ -63,10 +63,10 @@ export default function PrivacyPage() {
       <section className="container py-12 md:py-16">
         <div className="max-w-3xl">
           <p className="eyebrow">Legal</p>
-          <h1 className="mt-3 text-4xl font-medium text-[#efe6da] md:text-6xl">
+          <h1 className="mt-3 text-4xl font-medium text-[var(--text-primary)] md:text-6xl">
             Privacy Notice
           </h1>
-          <p className="mt-5 text-lg leading-8 text-[#b9ab9a]">
+          <p className="mt-5 text-lg leading-8 text-[var(--text-muted)]">
             {getPrivacyPolicyIntro(policy)}
           </p>
         </div>
@@ -74,10 +74,10 @@ export default function PrivacyPage() {
         <div className="mt-10 grid gap-5">
           {sections.map((section) => (
             <article key={section.title} className="panel rounded-lg p-5 sm:p-7">
-              <h2 className="text-2xl font-medium text-[#efe6da]">
+              <h2 className="text-2xl font-medium text-[var(--text-primary)]">
                 {section.title}
               </h2>
-              <p className="mt-3 leading-7 text-[#b9ab9a]">{section.body}</p>
+              <p className="mt-3 leading-7 text-[var(--text-muted)]">{section.body}</p>
             </article>
           ))}
         </div>

@@ -103,7 +103,7 @@ export function ScenarioForm({
       <div className="space-y-7">
         <div>
           <p className="eyebrow mb-4">1. What are you calculating?</p>
-          <label className="text-sm text-[#d9ccbd]" htmlFor="itemName">
+          <label className="text-sm text-[var(--text-secondary)]" htmlFor="itemName">
             Item name
           </label>
           <input
@@ -118,7 +118,7 @@ export function ScenarioForm({
           <p className="eyebrow mb-4">2. Today&apos;s prices</p>
           {multiCurrencyEnabled ? (
             <div className="mb-4">
-              <label className="text-sm text-[#d9ccbd]" htmlFor="currencyCode">
+              <label className="text-sm text-[var(--text-secondary)]" htmlFor="currencyCode">
                 Local currency
               </label>
               <select
@@ -137,7 +137,7 @@ export function ScenarioForm({
                 <option value="CHF">CHF - Swiss franc</option>
                 <option value="JPY">JPY - Japanese yen</option>
               </select>
-              <p className="mt-2 text-xs leading-5 text-[#8f8172]">
+              <p className="mt-2 text-xs leading-5 text-[var(--text-subtle)]">
                 Bitcoin remains the benchmark. Fiat reference rates are educational,
                 not executable exchange quotes.
               </p>
@@ -146,7 +146,7 @@ export function ScenarioForm({
           <div className="grid items-start gap-4 sm:grid-cols-2">
             <div className="grid content-start">
               <label
-                className="text-sm text-[#d9ccbd] sm:min-h-10"
+                className="text-sm text-[var(--text-secondary)] sm:min-h-10"
                 htmlFor="currentItemPriceUSD"
               >
                 Current item price in {normalizeCurrencyCode(value.currencyCode)}
@@ -167,7 +167,7 @@ export function ScenarioForm({
             </div>
             <div className="grid content-start">
               <label
-                className="text-sm text-[#d9ccbd] sm:min-h-10"
+                className="text-sm text-[var(--text-secondary)] sm:min-h-10"
                 htmlFor="currentBTCPriceUSD"
               >
                 Current Bitcoin price in {normalizeCurrencyCode(value.currencyCode)}
@@ -196,7 +196,7 @@ export function ScenarioForm({
         <div>
           <p className="eyebrow mb-4">3. Your assumptions</p>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="text-sm text-[#d9ccbd]">
+            <label className="text-sm text-[var(--text-secondary)]">
               Time horizon in years
               <input
                 className="field mt-2"
@@ -208,7 +208,7 @@ export function ScenarioForm({
                 onFocus={() => startNumberEdit("years")}
               />
             </label>
-            <label className="text-sm text-[#d9ccbd]">
+            <label className="text-sm text-[var(--text-secondary)]">
               Annual item inflation rate
               <input
                 className="field mt-2"
@@ -222,7 +222,7 @@ export function ScenarioForm({
                 onFocus={() => startNumberEdit("itemInflationRate")}
               />
             </label>
-            <label className="text-sm text-[#d9ccbd]">
+            <label className="text-sm text-[var(--text-secondary)]">
               Annual BTC growth assumption
               <input
                 className="field mt-2"
@@ -236,7 +236,7 @@ export function ScenarioForm({
                 onFocus={() => startNumberEdit("btcGrowthRate")}
               />
             </label>
-            <div className="rounded-md border border-[rgba(239,230,218,0.18)] p-4 text-sm leading-5 text-[#b9ab9a]">
+            <div className="rounded-md border border-[var(--neutral-line)] p-4 text-sm leading-5 text-[var(--text-muted)]">
               BTC spot price is fetched server-side when available. Item prices
               and future assumptions remain editable local inputs.
             </div>
@@ -245,7 +245,7 @@ export function ScenarioForm({
 
         <div>
           <p className="eyebrow mb-4">4. Purchase type</p>
-          <div className="grid overflow-hidden rounded-md border border-[rgba(239,230,218,0.18)] sm:grid-cols-2">
+          <div className="grid overflow-hidden rounded-md border border-[var(--neutral-line)] sm:grid-cols-2">
             {[
               ["one-time", "One-time purchase", "Buying the item once"],
               ["monthly", "Monthly expense", "Recurring monthly cost"],
@@ -255,15 +255,15 @@ export function ScenarioForm({
                 type="button"
                 className={`p-4 text-left transition ${
                   value.purchaseType === type
-                    ? "border border-[#f0a36f] bg-[#3a2115]/55 text-[#f0a36f]"
-                    : "text-[#d9ccbd] hover:bg-white/5"
+                    ? "border border-[var(--accent)] bg-[var(--accent-surface-strong)] text-[var(--accent-text)]"
+                    : "text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]"
                 }`}
                 onClick={() =>
                   update("purchaseType", type as ScenarioInput["purchaseType"])
                 }
               >
                 <span className="block font-medium">{label}</span>
-                <span className="mt-1 block text-sm text-[#b9ab9a]">
+                <span className="mt-1 block text-sm text-[var(--text-muted)]">
                   {description}
                 </span>
               </button>
@@ -284,7 +284,7 @@ function BTCPriceStatusNote({
 }) {
   if (btcPriceWasManuallyEdited) {
     return (
-      <span className="mt-2 block text-xs leading-5 text-[#f0a36f]">
+      <span className="mt-2 block text-xs leading-5 text-[var(--accent-text)]">
         Manual BTC price active. Live updates will not replace this value.
       </span>
     );
@@ -292,7 +292,7 @@ function BTCPriceStatusNote({
 
   if (btcPriceStatus.status === "loading") {
     return (
-      <span className="mt-2 block text-xs leading-5 text-[#b9ab9a]">
+      <span className="mt-2 block text-xs leading-5 text-[var(--text-muted)]">
         Loading live BTC price...
       </span>
     );
@@ -300,7 +300,7 @@ function BTCPriceStatusNote({
 
   if (btcPriceStatus.status === "error") {
     return (
-      <span className="mt-2 block text-xs leading-5 text-[#f0a36f]">
+      <span className="mt-2 block text-xs leading-5 text-[var(--accent-text)]">
         Live price unavailable. Your current BTC value is still editable.
       </span>
     );
@@ -316,7 +316,7 @@ function BTCPriceStatusNote({
 
   if (data.manualPriceRequired) {
     return (
-      <span className="mt-2 block text-xs leading-5 text-[#f0a36f]">
+      <span className="mt-2 block text-xs leading-5 text-[var(--accent-text)]">
         The local-currency reference rate is unavailable. Enter a Bitcoin price
         in {data.currencyCode} manually; the app will not label it as live.
       </span>
@@ -325,7 +325,7 @@ function BTCPriceStatusNote({
 
   if (data.status === "fallback") {
     return (
-      <span className="mt-2 block text-xs leading-5 text-[#f0a36f]">
+      <span className="mt-2 block text-xs leading-5 text-[var(--accent-text)]">
         Reference pricing is unavailable. Keeping your current editable BTC value;{" "}
         {formatCurrency(data.fallbackPrice, data.currencyCode)} remains the fallback reference.
       </span>
@@ -333,7 +333,7 @@ function BTCPriceStatusNote({
   }
 
   return (
-    <span className="mt-2 block text-xs leading-5 text-[#b9ab9a]">
+    <span className="mt-2 block text-xs leading-5 text-[var(--text-muted)]">
       CoinGecko BTC price loaded
       {data.stale ? " but may be stale" : ""}: updated {updatedAt}.
       {data.currencyCode !== "USD" && data.fiatRateProvider

@@ -55,10 +55,10 @@ export function ProductWalkthrough({
       <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
         <div>
           <p className="eyebrow">Product walkthrough</p>
-          <h2 className="mt-3 text-3xl font-medium text-[#efe6da] sm:text-4xl">
+          <h2 className="mt-3 text-3xl font-medium text-[var(--text-primary)] sm:text-4xl">
             See the purchasing-power workflow
           </h2>
-          <p className="mt-4 max-w-xl text-base leading-7 text-[#b9ab9a]">
+          <p className="mt-4 max-w-xl text-base leading-7 text-[var(--text-muted)]">
             Follow one scenario from editable assumptions to a plain-English
             result. No trading controls, hidden model, or price prediction.
           </p>
@@ -79,14 +79,14 @@ export function ProductWalkthrough({
                   aria-pressed={selected}
                   className={`flex w-full items-start gap-3 border-l px-4 py-4 text-left transition ${
                     selected
-                      ? "border-[#f0a36f] bg-[#2a1810]/45 text-[#efe6da]"
-                      : "border-[rgba(239,230,218,0.14)] text-[#b9ab9a] hover:border-[rgba(240,163,111,0.5)] hover:text-[#efe6da]"
+                      ? "border-[var(--accent)] bg-[var(--accent-surface)] text-[var(--text-primary)]"
+                      : "border-[var(--neutral-line-soft)] text-[var(--text-muted)] hover:border-[var(--accent-line-strong)] hover:text-[var(--text-primary)]"
                   }`}
                   onClick={() => selectStep(index)}
                 >
-                  <Icon className="mt-0.5 shrink-0 text-[#f0a36f]" size={19} />
+                  <Icon className="mt-0.5 shrink-0 text-[var(--accent-text)]" size={19} />
                   <span>
-                    <span className="block text-xs uppercase tracking-[0.14em] text-[#f0a36f]">
+                    <span className="block text-xs uppercase tracking-[0.14em] text-[var(--accent-text)]">
                       {step.eyebrow}
                     </span>
                     <span className="mt-1 block font-medium">{step.title}</span>
@@ -114,7 +114,7 @@ export function ProductWalkthrough({
           <div
             id="walkthrough-screen"
             aria-live="polite"
-            className="overflow-hidden rounded-lg border border-[rgba(240,163,111,0.3)] bg-[#0b0907]"
+            className="overflow-hidden rounded-lg border border-[var(--accent-line)] bg-[var(--surface-card)]"
           >
             <div className="relative aspect-[8/5] w-full">
               <Image
@@ -128,24 +128,24 @@ export function ProductWalkthrough({
                 fetchPriority="low"
               />
             </div>
-            <div className="border-t border-[rgba(239,230,218,0.12)] p-5">
-              <p className="text-lg font-medium text-[#efe6da]">
+            <div className="border-t border-[var(--neutral-line-soft)] p-5">
+              <p className="text-lg font-medium text-[var(--text-primary)]">
                 {activeStep.title}
               </p>
-              <p className="mt-2 text-sm leading-6 text-[#b9ab9a]">
+              <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
                 {activeStep.description}
               </p>
             </div>
           </div>
 
-          <details className="mt-4 border-t border-[rgba(239,230,218,0.14)] py-4 text-sm text-[#b9ab9a]">
-            <summary className="cursor-pointer text-[#efe6da]">
+          <details className="mt-4 border-t border-[var(--neutral-line-soft)] py-4 text-sm text-[var(--text-muted)]">
+            <summary className="cursor-pointer text-[var(--text-primary)]">
               Text-only walkthrough
             </summary>
             <ol className="mt-4 space-y-4">
               {walkthroughSteps.map((step) => (
                 <li key={step.id}>
-                  <span className="font-medium text-[#f0a36f]">
+                  <span className="font-medium text-[var(--accent-text)]">
                     {step.title}.
                   </span>{" "}
                   {step.description}
