@@ -132,10 +132,10 @@ function SignedInAccountExperience({ email }: { email: string }) {
           <AccountIcon icon={<Mail size={20} />} />
           <div className="min-w-0">
             <p className="eyebrow mb-3">Signed in</p>
-            <h2 className="break-words text-2xl font-medium text-[#efe6da]">
+            <h2 className="break-words text-2xl font-medium text-[var(--text-primary)]">
               {email || "Denominated account"}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-[#b9ab9a]">
+            <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
               Clerk protects your sign-in. Phone number is not required.
             </p>
           </div>
@@ -151,22 +151,22 @@ function SignedInAccountExperience({ email }: { email: string }) {
             {isWorking ? "Activating..." : "Activate account storage"}
           </button>
         ) : (
-          <p className="flex items-center gap-2 text-sm text-[#f0a36f]">
+          <p className="flex items-center gap-2 text-sm text-[var(--accent-text)]">
             <Check size={16} />
             Account storage active
           </p>
         )}
 
         {account && localSavedScenarioCount > 0 ? (
-          <div className="mt-5 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
-            <p className="font-medium text-[#efe6da]">Saved scenarios found</p>
-            <p className="mt-2 text-sm leading-6 text-[#b9ab9a]">
+          <div className="mt-5 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4">
+            <p className="font-medium text-[var(--text-primary)]">Saved scenarios found</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
               Import {localSavedScenarioCount} scenario
               {localSavedScenarioCount === 1 ? "" : "s"} saved in this
               browser to your account.
             </p>
             <button
-              className="outline-button mt-3 rounded-md px-4 py-3 text-sm font-medium text-[#f0a36f]"
+              className="outline-button mt-3 rounded-md px-4 py-3 text-sm font-medium text-[var(--accent-text)]"
               type="button"
               disabled={isWorking}
               onClick={importScenariosFromDevice}
@@ -177,15 +177,15 @@ function SignedInAccountExperience({ email }: { email: string }) {
         ) : null}
 
         {message ? (
-          <p className="mt-4 flex items-center gap-2 text-sm text-[#f0a36f]">
+          <p className="mt-4 flex items-center gap-2 text-sm text-[var(--accent-text)]">
             <Check size={16} />
             {message}
           </p>
         ) : null}
-        {error ? <p className="mt-4 text-sm text-[#f0a36f]">{error}</p> : null}
+        {error ? <p className="mt-4 text-sm text-[var(--accent-text)]">{error}</p> : null}
 
         <button
-          className="outline-button mt-5 inline-flex items-center justify-center gap-2 rounded-md px-4 py-3 text-[#f0a36f]"
+          className="outline-button mt-5 inline-flex items-center justify-center gap-2 rounded-md px-4 py-3 text-[var(--accent-text)]"
           type="button"
           disabled={isWorking}
           onClick={signOutAccount}
@@ -200,10 +200,10 @@ function SignedInAccountExperience({ email }: { email: string }) {
           <AccountIcon icon={<ShieldCheck size={20} />} />
           <div>
             <p className="eyebrow mb-3">Free account</p>
-            <h2 className="text-2xl font-medium text-[#efe6da]">
+            <h2 className="text-2xl font-medium text-[var(--text-primary)]">
               Your purchasing-power home base
             </h2>
-            <p className="mt-2 text-sm leading-6 text-[#b9ab9a]">
+            <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
               Keep your first saved scenario connected to your account while
               the calculator, examples, Learn, and sharing remain free.
             </p>
@@ -229,21 +229,21 @@ function SignedInAccountExperience({ email }: { email: string }) {
         </div>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">
           <Link
-            className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-[#f0a36f]"
+            className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-[var(--accent-text)]"
             href="/watchlist"
           >
             Open Watchlist
           </Link>
           <Link
-            className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-[#f0a36f]"
+            className="outline-button inline-flex items-center justify-center rounded-md px-4 py-3 text-[var(--accent-text)]"
             href="/calculator"
           >
             Run a Scenario
           </Link>
         </div>
         {account && isProEntitled(account.planTier) ? (
-          <div className="mt-5 border-t border-[rgba(239,230,218,0.14)] pt-5">
-            <p className="text-sm leading-6 text-[#b9ab9a]">
+          <div className="mt-5 border-t border-[var(--neutral-line-soft)] pt-5">
+            <p className="text-sm leading-6 text-[var(--text-muted)]">
               Manage your subscription, payment method, and invoices securely
               through Stripe.
             </p>
@@ -266,10 +266,10 @@ function AccountSignInState() {
           <AccountIcon icon={<LogIn size={20} />} />
           <div>
             <p className="eyebrow mb-3">Account access</p>
-            <h2 className="text-2xl font-medium text-[#efe6da]">
+            <h2 className="text-2xl font-medium text-[var(--text-primary)]">
               Save your purchasing-power work
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#b9ab9a]">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--text-muted)]">
               Sign in to access an existing account, or create one after you
               have run a scenario. No phone number is required.
             </p>
@@ -283,13 +283,13 @@ function AccountSignInState() {
             Create free account
           </Link>
           <Link
-            className="outline-button inline-flex items-center justify-center rounded-md px-5 py-3 text-[#f0a36f]"
+            className="outline-button inline-flex items-center justify-center rounded-md px-5 py-3 text-[var(--accent-text)]"
             href="/sign-in"
           >
             Sign in
           </Link>
           <Link
-            className="inline-flex items-center justify-center px-5 py-3 text-sm text-[#b9ab9a] hover:text-[#efe6da]"
+            className="inline-flex items-center justify-center px-5 py-3 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             href="/calculator"
           >
             Continue without an account
@@ -324,7 +324,7 @@ function AccountLoadingState() {
       title="Loading your account"
       description="Connecting your secure account and saved scenarios."
     >
-      <section className="panel rounded-lg p-5 text-[#b9ab9a] sm:p-7 lg:col-span-2">
+      <section className="panel rounded-lg p-5 text-[var(--text-muted)] sm:p-7 lg:col-span-2">
         Loading account...
       </section>
     </AccountShell>
@@ -345,10 +345,10 @@ function AccountShell({
       <div className="mb-8 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <p className="eyebrow">Account</p>
-          <h1 className="mt-3 text-4xl font-medium text-[#efe6da] md:text-6xl">
+          <h1 className="mt-3 text-4xl font-medium text-[var(--text-primary)] md:text-6xl">
             {title}
           </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
             {description}
           </p>
         </div>
@@ -367,7 +367,7 @@ function AccountShell({
 
 function AccountIcon({ icon }: { icon: React.ReactNode }) {
   return (
-    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[var(--accent-line)] bg-[var(--accent-surface)] text-[var(--accent-text)]">
       {icon}
     </div>
   );
@@ -375,11 +375,11 @@ function AccountIcon({ icon }: { icon: React.ReactNode }) {
 
 function AccountMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
-      <p className="text-xs uppercase tracking-[0.14em] text-[#b9ab9a]">
+    <div className="rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4">
+      <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-muted)]">
         {label}
       </p>
-      <p className="mt-2 text-2xl text-[#efe6da]">{value}</p>
+      <p className="mt-2 text-2xl text-[var(--text-primary)]">{value}</p>
     </div>
   );
 }

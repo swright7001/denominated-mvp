@@ -16,7 +16,7 @@ export function OpportunityCostCard({
   return (
     <section className="panel rounded-lg p-5">
       <p className="eyebrow mb-3">Opportunity cost</p>
-      <p className="text-lg leading-7 text-[#efe6da]">
+      <p className="text-lg leading-7 text-[var(--text-primary)]">
         Buying {scenario.itemName} today costs{" "}
         <span className="copper-text">{formatBTC(result.currentItemCostBTC)} BTC</span>.
         If that same amount of Bitcoin followed your growth assumption, it would

@@ -60,7 +60,7 @@ export function CheckoutButton({
       <button
         type="button"
         className={`inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-semibold ${
-          featured ? "copper-button" : "outline-button text-[#f0a36f]"
+          featured ? "copper-button" : "outline-button text-[var(--accent-text)]"
         }`}
         disabled={status === "loading"}
         onClick={startCheckout}
@@ -73,14 +73,14 @@ export function CheckoutButton({
         {plan.label}
       </button>
       {message ? (
-        <p className="mt-2 text-xs leading-5 text-[#b9ab9a]">
+        <p className="mt-2 text-xs leading-5 text-[var(--text-muted)]">
           {message}{" "}
           {message.includes("billing") ? (
-            <Link className="text-[#f0a36f]" href="/billing">
+            <Link className="text-[var(--accent-text)]" href="/billing">
               Manage billing
             </Link>
           ) : message.includes("account") ? (
-            <Link className="text-[#f0a36f]" href="/account">
+            <Link className="text-[var(--accent-text)]" href="/account">
               Go to account
             </Link>
           ) : null}

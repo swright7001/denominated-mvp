@@ -38,14 +38,14 @@ export default async function Home() {
     <Layout>
       <section className="container grid gap-10 py-12 md:grid-cols-[1fr_0.82fr] md:items-center md:py-20">
         <div>
-          <h1 className="max-w-3xl text-4xl font-medium leading-[1.08] text-[#efe6da] sm:text-5xl md:text-7xl">
+          <h1 className="max-w-3xl text-4xl font-medium leading-[1.08] text-[var(--text-primary)] sm:text-5xl md:text-7xl">
             See What Life Costs in Bitcoin Terms
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-[#b9ab9a] sm:text-xl">
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--text-muted)] sm:text-xl">
             Compare everyday expenses in dollars and Bitcoin so you can
             understand purchasing power over time.
           </p>
-          <p className="mt-4 text-2xl text-[#f0a36f]">
+          <p className="mt-4 text-2xl text-[var(--accent-text)]">
             Measure life in purchasing power.
           </p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">
@@ -91,46 +91,46 @@ export default async function Home() {
         <div className="panel rounded-lg p-5">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <p className="text-xl text-[#efe6da]">Tesla Model 3</p>
-              <p className="text-sm text-[#b9ab9a]">Example scenario</p>
+              <p className="text-xl text-[var(--text-primary)]">Tesla Model 3</p>
+              <p className="text-sm text-[var(--text-muted)]">Example scenario</p>
             </div>
-            <span className="rounded-md bg-white/5 px-3 py-1 text-xs text-[#b9ab9a]">
+            <span className="rounded-md bg-[var(--surface-hover)] px-3 py-1 text-xs text-[var(--text-muted)]">
               5 Year Outlook
             </span>
           </div>
-          <div className="grid gap-6 border-y border-[rgba(239,230,218,0.12)] py-6 sm:grid-cols-2">
+          <div className="grid gap-6 border-y border-[var(--neutral-line-soft)] py-6 sm:grid-cols-2">
             <div>
               <p className="eyebrow">Today</p>
-              <p className="metric mt-2 text-4xl text-[#f0a36f]">
+              <p className="metric mt-2 text-4xl text-[var(--accent-text)]">
                 {formatBTC(heroResult.currentItemCostBTC)} BTC
               </p>
-              <p className="mt-1 text-sm text-[#b9ab9a]">
+              <p className="mt-1 text-sm text-[var(--text-muted)]">
                 {formatUSD(heroScenario.currentItemPriceUSD)}
               </p>
             </div>
             <div>
               <p className="eyebrow">In 5 years</p>
-              <p className="metric mt-2 text-4xl text-[#f0a36f]">
+              <p className="metric mt-2 text-4xl text-[var(--accent-text)]">
                 {formatBTC(heroResult.futureItemCostBTC)} BTC
               </p>
-              <p className="mt-1 text-sm text-[#b9ab9a]">
+              <p className="mt-1 text-sm text-[var(--text-muted)]">
                 {formatUSD(heroResult.futureItemPriceUSD)}
               </p>
             </div>
           </div>
-          <div className="mt-6 h-36 rounded-md border border-[rgba(240,163,111,0.18)] bg-[linear-gradient(160deg,rgba(199,119,66,0.2),transparent)] p-5">
+          <div className="mt-6 h-36 rounded-md border border-[var(--accent-line-soft)] bg-[linear-gradient(160deg,rgba(199,119,66,0.2),transparent)] p-5">
             <div className="flex h-full items-end gap-2">
               {[70, 62, 55, 48, 42, 34, 28].map((height, index) => (
                 <div
                   key={height}
-                  className="flex-1 rounded-t bg-[#c77742]/60"
+                  className="flex-1 rounded-t bg-[var(--chart-bar)] opacity-60"
                   style={{ height: `${height - index * 2}%` }}
                 />
               ))}
-              <TrendingUp className="mb-16 text-[#f0a36f]" size={42} />
+              <TrendingUp className="mb-16 text-[var(--accent-text)]" size={42} />
             </div>
           </div>
-          <p className="mt-5 rounded-md border border-[rgba(240,163,111,0.18)] bg-[#2a1810]/45 p-4 text-sm text-[#f0c19f]">
+          <p className="mt-5 rounded-md border border-[var(--accent-line-soft)] bg-[var(--accent-surface)] p-4 text-sm text-[var(--accent-soft-text)]">
             More expensive in dollars. Cheaper in Bitcoin.
           </p>
           <BTCPriceStatus btcPrice={btcPrice} className="mt-4" />
@@ -142,10 +142,10 @@ export default async function Home() {
       <section className="container py-8">
         <div className="mb-8 text-center">
           <p className="eyebrow">Popular examples</p>
-          <h2 className="mt-3 text-3xl text-[#efe6da]">
+          <h2 className="mt-3 text-3xl text-[var(--text-primary)]">
             Real-life costs, not trading screens
           </h2>
-          <p className="mt-3 text-[#b9ab9a]">
+          <p className="mt-3 text-[var(--text-muted)]">
             Explore common expenses through a purchasing-power lens.
           </p>
         </div>
@@ -168,19 +168,19 @@ export default async function Home() {
         <InfoPanel title="Disclaimer" copy={DISCLAIMER} />
       </section>
 
-      <section className="border-t border-[rgba(240,163,111,0.16)] py-12">
+      <section className="border-t border-[var(--accent-line-soft)] py-12">
         <div className="container flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="eyebrow">Contact</p>
-            <h2 className="mt-2 text-3xl text-[#efe6da]">Questions or feedback?</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#b9ab9a]">
+            <h2 className="mt-2 text-3xl text-[var(--text-primary)]">Questions or feedback?</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--text-muted)]">
               Get account help, report a bug, suggest an improvement, or use
               the private security channel.
             </p>
           </div>
           <Link
             href="/support"
-            className="outline-button inline-flex shrink-0 items-center justify-center rounded-md px-5 py-3 text-sm font-semibold text-[#f0a36f]"
+            className="outline-button inline-flex shrink-0 items-center justify-center rounded-md px-5 py-3 text-sm font-semibold text-[var(--accent-text)]"
           >
             Contact Denominated
           </Link>
@@ -201,10 +201,10 @@ function MiniProof({
 }) {
   return (
     <div className="flex gap-3">
-      <div className="text-[#f0a36f] [&>svg]:h-6 [&>svg]:w-6">{icon}</div>
+      <div className="text-[var(--accent-text)] [&>svg]:h-6 [&>svg]:w-6">{icon}</div>
       <div>
-        <p className="text-sm font-medium text-[#efe6da]">{title}</p>
-        <p className="mt-1 text-xs leading-5 text-[#b9ab9a]">{copy}</p>
+        <p className="text-sm font-medium text-[var(--text-primary)]">{title}</p>
+        <p className="mt-1 text-xs leading-5 text-[var(--text-muted)]">{copy}</p>
       </div>
     </div>
   );
@@ -213,8 +213,8 @@ function MiniProof({
 function InfoPanel({ title, copy }: { title: string; copy: string }) {
   return (
     <article className="panel rounded-lg p-6">
-      <h3 className="text-2xl text-[#efe6da]">{title}</h3>
-      <p className="mt-4 text-sm leading-6 text-[#b9ab9a]">{copy}</p>
+      <h3 className="text-2xl text-[var(--text-primary)]">{title}</h3>
+      <p className="mt-4 text-sm leading-6 text-[var(--text-muted)]">{copy}</p>
     </article>
   );
 }

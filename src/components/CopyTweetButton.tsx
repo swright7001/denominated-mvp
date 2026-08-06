@@ -39,7 +39,7 @@ export function CopyTweetButton({
   return (
     <button
       type="button"
-      className="outline-button inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-[#f0a36f] transition hover:bg-[#2a1810] sm:w-auto"
+      className="outline-button inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-[var(--accent-text)] transition hover:bg-[var(--accent-surface)] sm:w-auto"
       onClick={copyTweet}
     >
       <Share2 size={18} />

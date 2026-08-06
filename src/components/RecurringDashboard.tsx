@@ -119,10 +119,10 @@ function LocalRecurringDashboard() {
       <div className="mb-8 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <p className="eyebrow">Dashboard</p>
-          <h1 className="mt-3 text-4xl font-medium text-[#efe6da] md:text-6xl">
+          <h1 className="mt-3 text-4xl font-medium text-[var(--text-primary)] md:text-6xl">
             Your purchasing-power home base
           </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
             Track saved expenses, review today&apos;s BTC-term movement, and
             keep the next scenario close at hand.
           </p>
@@ -248,10 +248,10 @@ function SignedInAccountRecurringDashboard({ email }: { email: string }) {
       <div className="mb-8 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <p className="eyebrow">Account dashboard</p>
-          <h1 className="mt-3 text-4xl font-medium text-[#efe6da] md:text-6xl">
+          <h1 className="mt-3 text-4xl font-medium text-[var(--text-primary)] md:text-6xl">
             Your purchasing-power home base
           </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
             Track saved expenses from your Denominated account, review
             BTC-term movement, and keep your next scenario close at hand.
           </p>
@@ -344,7 +344,7 @@ function DailySnapshot({
   return (
     <section className="panel rounded-lg p-5 sm:p-7">
       <div className="flex items-start gap-4">
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[var(--accent-line)] bg-[var(--accent-surface)] text-[var(--accent-text)]">
           {biggestImpact && biggestImpact.btcDifference < 0 ? (
             <TrendingDown size={22} />
           ) : (
@@ -353,7 +353,7 @@ function DailySnapshot({
         </div>
         <div className="min-w-0">
           <p className="eyebrow mb-3">Today&apos;s purchasing power</p>
-          <h2 className="text-2xl font-medium text-[#efe6da]">
+          <h2 className="text-2xl font-medium text-[var(--text-primary)]">
             {biggestImpact
               ? buildScenarioChangeInsight({
                   itemName: biggestImpact.itemName,
@@ -364,7 +364,7 @@ function DailySnapshot({
                 })
               : "Save a scenario to see today&apos;s BTC-term movement."}
           </h2>
-          <p className="mt-3 text-sm leading-6 text-[#b9ab9a]">
+          <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
             {biggestImpact
               ? `BTC price used: ${formatCurrency(
                   biggestImpact.currentBTCPriceUSD,
@@ -386,10 +386,10 @@ function RecentScenarioChanges({ impacts }: { impacts: ScenarioImpact[] }) {
     return (
       <section className="panel rounded-lg p-5 sm:p-7">
         <p className="eyebrow mb-3">Recent changes</p>
-        <h2 className="text-2xl font-medium text-[#efe6da]">
+        <h2 className="text-2xl font-medium text-[var(--text-primary)]">
           No saved scenario changes yet.
         </h2>
-        <p className="mt-3 text-sm leading-6 text-[#b9ab9a]">
+        <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
           Save your first expense to compare its BTC-denominated cost against a
           future snapshot.
         </p>
@@ -404,24 +404,24 @@ function RecentScenarioChanges({ impacts }: { impacts: ScenarioImpact[] }) {
         {impacts.slice(0, 4).map((impact) => (
           <div
             key={`${impact.itemName}-${impact.comparisonDate}`}
-            className="rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4"
+            className="rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="font-medium text-[#efe6da]">{impact.itemName}</p>
+              <p className="font-medium text-[var(--text-primary)]">{impact.itemName}</p>
               <p
                 className={`text-sm ${
                   impact.btcDifference <= 0
-                    ? "text-[#f0a36f]"
-                    : "text-[#efe6da]"
+                    ? "text-[var(--accent-text)]"
+                    : "text-[var(--text-primary)]"
                 }`}
               >
                 {impact.btcDifference <= 0 ? "Cheaper" : "Higher"} in BTC
               </p>
             </div>
-            <p className="mt-2 text-sm leading-6 text-[#b9ab9a]">
+            <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
               {buildSavedScenarioImpactCopy(impact)}
             </p>
-            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-[#8f8172]">
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-[var(--text-subtle)]">
               {formatBTC(impact.priorBTCCost)} BTC baseline to{" "}
               {formatBTC(impact.currentBTCCost)} BTC today
             </p>
@@ -442,7 +442,7 @@ function SavedScenarioSummary({
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="eyebrow mb-3">Saved scenarios</p>
-          <h2 className="text-2xl font-medium text-[#efe6da]">
+          <h2 className="text-2xl font-medium text-[var(--text-primary)]">
             {savedScenarios.length > 0
               ? `${savedScenarios.length} saved goal${
                   savedScenarios.length === 1 ? "" : "s"
@@ -450,12 +450,12 @@ function SavedScenarioSummary({
               : "Your watchlist is empty"}
           </h2>
         </div>
-        <Link className="text-sm text-[#f0a36f]" href="/watchlist">
+        <Link className="text-sm text-[var(--accent-text)]" href="/watchlist">
           Open Watchlist
         </Link>
       </div>
       {savedScenarios.length === 0 ? (
-        <p className="text-sm leading-6 text-[#b9ab9a]">
+        <p className="text-sm leading-6 text-[var(--text-muted)]">
           Start with something real: a truck, rent, elder care, tuition, or any
           expense you want to understand in purchasing-power terms.
         </p>
@@ -466,17 +466,17 @@ function SavedScenarioSummary({
             return (
               <div
                 key={savedScenario.id}
-                className="rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4"
+                className="rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4"
               >
-                <p className="font-medium text-[#efe6da]">
+                <p className="font-medium text-[var(--text-primary)]">
                   {savedScenario.scenario.itemName}
                 </p>
-                <p className="mt-2 text-sm text-[#b9ab9a]">
+                <p className="mt-2 text-sm text-[var(--text-muted)]">
                   {formatCurrency(
                     savedScenario.scenario.currentItemPriceUSD,
                     normalizeCurrencyCode(savedScenario.scenario.currencyCode),
                   )} ={" "}
-                  <span className="text-[#f0a36f]">
+                  <span className="text-[var(--accent-text)]">
                     {formatBTC(result.currentItemCostBTC)} BTC
                   </span>
                 </p>
@@ -512,15 +512,15 @@ function WeeklyReportPreview({
   return (
     <section className="panel rounded-lg p-5 sm:p-7">
       <div className="mb-5 flex items-start gap-4">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[var(--accent-line)] bg-[var(--accent-surface)] text-[var(--accent-text)]">
           <CalendarDays size={20} />
         </div>
         <div>
           <p className="eyebrow mb-3">Weekly report preview</p>
-          <h2 className="text-2xl font-medium text-[#efe6da]">
+          <h2 className="text-2xl font-medium text-[var(--text-primary)]">
             Cost-of-life report
           </h2>
-          <p className="mt-2 text-sm text-[#b9ab9a]">
+          <p className="mt-2 text-sm text-[var(--text-muted)]">
             {reportDate} at {formatCurrency(usdBTCPrice, "USD")} BTC
           </p>
         </div>
@@ -529,13 +529,13 @@ function WeeklyReportPreview({
       <div className="space-y-5">
         <ReportSection title="Your saved scenarios">
           {savedScenarios.length > 0 ? (
-            <ul className="space-y-2 text-sm leading-6 text-[#b9ab9a]">
+            <ul className="space-y-2 text-sm leading-6 text-[var(--text-muted)]">
               {impacts.slice(0, 3).map((impact) => (
                 <li key={impact.itemName}>{buildSavedScenarioImpactCopy(impact)}</li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm leading-6 text-[#b9ab9a]">
+            <p className="text-sm leading-6 text-[var(--text-muted)]">
               No saved scenarios yet. The report can include popular examples
               until a user saves their first goal.
             </p>
@@ -543,7 +543,7 @@ function WeeklyReportPreview({
         </ReportSection>
 
         <ReportSection title="Biggest BTC-term change">
-          <p className="text-sm leading-6 text-[#b9ab9a]">
+          <p className="text-sm leading-6 text-[var(--text-muted)]">
             {biggestImpact
               ? buildScenarioChangeInsight({
                   itemName: biggestImpact.itemName,
@@ -563,10 +563,10 @@ function WeeklyReportPreview({
               return (
                 <p
                   key={scenario.slug}
-                  className="text-sm leading-6 text-[#b9ab9a]"
+                  className="text-sm leading-6 text-[var(--text-muted)]"
                 >
                   {scenario.itemName}:{" "}
-                  <span className="text-[#efe6da]">
+                  <span className="text-[var(--text-primary)]">
                     {formatBTC(result.currentItemCostBTC)} BTC
                   </span>{" "}
                   today
@@ -577,15 +577,15 @@ function WeeklyReportPreview({
         </ReportSection>
 
         <ReportSection title="Educational note of the week">
-          <p className="text-sm leading-6 text-[#b9ab9a]">
+          <p className="text-sm leading-6 text-[var(--text-muted)]">
             A price can rise in dollars while falling in BTC terms. Denominated
             is measuring purchasing power, not predicting future prices.
           </p>
         </ReportSection>
       </div>
 
-      <p className="mt-5 text-xs leading-5 text-[#8f8172]">{DISCLAIMER}</p>
-      <p className="mt-3 text-xs leading-5 text-[#8f8172]">
+      <p className="mt-5 text-xs leading-5 text-[var(--text-subtle)]">{DISCLAIMER}</p>
+      <p className="mt-3 text-xs leading-5 text-[var(--text-subtle)]">
         Backend requirement: connect Resend or another email provider, store
         preferences server-side, and schedule weekly sends after auth exists.
       </p>
@@ -667,15 +667,15 @@ function EmailPreferencesPanel({
   return (
     <section className="panel rounded-lg p-5 sm:p-7">
       <div className="mb-5 flex items-start gap-4">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[var(--accent-line)] bg-[var(--accent-surface)] text-[var(--accent-text)]">
           <Mail size={20} />
         </div>
         <div>
           <p className="eyebrow mb-3">Email reports</p>
-          <h2 className="text-2xl font-medium text-[#efe6da]">
+          <h2 className="text-2xl font-medium text-[var(--text-primary)]">
             {email ? "Education preferences" : "No email saved yet"}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-[#b9ab9a]">
+          <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
             {email
               ? `${accountBacked ? "Account email" : "Local preview email"}: ${email}`
               : "Save a scenario to add an email and start receiving purchasing-power reports."}
@@ -683,15 +683,15 @@ function EmailPreferencesPanel({
         </div>
       </div>
       {accountBacked ? (
-        <div className="mb-5 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
-          <p className="font-medium text-[#efe6da]">Send this week&apos;s report</p>
-          <p className="mt-1 text-sm leading-6 text-[#b9ab9a]">
+        <div className="mb-5 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4">
+          <p className="font-medium text-[var(--text-primary)]">Send this week&apos;s report</p>
+          <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
             Pro and Lifetime accounts can request one purchasing-power report
             per week.
           </p>
           <button
             type="button"
-            className="outline-button mt-3 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-medium text-[#f0a36f]"
+            className="outline-button mt-3 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-medium text-[var(--accent-text)]"
             disabled={!preferences.weeklyReport || reportStatus === "sending"}
             onClick={sendWeeklyReport}
           >
@@ -700,7 +700,7 @@ function EmailPreferencesPanel({
           {reportMessage ? (
             <p
               className={`mt-3 text-sm leading-6 ${
-                reportStatus === "sent" ? "text-[#f0a36f]" : "text-[#b9ab9a]"
+                reportStatus === "sent" ? "text-[var(--accent-text)]" : "text-[var(--text-muted)]"
               }`}
             >
               {reportMessage}
@@ -713,30 +713,30 @@ function EmailPreferencesPanel({
           <button
             key={option.key}
             type="button"
-            className="flex w-full items-start gap-3 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4 text-left"
+            className="flex w-full items-start gap-3 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4 text-left"
             onClick={() => onToggle(option.key)}
           >
             <span
               className={`mt-1 grid h-5 w-5 shrink-0 place-items-center rounded border ${
                 preferences[option.key]
-                  ? "border-[#f0a36f] bg-[#f0a36f] text-[#140b06]"
-                  : "border-[rgba(239,230,218,0.3)] text-transparent"
+                  ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--text-on-accent)]"
+                  : "border-[var(--neutral-line)] text-transparent"
               }`}
             >
               <Check size={14} />
             </span>
             <span>
-              <span className="block font-medium text-[#efe6da]">
+              <span className="block font-medium text-[var(--text-primary)]">
                 {option.label}
               </span>
-              <span className="mt-1 block text-sm leading-6 text-[#b9ab9a]">
+              <span className="mt-1 block text-sm leading-6 text-[var(--text-muted)]">
                 {option.description}
               </span>
             </span>
           </button>
         ))}
       </div>
-      <p className="mt-4 text-xs leading-5 text-[#8f8172]">
+      <p className="mt-4 text-xs leading-5 text-[var(--text-subtle)]">
         Phone/SMS is not required. {accountBacked
           ? "These preferences are saved to your Denominated account."
           : "These settings stay on this device until you sign in."}
@@ -753,8 +753,8 @@ function ReportSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
-      <h3 className="mb-2 text-sm font-semibold text-[#efe6da]">{title}</h3>
+    <div className="rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4">
+      <h3 className="mb-2 text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
       {children}
     </div>
   );
@@ -764,13 +764,13 @@ function DashboardLoadingState() {
   return (
     <div className="container py-10">
       <section className="panel rounded-lg p-7 text-center sm:p-10">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[var(--accent-line)] bg-[var(--accent-surface)] text-[var(--accent-text)]">
           <CalendarDays size={24} />
         </div>
-        <h1 className="mt-5 text-3xl font-medium text-[#efe6da]">
+        <h1 className="mt-5 text-3xl font-medium text-[var(--text-primary)]">
           Loading your dashboard
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#b9ab9a]">
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[var(--text-muted)]">
           We are checking your account-backed scenarios and purchasing-power
           settings.
         </p>
@@ -783,13 +783,13 @@ function DashboardSignInState() {
   return (
     <div className="container py-10">
       <section className="panel rounded-lg p-7 text-center sm:p-10">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[var(--accent-line)] bg-[var(--accent-surface)] text-[var(--accent-text)]">
           <CalendarDays size={24} />
         </div>
-        <h1 className="mt-5 text-3xl font-medium text-[#efe6da]">
+        <h1 className="mt-5 text-3xl font-medium text-[var(--text-primary)]">
           Sign in to open your dashboard
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#b9ab9a]">
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[var(--text-muted)]">
           The calculator stays free. A Denominated account keeps saved
           scenarios and purchasing-power updates available across devices.
         </p>
@@ -801,7 +801,7 @@ function DashboardSignInState() {
             Create account
           </Link>
           <Link
-            className="outline-button inline-flex items-center justify-center rounded-md px-5 py-3 font-semibold text-[#f0a36f]"
+            className="outline-button inline-flex items-center justify-center rounded-md px-5 py-3 font-semibold text-[var(--accent-text)]"
             href="/sign-in"
           >
             Sign in

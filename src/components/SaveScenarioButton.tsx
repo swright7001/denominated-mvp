@@ -150,11 +150,11 @@ export function SaveScenarioButton({
       </button>
 
       {accountRequired ? (
-        <div className="mt-3 max-w-xl rounded-md border border-[rgba(240,163,111,0.26)] bg-black/24 p-4 text-sm leading-6 text-[#b9ab9a]">
+        <div className="mt-3 max-w-xl rounded-md border border-[var(--accent-line)] bg-[var(--surface-soft-strong)] p-4 text-sm leading-6 text-[var(--text-muted)]">
           <p className="flex items-start gap-2">
-            <LogIn className="mt-0.5 shrink-0 text-[#f0a36f]" size={16} />
+            <LogIn className="mt-0.5 shrink-0 text-[var(--accent-text)]" size={16} />
             <span>
-              <span className="block font-medium text-[#efe6da]">
+              <span className="block font-medium text-[var(--text-primary)]">
                 Sign in to save this scenario
               </span>
               <span className="mt-1 block">
@@ -164,10 +164,10 @@ export function SaveScenarioButton({
             </span>
           </p>
           <div className="mt-3 flex flex-wrap gap-3">
-            <Link className="text-[#f0a36f]" href="/sign-up">
+            <Link className="text-[var(--accent-text)]" href="/sign-up">
               Create account
             </Link>
-            <Link className="text-[#d9ccbd]" href="/sign-in">
+            <Link className="text-[var(--text-secondary)]" href="/sign-in">
               Sign in
             </Link>
           </div>
@@ -175,32 +175,32 @@ export function SaveScenarioButton({
       ) : null}
 
       {limitReached ? (
-        <div className="mt-3 max-w-xl rounded-md border border-[rgba(240,163,111,0.26)] bg-black/24 p-4 text-sm leading-6 text-[#b9ab9a]">
+        <div className="mt-3 max-w-xl rounded-md border border-[var(--accent-line)] bg-[var(--surface-soft-strong)] p-4 text-sm leading-6 text-[var(--text-muted)]">
           <p className="flex items-start gap-2">
-            <Lock className="mt-0.5 shrink-0 text-[#f0a36f]" size={16} />
+            <Lock className="mt-0.5 shrink-0 text-[var(--accent-text)]" size={16} />
             <span>
-              <span className="block font-medium text-[#efe6da]">
+              <span className="block font-medium text-[var(--text-primary)]">
                 {saveLimitCopy.title}
               </span>
               <span className="mt-1 block">{saveLimitCopy.body}</span>
             </span>
           </p>
           <div className="mt-3 flex flex-wrap gap-3">
-            <Link className="text-[#f0a36f]" href="/plans">
+            <Link className="text-[var(--accent-text)]" href="/plans">
               {saveLimitCopy.primaryCta}
             </Link>
-            <Link className="text-[#d9ccbd]" href="/calculator">
+            <Link className="text-[var(--text-secondary)]" href="/calculator">
               {saveLimitCopy.secondaryCta}
             </Link>
           </div>
-          <p className="mt-3 text-xs leading-5 text-[#8f8172]">
+          <p className="mt-3 text-xs leading-5 text-[var(--text-subtle)]">
             {saveLimitCopy.footnote}
           </p>
         </div>
       ) : null}
 
       {syncError ? (
-        <p className="mt-3 max-w-xl text-sm leading-6 text-[#f0a36f]">
+        <p className="mt-3 max-w-xl text-sm leading-6 text-[var(--accent-text)]">
           {syncError}
         </p>
       ) : null}

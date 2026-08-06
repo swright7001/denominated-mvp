@@ -12,27 +12,27 @@ export function AssumptionsPanel({ scenario }: { scenario: ScenarioInput }) {
       <dl className="grid gap-4 text-sm sm:grid-cols-2">
         <div>
           <dt className="muted">Local currency</dt>
-          <dd className="text-[#efe6da]">
+          <dd className="text-[var(--text-primary)]">
             {normalizeCurrencyCode(scenario.currencyCode)}
           </dd>
         </div>
         <div>
           <dt className="muted">Time horizon</dt>
-          <dd className="text-[#efe6da]">{scenario.years} years</dd>
+          <dd className="text-[var(--text-primary)]">{scenario.years} years</dd>
         </div>
         <div>
           <dt className="muted">Purchase type</dt>
-          <dd className="capitalize text-[#efe6da]">
+          <dd className="capitalize text-[var(--text-primary)]">
             {scenario.purchaseType.replace("-", " ")}
           </dd>
         </div>
         <div>
           <dt className="muted">Item inflation</dt>
-          <dd className="text-[#efe6da]">{scenario.itemInflationRate}% / year</dd>
+          <dd className="text-[var(--text-primary)]">{scenario.itemInflationRate}% / year</dd>
         </div>
         <div>
           <dt className="muted">BTC growth</dt>
-          <dd className="text-[#efe6da]">{scenario.btcGrowthRate}% / year</dd>
+          <dd className="text-[var(--text-primary)]">{scenario.btcGrowthRate}% / year</dd>
         </div>
       </dl>
     </div>

@@ -20,10 +20,10 @@ export default function SupportPage() {
     <Layout>
       <section className="container py-10 sm:py-14">
         <p className="eyebrow">Support</p>
-        <h1 className="mt-3 max-w-3xl text-4xl font-medium text-[#efe6da] sm:text-6xl">
+        <h1 className="mt-3 max-w-3xl text-4xl font-medium text-[var(--text-primary)] sm:text-6xl">
           Contact Denominated
         </h1>
-        <p className="mt-5 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+        <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
           Choose the path that fits your question. Never send passwords,
           verification codes, payment details, or API keys.
         </p>
@@ -60,7 +60,7 @@ export default function SupportPage() {
           />
         </div>
 
-        <p className="mt-8 max-w-3xl text-sm leading-6 text-[#8f8274]">
+        <p className="mt-8 max-w-3xl text-sm leading-6 text-[var(--text-subtle)]">
           Denominated is an educational tool and does not provide financial
           advice. Support cannot provide personalized investment guidance.
         </p>
@@ -86,20 +86,20 @@ function SupportOption({
 }) {
   return (
     <article className="panel rounded-lg p-6">
-      <div className="text-[#f0a36f] [&>svg]:h-6 [&>svg]:w-6">{icon}</div>
-      <h2 className="mt-5 text-xl font-medium text-[#efe6da]">{title}</h2>
-      <p className="mt-3 text-sm leading-6 text-[#b9ab9a]">{copy}</p>
+      <div className="text-[var(--accent-text)] [&>svg]:h-6 [&>svg]:w-6">{icon}</div>
+      <h2 className="mt-5 text-xl font-medium text-[var(--text-primary)]">{title}</h2>
+      <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">{copy}</p>
       {href ? (
         <Link
           href={href}
-          className="outline-button mt-6 inline-flex rounded-md px-4 py-3 text-sm font-semibold text-[#f0a36f]"
+          className="outline-button mt-6 inline-flex rounded-md px-4 py-3 text-sm font-semibold text-[var(--accent-text)]"
           target={external ? "_blank" : undefined}
           rel={external ? "noreferrer" : undefined}
         >
           {action}
         </Link>
       ) : (
-        <p className="mt-6 text-sm font-medium text-[#8f8274]">{action}</p>
+        <p className="mt-6 text-sm font-medium text-[var(--text-subtle)]">{action}</p>
       )}
     </article>
   );

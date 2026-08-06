@@ -90,10 +90,10 @@ function LocalWatchlistExperience() {
       <div className="mb-8 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <p className="eyebrow">Watchlist</p>
-          <h1 className="mt-3 text-4xl font-medium text-[#efe6da] md:text-6xl">
+          <h1 className="mt-3 text-4xl font-medium text-[var(--text-primary)] md:text-6xl">
             Saved purchasing-power goals
           </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
             Keep the expenses you care about in one place. This local-first
             watchlist stores the assumptions needed to recalculate later as BTC
             prices change.
@@ -187,10 +187,10 @@ function SignedInAccountWatchlistExperience() {
       <div className="mb-8 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <p className="eyebrow">Account watchlist</p>
-          <h1 className="mt-3 text-4xl font-medium text-[#efe6da] md:text-6xl">
+          <h1 className="mt-3 text-4xl font-medium text-[var(--text-primary)] md:text-6xl">
             Saved purchasing-power goals
           </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#b9ab9a]">
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
             Your signed-in watchlist is tied to your Denominated account and
             recalculates from stored assumptions as BTC prices change.
           </p>
@@ -356,11 +356,11 @@ function WatchlistCard({
               </button>
             </div>
           ) : (
-            <h2 className="text-2xl font-medium text-[#efe6da]">
+            <h2 className="text-2xl font-medium text-[var(--text-primary)]">
               {savedScenario.scenario.itemName}
             </h2>
           )}
-          <p className="mt-2 text-sm text-[#b9ab9a]">
+          <p className="mt-2 text-sm text-[var(--text-muted)]">
             {savedScenario.scenario.purchaseType === "monthly"
               ? "Monthly expense"
               : "One-time purchase"}
@@ -369,7 +369,7 @@ function WatchlistCard({
         <div className="flex shrink-0 gap-2">
           <button
             type="button"
-            className="outline-button grid h-10 w-10 place-items-center rounded-md text-[#f0a36f] transition hover:bg-[#2a1810]"
+            className="outline-button grid h-10 w-10 place-items-center rounded-md text-[var(--accent-text)] transition hover:bg-[var(--accent-surface)]"
             aria-label={`Rename ${savedScenario.scenario.itemName}`}
             onClick={() => setIsRenaming((current) => !current)}
           >
@@ -377,7 +377,7 @@ function WatchlistCard({
           </button>
           <button
             type="button"
-            className="outline-button grid h-10 w-10 place-items-center rounded-md text-[#f0a36f] transition hover:bg-[#2a1810]"
+            className="outline-button grid h-10 w-10 place-items-center rounded-md text-[var(--accent-text)] transition hover:bg-[var(--accent-surface)]"
             aria-label={`Delete ${savedScenario.scenario.itemName}`}
             onClick={onDelete}
           >
@@ -405,30 +405,30 @@ function WatchlistCard({
         />
       </dl>
 
-      <div className="mt-5 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
-        <p className="text-sm leading-6 text-[#b9ab9a]">
+      <div className="mt-5 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4">
+        <p className="text-sm leading-6 text-[var(--text-muted)]">
           {buildSavedScenarioImpactCopy(impact)}{" "}
-          <span className="text-[#efe6da]">
+          <span className="text-[var(--text-primary)]">
             {formatBTC(Math.abs(impact.btcDifference))} BTC
           </span>{" "}
           absolute change,{" "}
-          <span className="text-[#efe6da]">
+          <span className="text-[var(--text-primary)]">
             {Math.abs(impact.percentDifference).toFixed(1)}%
           </span>{" "}
           from the saved baseline.
         </p>
-        <p className="mt-3 text-xs uppercase tracking-[0.14em] text-[#8f8172]">
+        <p className="mt-3 text-xs uppercase tracking-[0.14em] text-[var(--text-subtle)]">
           Compared with {formatCurrency(impact.priorBTCPriceUSD, currencyCode)} BTC on {savedDate};
           current comparison uses {formatCurrency(impact.currentBTCPriceUSD, currencyCode)} BTC.
         </p>
       </div>
 
-      <div className="mt-4 rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
-        <p className="text-sm leading-6 text-[#b9ab9a]">
+      <div className="mt-4 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4">
+        <p className="text-sm leading-6 text-[var(--text-muted)]">
           Assumes {savedScenario.scenario.itemInflationRate}% annual item
           inflation and {savedScenario.scenario.btcGrowthRate}% annual BTC
           growth. Saved baseline:{" "}
-          <span className="text-[#efe6da]">
+          <span className="text-[var(--text-primary)]">
             {formatBTC(savedScenario.baselineItemCostBTC)} BTC
           </span>{" "}
           at {formatCurrency(savedScenario.baselineBTCPriceUSD, currencyCode)} BTC.
@@ -436,7 +436,7 @@ function WatchlistCard({
       </div>
 
       <Link
-        className="outline-button mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-[#f0a36f] transition hover:bg-[#2a1810] sm:w-auto"
+        className="outline-button mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-[var(--accent-text)] transition hover:bg-[var(--accent-surface)] sm:w-auto"
         href={calculatorHref}
       >
         <RotateCcw size={18} />
@@ -448,11 +448,11 @@ function WatchlistCard({
 
 function WatchlistMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-[rgba(239,230,218,0.14)] bg-black/18 p-4">
-      <dt className="text-xs uppercase tracking-[0.14em] text-[#b9ab9a]">
+    <div className="rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4">
+      <dt className="text-xs uppercase tracking-[0.14em] text-[var(--text-muted)]">
         {label}
       </dt>
-      <dd className="mt-2 text-xl text-[#efe6da]">{value}</dd>
+      <dd className="mt-2 text-xl text-[var(--text-primary)]">{value}</dd>
     </div>
   );
 }
@@ -460,13 +460,13 @@ function WatchlistMetric({ label, value }: { label: string; value: string }) {
 function WatchlistEmptyState() {
   return (
     <section className="panel rounded-lg p-7 text-center sm:p-10">
-      <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+      <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[var(--accent-line)] bg-[var(--accent-surface)] text-[var(--accent-text)]">
         <BookmarkPlus size={24} />
       </div>
-      <h2 className="mt-5 text-2xl font-medium text-[#efe6da]">
+      <h2 className="mt-5 text-2xl font-medium text-[var(--text-primary)]">
         Save your first scenario
       </h2>
-      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#b9ab9a]">
+      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[var(--text-muted)]">
         Run a calculator scenario, save it here, and Denominated will have the
         foundation to track how that cost changes in Bitcoin terms over time.
       </p>
@@ -484,13 +484,13 @@ function WatchlistEmptyState() {
 function WatchlistLoadingState() {
   return (
     <section className="panel rounded-lg p-7 text-center sm:p-10">
-      <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+      <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[var(--accent-line)] bg-[var(--accent-surface)] text-[var(--accent-text)]">
         <BookmarkPlus size={24} />
       </div>
-      <h2 className="mt-5 text-2xl font-medium text-[#efe6da]">
+      <h2 className="mt-5 text-2xl font-medium text-[var(--text-primary)]">
         Loading your watchlist
       </h2>
-      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#b9ab9a]">
+      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[var(--text-muted)]">
         We are checking your account-backed purchasing-power scenarios.
       </p>
     </section>
@@ -501,13 +501,13 @@ function WatchlistSignInState() {
   return (
     <div className="container py-10">
       <section className="panel rounded-lg p-7 text-center sm:p-10">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[rgba(240,163,111,0.34)] bg-[#2a1810]/55 text-[#f0a36f]">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-[var(--accent-line)] bg-[var(--accent-surface)] text-[var(--accent-text)]">
           <BookmarkPlus size={24} />
         </div>
-        <h1 className="mt-5 text-3xl font-medium text-[#efe6da]">
+        <h1 className="mt-5 text-3xl font-medium text-[var(--text-primary)]">
           Sign in to see your watchlist
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#b9ab9a]">
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[var(--text-muted)]">
           The calculator stays free. A Denominated account keeps saved
           scenarios tied to you across devices.
         </p>
@@ -519,7 +519,7 @@ function WatchlistSignInState() {
             Create account
           </Link>
           <Link
-            className="outline-button inline-flex items-center justify-center rounded-md px-5 py-3 font-semibold text-[#f0a36f]"
+            className="outline-button inline-flex items-center justify-center rounded-md px-5 py-3 font-semibold text-[var(--accent-text)]"
             href="/sign-in"
           >
             Sign in

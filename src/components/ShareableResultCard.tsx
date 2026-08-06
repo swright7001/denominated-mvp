@@ -15,7 +15,7 @@ export function ShareableResultCard({
   const currencyCode = normalizeCurrencyCode(scenario.currencyCode);
 
   return (
-    <div className="min-w-0 overflow-hidden rounded-lg border border-[rgba(240,163,111,0.28)] bg-[#0b0907]">
+    <div className="min-w-0 overflow-hidden rounded-lg border border-[var(--accent-line)] bg-[var(--surface-card)]">
       <div className="relative min-h-[230px] p-4 sm:p-5">
         <Image
           src="/brand/logo.png"
@@ -37,15 +37,15 @@ export function ShareableResultCard({
               />
             </div>
             <div className="min-w-0">
-              <p className="truncate font-semibold text-[#efe6da]">
+              <p className="truncate font-semibold text-[var(--text-primary)]">
                 Denominated
               </p>
-              <p className="text-xs break-words text-[#f0a36f]">
+              <p className="text-xs break-words text-[var(--accent-text)]">
                 Measure life in purchasing power.
               </p>
             </div>
           </div>
-          <p className="max-w-full text-lg leading-8 break-words text-[#efe6da] sm:text-xl">
+          <p className="max-w-full text-lg leading-8 break-words text-[var(--text-primary)] sm:text-xl">
             {scenario.itemName} could move from{" "}
             <span className="copper-text">
               {formatBTC(result.currentItemCostBTC)} BTC
@@ -56,11 +56,11 @@ export function ShareableResultCard({
             </span>{" "}
             in {scenario.years} years.
           </p>
-          <p className="mt-5 text-base break-words text-[#f0a36f] sm:text-lg">
+          <p className="mt-5 text-base break-words text-[var(--accent-text)] sm:text-lg">
             {Math.abs(result.btcCostChangePercent).toFixed(1)}% {direction} in
             Bitcoin terms.
           </p>
-          <p className="mt-3 text-xs leading-5 text-[#b9ab9a]">
+          <p className="mt-3 text-xs leading-5 text-[var(--text-muted)]">
             {formatCurrency(scenario.currentItemPriceUSD, currencyCode)} today ·{" "}
             {formatCurrency(result.futureItemPriceUSD, currencyCode)} projected in{" "}
             {scenario.years} years
