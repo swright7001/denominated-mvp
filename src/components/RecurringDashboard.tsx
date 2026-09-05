@@ -1,17 +1,27 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import {
   CalendarDays,
+  Check,
+  Mail,
   Plus,
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
+import {
+  defaultEmailPreferences,
+  emailPreferencesKey,
+  parseEmailPreferences,
+  serializeEmailPreferences,
+  signupEmailKey,
+  type EmailPreferences,
+} from "@/lib/account";
 import { calculateScenario, formatBTC } from "@/lib/calculations";
 import { formatCurrency, normalizeCurrencyCode } from "@/lib/currency";
 import {
@@ -61,6 +71,16 @@ function LocalRecurringDashboard() {
     getWatchlistSnapshot,
     getServerWatchlistSnapshot,
   );
+  const [email] = useState(() =>
+    typeof window === "undefined"
+      ? ""
+      : (window.localStorage.getItem(signupEmailKey) ?? ""),
+  );
+  const [preferences, setPreferences] = useState<EmailPreferences>(() =>
+    typeof window === "undefined"
+      ? defaultEmailPreferences
+      : parseEmailPreferences(window.localStorage.getItem(emailPreferencesKey)),
+  );
   const planTier = useSyncExternalStore(
     subscribeToPlanTier,
     getPlanTierSnapshot,
@@ -82,6 +102,17 @@ function LocalRecurringDashboard() {
     [btcPrices, savedScenarios],
   );
   const hasProAccess = isProEntitled(planTier);
+
+  function updatePreference(key: keyof EmailPreferences) {
+    setPreferences((current) => {
+      const next = { ...current, [key]: !current[key] };
+      window.localStorage.setItem(
+        emailPreferencesKey,
+        serializeEmailPreferences(next),
+      );
+      return next;
+    });
+  }
 
   return (
     <div className="container py-10">
@@ -121,6 +152,12 @@ function LocalRecurringDashboard() {
               impacts={impacts}
               usdBTCPrice={btcPrices.USD?.price ?? 80000}
             />
+            <EmailPreferencesPanel
+              email={email}
+              preferences={preferences}
+              onToggle={updatePreference}
+              accountBacked={false}
+            />
           </div>
         </div>
       ) : (
@@ -151,7 +188,7 @@ function LocalRecurringDashboard() {
 }
 
 function AccountRecurringDashboard() {
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
 
   if (!isLoaded) {
     return <DashboardLoadingState />;
@@ -161,17 +198,25 @@ function AccountRecurringDashboard() {
     return <DashboardSignInState />;
   }
 
-  return <SignedInAccountRecurringDashboard />;
+  return (
+    <SignedInAccountRecurringDashboard
+      email={user.primaryEmailAddress?.emailAddress ?? ""}
+    />
+  );
 }
 
-function SignedInAccountRecurringDashboard() {
+function SignedInAccountRecurringDashboard({ email }: { email: string }) {
   const savedScenarioDocs = useQuery(api.savedScenarios.list, { limit: 100 });
   const account = useQuery(api.accounts.getViewerAccount);
+  const updateEmailPreferences = useMutation(
+    api.accounts.updateEmailPreferences,
+  );
   const savedScenarios = useMemo(
     () => (savedScenarioDocs ?? []).map(toSavedScenario),
     [savedScenarioDocs],
   );
   const btcPrices = useBTCPrices(savedScenarios);
+  const preferences = account?.emailPreferences ?? defaultEmailPreferences;
   const planTier: PlanTier = account?.planTier ?? "freeAccount";
   const impacts = useMemo(
     () =>
@@ -188,6 +233,15 @@ function SignedInAccountRecurringDashboard() {
     [btcPrices, savedScenarios],
   );
   const hasProAccess = isProEntitled(planTier);
+
+  async function updatePreference(key: keyof EmailPreferences) {
+    await updateEmailPreferences({
+      preferences: {
+        ...preferences,
+        [key]: !preferences[key],
+      },
+    });
+  }
 
   return (
     <div className="container py-10">
@@ -228,6 +282,12 @@ function SignedInAccountRecurringDashboard() {
               savedScenarios={savedScenarios}
               impacts={impacts}
               usdBTCPrice={btcPrices.USD?.price ?? 80000}
+            />
+            <EmailPreferencesPanel
+              email={account?.email ?? email}
+              preferences={preferences}
+              onToggle={updatePreference}
+              accountBacked
             />
           </div>
         </div>
@@ -525,6 +585,163 @@ function WeeklyReportPreview({
       </div>
 
       <p className="mt-5 text-xs leading-5 text-[var(--text-subtle)]">{DISCLAIMER}</p>
+      <p className="mt-3 text-xs leading-5 text-[var(--text-subtle)]">
+        Review your weekly summary here or request a copy from Email reports.
+      </p>
+    </section>
+  );
+}
+
+function EmailPreferencesPanel({
+  email,
+  preferences,
+  onToggle,
+  accountBacked,
+}: {
+  email: string;
+  preferences: EmailPreferences;
+  onToggle: (key: keyof EmailPreferences) => void | Promise<void>;
+  accountBacked: boolean;
+}) {
+  const [reportStatus, setReportStatus] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+  const [reportMessage, setReportMessage] = useState("");
+  const options: Array<{
+    key: keyof EmailPreferences;
+    label: string;
+    description: string;
+  }> = [
+    {
+      key: "weeklyReport",
+      label: "Weekly purchasing-power report",
+      description: "A readable summary of saved scenarios and examples.",
+    },
+    {
+      key: "scenarioUpdates",
+      label: "Saved scenario updates",
+      description: "Changes in BTC terms for the goals you care about.",
+    },
+    {
+      key: "educationLessons",
+      label: "Educational lessons",
+      description: "Plain-English purchasing-power concepts.",
+    },
+    {
+      key: "popularExamples",
+      label: "Popular examples",
+      description: "Cars, housing, elder care, tuition, and other life costs.",
+    },
+  ];
+
+  async function sendWeeklyReport() {
+    setReportStatus("sending");
+    setReportMessage("");
+
+    try {
+      const response = await fetch("/api/email/weekly-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+
+      if (!response.ok) {
+        setReportStatus("error");
+        setReportMessage(
+          payload?.error ?? "The weekly report could not be sent right now.",
+        );
+        return;
+      }
+
+      setReportStatus("sent");
+      setReportMessage("This week's report was sent to your account email.");
+    } catch {
+      setReportStatus("error");
+      setReportMessage("The weekly report could not be sent right now.");
+    }
+  }
+
+  return (
+    <section className="panel rounded-lg p-5 sm:p-7">
+      <div className="mb-5 flex items-start gap-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[var(--accent-line)] bg-[var(--accent-surface)] text-[var(--accent-text)]">
+          <Mail size={20} />
+        </div>
+        <div>
+          <p className="eyebrow mb-3">Email reports</p>
+          <h2 className="text-2xl font-medium text-[var(--text-primary)]">
+            {email ? "Education preferences" : "No email saved yet"}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
+            {email
+              ? `${accountBacked ? "Account email" : "Local preview email"}: ${email}`
+              : "Sign in with a verified email to request purchasing-power reports."}
+          </p>
+        </div>
+      </div>
+      {accountBacked ? (
+        <div className="mb-5 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4">
+          <p className="font-medium text-[var(--text-primary)]">Send this week&apos;s report</p>
+          <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
+            Pro and Lifetime accounts can request one purchasing-power report
+            per week.
+          </p>
+          <button
+            type="button"
+            className="outline-button mt-3 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-medium text-[var(--accent-text)]"
+            disabled={!preferences.weeklyReport || reportStatus === "sending" || reportStatus === "sent"}
+            onClick={sendWeeklyReport}
+          >
+            {reportStatus === "sending" ? "Sending..." : reportStatus === "sent" ? "Report sent" : "Email this report"}
+          </button>
+          {reportMessage ? (
+            <p
+              role="status"
+              className={`mt-3 text-sm leading-6 ${
+                reportStatus === "sent" ? "text-[var(--accent-text)]" : "text-[var(--text-muted)]"
+              }`}
+            >
+              {reportMessage}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+      <div className="space-y-3">
+        {options.map((option) => (
+          <button
+            key={option.key}
+            type="button"
+            aria-pressed={preferences[option.key]}
+            className="flex w-full items-start gap-3 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4 text-left"
+            onClick={() => onToggle(option.key)}
+          >
+            <span
+              className={`mt-1 grid h-5 w-5 shrink-0 place-items-center rounded border ${
+                preferences[option.key]
+                  ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--text-on-accent)]"
+                  : "border-[var(--neutral-line)] text-transparent"
+              }`}
+            >
+              <Check size={14} />
+            </span>
+            <span>
+              <span className="block font-medium text-[var(--text-primary)]">
+                {option.label}
+              </span>
+              <span className="mt-1 block text-sm leading-6 text-[var(--text-muted)]">
+                {option.description}
+              </span>
+            </span>
+          </button>
+        ))}
+      </div>
+      <p className="mt-4 text-xs leading-5 text-[var(--text-subtle)]">
+        Phone/SMS is not required. {accountBacked
+          ? "These preferences are saved to your Denominated account."
+          : "These settings stay on this device until you sign in."}
+      </p>
     </section>
   );
 }

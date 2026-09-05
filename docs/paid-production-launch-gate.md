@@ -21,12 +21,11 @@ be the literal value `true`.
 | `DENOMINATED_STRIPE_AUTOMATIC_TAX_ENABLED` | Explicit `true` or `false` decision for automatic tax on API-created Stripe Checkout Sessions. |
 | `DENOMINATED_SUPPORT_EMAIL` | Monitored customer support email for billing, refunds, and account access. |
 | `NEXT_PUBLIC_SUPPORT_URL` | Published customer support URL configured in both the app and Stripe. |
-| `DENOMINATED_ENABLE_EMAIL_REPORTS` | Keep unset or `false` while recurring email delivery is deferred. If enabled later, production Resend configuration becomes mandatory. |
+| `DENOMINATED_EMAIL_FROM` | Verified customer-facing Resend sender, such as `Denominated <reports@approved-domain>`. |
 
 These values do not replace the provider variables reported by
 `getProductionReadinessChecks`. Production also needs live Clerk, Convex,
-Stripe, webhook, and canonical app URL configuration. Resend is required only
-when `DENOMINATED_ENABLE_EMAIL_REPORTS=true`.
+Stripe, webhook, Resend, and canonical app URL configuration.
 
 Production readiness validates provider values, not only their presence:
 
@@ -40,8 +39,16 @@ Production readiness validates provider values, not only their presence:
 
 ## Release sequence
 
+Recurring email is part of the initial paid launch. DEN-104 and DEN-109 must
+be complete before release: an approved dedicated Denominated sender, an
+automatic weekly delivery schedule, paid eligibility and opt-in enforcement,
+opt-out handling, duplicate prevention, and recorded inbox delivery evidence.
+The existing dashboard action sends a report on request; it does not prove
+automatic weekly scheduling. Keep the paid PR in draft until this work is
+implemented and verified. Preserve the existing Hard Money Hustlers sender.
+
 1. Keep `DENOMINATED_ENABLE_PAID_CHECKOUT` disabled in Production.
-2. Complete DEN-99, DEN-100, and DEN-101 and record evidence in Linear.
+2. Complete DEN-99, DEN-100, DEN-101, DEN-104, and DEN-109 and record evidence in Linear.
 3. Configure live provider credentials and the decision variables above.
 4. Deploy the paid branch to Preview and rerun auth, storage, checkout, webhook,
    entitlement, Billing Portal, cancellation, and failed-payment tests.

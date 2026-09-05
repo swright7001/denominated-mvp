@@ -1,28 +1,27 @@
 # Changelog
 
-## 0.2.1 - 2026-07-19
+## 0.2.1 - Unreleased
 
 ### Changed
 
-- Kept the in-app weekly cost-of-life report in Pro while deferring email
-  delivery from the initial paid launch.
-- Removed email reports from the launch plan comparison and dashboard so paid
-  packaging matches what is available on day one.
-- Made Resend readiness conditional on the email-report feature flag instead
-  of blocking the core paid checkout launch.
+- Restored recurring email to the paid-launch scope, including dashboard email
+  preferences, the authenticated report request, and plan/privacy wording.
+- Required Resend configuration for paid-launch readiness again.
 - When automatic tax is approved, Checkout now collects a billing address and
   persists it for existing customers so Stripe can calculate tax reliably.
 
 ### Security
 
-- Kept the dormant weekly-report endpoint fail-closed unless
-  `DENOMINATED_ENABLE_EMAIL_REPORTS=true` is explicitly configured.
+- Preserved verified-account, paid-entitlement, opt-in, and weekly delivery
+  deduplication checks on the report endpoint.
+- Updated Next.js to 16.3.0 and the PostCSS override to 8.5.23.
 
 ### Notes
 
 - The public calculator remains free and does not require an account.
-- Resend production setup remains deferred and no Hard Money Hustlers email
-  configuration is changed.
+- Automatic weekly scheduling and verified production delivery remain required
+  launch work under DEN-104 and DEN-109; the restored manual send action does
+  not establish automatic delivery. No provider configuration is changed.
 
 ## 0.2.0 - 2026-07-19
 
