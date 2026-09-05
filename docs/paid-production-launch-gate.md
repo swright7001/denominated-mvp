@@ -43,9 +43,11 @@ Recurring email is part of the initial paid launch. DEN-104 and DEN-109 must
 be complete before release: an approved dedicated Denominated sender, an
 automatic weekly delivery schedule, paid eligibility and opt-in enforcement,
 opt-out handling, duplicate prevention, and recorded inbox delivery evidence.
-The existing dashboard action sends a report on request; it does not prove
-automatic weekly scheduling. Keep the paid PR in draft until this work is
-implemented and verified. Preserve the existing Hard Money Hustlers sender.
+The Convex cron now queues automatic reports each Monday at 13:00 UTC. It stays
+disabled until `DENOMINATED_ENABLE_RECURRING_EMAIL=true` is set in the intended
+Convex environment. Follow [recurring email activation](./recurring-email.md)
+and keep the paid PR in draft until sender and real inbox delivery verification
+are complete. Preserve the existing Hard Money Hustlers sender.
 
 1. Keep `DENOMINATED_ENABLE_PAID_CHECKOUT` disabled in Production.
 2. Complete DEN-99, DEN-100, DEN-101, DEN-104, and DEN-109 and record evidence in Linear.

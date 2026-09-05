@@ -211,6 +211,7 @@ function SignedInAccountRecurringDashboard({ email }: { email: string }) {
   const updateEmailPreferences = useMutation(
     api.accounts.updateEmailPreferences,
   );
+  const setWeeklySubscription = useMutation(api.accounts.setWeeklyReportSubscription);
   const savedScenarios = useMemo(
     () => (savedScenarioDocs ?? []).map(toSavedScenario),
     [savedScenarioDocs],
@@ -288,6 +289,8 @@ function SignedInAccountRecurringDashboard({ email }: { email: string }) {
               preferences={preferences}
               onToggle={updatePreference}
               accountBacked
+              subscribed={account?.weeklyReportSubscribed === true}
+              onSubscribe={(enabled) => setWeeklySubscription({ enabled })}
             />
           </div>
         </div>
@@ -597,12 +600,24 @@ function EmailPreferencesPanel({
   preferences,
   onToggle,
   accountBacked,
+  subscribed = false,
+  onSubscribe,
 }: {
   email: string;
   preferences: EmailPreferences;
   onToggle: (key: keyof EmailPreferences) => void | Promise<void>;
   accountBacked: boolean;
+  subscribed?: boolean;
+  onSubscribe?: (enabled: boolean) => Promise<null>;
 }) {
+  const [saving, setSaving] = useState(false);
+  const [preferenceError, setPreferenceError] = useState("");
+  async function savePreference(action: () => void | Promise<unknown>) {
+    setSaving(true);
+    setPreferenceError("");
+    try { await action(); } catch { setPreferenceError("Your preference could not be saved. Please try again."); }
+    finally { setSaving(false); }
+  }
   const [reportStatus, setReportStatus] = useState<
     "idle" | "sending" | "sent" | "error"
   >("idle");
@@ -683,6 +698,15 @@ function EmailPreferencesPanel({
       </div>
       {accountBacked ? (
         <div className="mb-5 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4">
+          {onSubscribe ? (
+            <label className="mb-5 flex items-start gap-3 text-sm leading-6 text-[var(--text-primary)]">
+              <input type="checkbox" className="mt-1" checked={subscribed} disabled={saving}
+                onChange={(event) => { const enabled = event.target.checked; void savePreference(() => onSubscribe(enabled)); }} />
+              <span>Send me the weekly purchasing-power email automatically on Mondays.
+                <span className="block text-[var(--text-muted)]">You can turn this off here at any time. Delivery uses your verified account email and requires Pro or Lifetime access.</span>
+              </span>
+            </label>
+          ) : null}
           <p className="font-medium text-[var(--text-primary)]">Send this week&apos;s report</p>
           <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
             Pro and Lifetime accounts can request one purchasing-power report
@@ -715,7 +739,8 @@ function EmailPreferencesPanel({
             type="button"
             aria-pressed={preferences[option.key]}
             className="flex w-full items-start gap-3 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4 text-left"
-            onClick={() => onToggle(option.key)}
+            disabled={saving}
+            onClick={() => void savePreference(() => onToggle(option.key))}
           >
             <span
               className={`mt-1 grid h-5 w-5 shrink-0 place-items-center rounded border ${
@@ -738,6 +763,7 @@ function EmailPreferencesPanel({
         ))}
       </div>
       <p className="mt-4 text-xs leading-5 text-[var(--text-subtle)]">
+        {preferenceError ? <span role="alert" className="block">{preferenceError}</span> : null}
         Phone/SMS is not required. {accountBacked
           ? "These preferences are saved to your Denominated account."
           : "These settings stay on this device until you sign in."}

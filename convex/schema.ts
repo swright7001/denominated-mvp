@@ -56,6 +56,7 @@ export default defineSchema({
     email: v.optional(v.string()),
     planTier: planTierValidator,
     emailPreferences: emailPreferencesValidator,
+    weeklyReportSubscribed: v.optional(v.boolean()),
     stripeCustomerId: v.optional(v.string()),
     stripeSubscriptionId: v.optional(v.string()),
     stripePriceId: v.optional(v.string()),
@@ -69,6 +70,7 @@ export default defineSchema({
   })
     .index("by_ownerTokenIdentifier", ["ownerTokenIdentifier"])
     .index("by_email", ["email"])
+    .index("by_weeklyReportSubscribed", ["weeklyReportSubscribed"])
     .index("by_stripeCustomerId", ["stripeCustomerId"]),
 
   billingSnapshots: defineTable({

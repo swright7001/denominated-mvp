@@ -56,14 +56,15 @@ export async function getFiatReferenceRates({
   const timeout = setTimeout(() => controller.abort(), FIAT_RATE_FETCH_TIMEOUT_MS);
 
   try {
-    const response = await fetcher(ECB_REFERENCE_RATE_URL, {
+    const requestOptions = {
       signal: controller.signal,
       headers: { Accept: "application/vnd.sdmx.data+json;version=1.0.0-wd" },
       next: {
         revalidate: FIAT_RATE_REVALIDATE_SECONDS,
         tags: ["fiat-reference-rates"],
       },
-    });
+    };
+    const response = await fetcher(ECB_REFERENCE_RATE_URL, requestOptions);
 
     if (!response.ok) {
       throw new Error(`ECB responded with ${response.status}`);

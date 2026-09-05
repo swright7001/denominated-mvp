@@ -153,6 +153,7 @@ type ExistingDelivery = {
   status: "processing" | "sent" | "failed";
   attempts: number;
   updatedAt: number;
+  createdAt?: number;
 };
 
 export function getWeeklyDeliveryRetryDecision(
@@ -161,6 +162,10 @@ export function getWeeklyDeliveryRetryDecision(
 ) {
   if (delivery.status === "sent") {
     return { allowed: false as const, code: "ALREADY_SENT" };
+  }
+
+  if (delivery.createdAt !== undefined && now - delivery.createdAt >= 23 * 60 * 60 * 1000) {
+    return { allowed: false as const, code: "RETRY_WINDOW_EXPIRED" };
   }
 
   if (
