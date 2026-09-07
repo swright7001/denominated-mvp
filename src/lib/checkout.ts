@@ -127,6 +127,32 @@ export function getStripeAutomaticTaxConfig(
   return null;
 }
 
+export function getStripeTaxCheckoutConfig(
+  plan: CheckoutPlan,
+  customerId: string | undefined,
+  env: Record<string, string | undefined> = process.env,
+) {
+  const automaticTax = getStripeAutomaticTaxConfig(env);
+
+  if (!automaticTax) {
+    return {};
+  }
+
+  if (!automaticTax.enabled) {
+    return { automatic_tax: automaticTax };
+  }
+
+  return {
+    automatic_tax: automaticTax,
+    billing_address_collection: "required" as const,
+    ...(customerId
+      ? { customer_update: { address: "auto" as const } }
+      : plan.mode === "payment"
+        ? { customer_creation: "always" as const }
+        : {}),
+  };
+}
+
 export function getCheckoutAccountConflict(
   plan: CheckoutPlan,
   account: CheckoutAccountState | null | undefined,

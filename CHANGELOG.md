@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.2.1 - Unreleased
+
+### Changed
+
+- Added a Monday Convex schedule for opted-in Pro and Lifetime accounts, with
+  verified-email checks, bounded batches, and shared manual/scheduled deduplication.
+- Added explicit automatic-email consent and opt-out controls; existing accounts
+  are not automatically subscribed.
+- Restored recurring email to the paid-launch scope, including dashboard email
+  preferences, the authenticated report request, and plan/privacy wording.
+- Required Resend configuration for paid-launch readiness again.
+- When automatic tax is approved, Checkout now collects a billing address and
+  persists it for existing customers so Stripe can calculate tax reliably.
+
+### Security
+
+- Preserved verified-account, paid-entitlement, opt-in, and weekly delivery
+  deduplication checks on the report endpoint.
+- Updated Next.js to 16.3.0 and the PostCSS override to 8.5.23.
+
+### Notes
+
+- The public calculator remains free and does not require an account.
+- Automatic weekly scheduling is implemented but disabled. Production sender
+  verification and real inbox delivery remain required launch work under
+  DEN-104 and DEN-109.
+
 ## 0.2.0 - 2026-07-19
 
 ### Added

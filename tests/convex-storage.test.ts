@@ -5,16 +5,18 @@ import {
   toConvexPresetInput,
   toConvexSavedScenarioInput,
 } from "../src/lib/convex-storage";
+import type { Scenario } from "../src/lib/types";
 import { buildSavedScenario } from "../src/lib/watchlist";
 
 test("toConvexSavedScenarioInput preserves local saved scenario baseline data", () => {
+  const scenarioWithUiFields: Scenario = {
+    ...defaultScenario,
+    slug: "ui-only-slug",
+    category: "Vehicle",
+    icon: "Car",
+  };
   const savedScenario = buildSavedScenario(
-    {
-      ...defaultScenario,
-      slug: "ui-only-slug",
-      category: "Vehicle",
-      icon: "Car",
-    },
+    scenarioWithUiFields,
     {
       id: "saved-local-1",
       savedAt: "2026-06-22T12:00:00.000Z",

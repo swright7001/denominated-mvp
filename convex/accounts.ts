@@ -93,9 +93,28 @@ export const updateEmailPreferences = mutation({
 
     await ctx.db.patch(account._id, {
       emailPreferences: args.preferences,
+      ...(!args.preferences.weeklyReport ? { weeklyReportSubscribed: false } : {}),
       updatedAt: Date.now(),
     });
 
     return account._id;
+  },
+});
+
+export const setWeeklyReportSubscription = mutation({
+  args: { enabled: v.boolean() },
+  returns: v.null(),
+  handler: async (ctx, { enabled }) => {
+    const owner = await requireOwnerTokenIdentifier(ctx);
+    const account = await ctx.db.query("accounts")
+      .withIndex("by_ownerTokenIdentifier", (q) => q.eq("ownerTokenIdentifier", owner))
+      .unique();
+    if (!account) throw new Error("Create an account first.");
+    await ctx.db.patch(account._id, {
+      weeklyReportSubscribed: enabled,
+      ...(enabled ? { emailPreferences: { ...account.emailPreferences, weeklyReport: true } } : {}),
+      updatedAt: Date.now(),
+    });
+    return null;
   },
 });

@@ -81,14 +81,15 @@ export async function getBTCPrice({
   );
 
   try {
-    const response = await fetcher(requestUrl, {
+    const requestOptions = {
       headers,
       signal: controller.signal,
       next: {
         revalidate: BTC_PRICE_REVALIDATE_SECONDS,
         tags: ["btc-price"],
       },
-    });
+    };
+    const response = await fetcher(requestUrl, requestOptions);
 
     if (!response.ok) {
       throw new Error(`CoinGecko responded with ${response.status}`);

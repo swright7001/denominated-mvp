@@ -39,8 +39,18 @@ Production readiness validates provider values, not only their presence:
 
 ## Release sequence
 
+Recurring email is part of the initial paid launch. DEN-104 and DEN-109 must
+be complete before release: an approved dedicated Denominated sender, an
+automatic weekly delivery schedule, paid eligibility and opt-in enforcement,
+opt-out handling, duplicate prevention, and recorded inbox delivery evidence.
+The Convex cron now queues automatic reports each Monday at 13:00 UTC. It stays
+disabled until `DENOMINATED_ENABLE_RECURRING_EMAIL=true` is set in the intended
+Convex environment. Follow [recurring email activation](./recurring-email.md)
+and keep the paid PR in draft until sender and real inbox delivery verification
+are complete. Preserve the existing Hard Money Hustlers sender.
+
 1. Keep `DENOMINATED_ENABLE_PAID_CHECKOUT` disabled in Production.
-2. Complete DEN-99, DEN-100, and DEN-101 and record evidence in Linear.
+2. Complete DEN-99, DEN-100, DEN-101, DEN-104, and DEN-109 and record evidence in Linear.
 3. Configure live provider credentials and the decision variables above.
 4. Deploy the paid branch to Preview and rerun auth, storage, checkout, webhook,
    entitlement, Billing Portal, cancellation, and failed-payment tests.

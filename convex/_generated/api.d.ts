@@ -10,9 +10,12 @@
 
 import type * as accounts from "../accounts.js";
 import type * as billing from "../billing.js";
+import type * as crons from "../crons.js";
 import type * as emailDeliveries from "../emailDeliveries.js";
 import type * as presets from "../presets.js";
 import type * as savedScenarios from "../savedScenarios.js";
+import type * as weeklyReportDelivery from "../weeklyReportDelivery.js";
+import type * as weeklyReports from "../weeklyReports.js";
 
 import type {
   ApiFromModules,
@@ -23,9 +26,12 @@ import type {
 declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
   billing: typeof billing;
+  crons: typeof crons;
   emailDeliveries: typeof emailDeliveries;
   presets: typeof presets;
   savedScenarios: typeof savedScenarios;
+  weeklyReportDelivery: typeof weeklyReportDelivery;
+  weeklyReports: typeof weeklyReports;
 }>;
 
 /**

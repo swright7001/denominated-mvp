@@ -36,6 +36,16 @@ test("paid launch readiness reports missing provider env vars", () => {
   assert.equal(isPaidLaunchReady({}), false);
 });
 
+test("email cannot be omitted from paid readiness using the retired deferral flag", () => {
+  for (const flag of [undefined, "false", "true"]) {
+    const env = { DENOMINATED_ENABLE_EMAIL_REPORTS: flag };
+    const check = getProductionReadinessChecks(env).find((item) => item.id === "email");
+    assert.equal(check?.status, "missing");
+    assert.deepEqual(check?.missingEnvVars, ["RESEND_API_KEY", "DENOMINATED_EMAIL_FROM"]);
+    assert.equal(shouldBlockProductionPaidCheckout({ ...env, VERCEL_ENV: "production" }), true);
+  }
+});
+
 test("paid launch readiness passes environment checks when providers are configured", () => {
   const env = {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_live_123",

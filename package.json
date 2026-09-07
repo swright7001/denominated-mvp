@@ -1,13 +1,15 @@
 {
   "name": "denominated-mvp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test --import tsx tests/**/*.test.ts"
+    "test": "npm run test:unit && npm run test:convex",
+    "test:unit": "node --test --import tsx tests/**/*.test.ts",
+    "test:convex": "vitest run"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.20",
@@ -15,26 +17,29 @@
     "@vercel/speed-insights": "^2.0.0",
     "convex": "^1.42.1",
     "lucide-react": "^1.16.0",
-    "next": "16.2.10",
+    "next": "16.3.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
     "stripe": "^22.2.1"
   },
   "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24.13.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "convex-test": "^0.0.56",
     "eslint": "^9",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.3.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.0"
   },
   "overrides": {
     "next": {
-      "postcss": "8.5.19"
+      "postcss": "8.5.23"
     }
   }
 }
