@@ -1,4 +1,11 @@
 import { Scenario } from "./types";
+import { getLatestPriceRecord } from "./price-history";
+
+function benchmark(slug: string) {
+  const record = getLatestPriceRecord(slug);
+  if (!record) throw new Error(`Missing benchmark: ${slug}`);
+  return { currentItemPriceUSD: record.newUSD, shortDescription: record.definition };
+}
 
 export const defaultScenario: Scenario = {
   slug: "tesla-model-3",
@@ -22,12 +29,11 @@ export const scenarios: Scenario[] = [
   {
     slug: "median-us-house",
     itemName: "Median U.S. house",
-    shortDescription: "National median price",
+    ...benchmark("median-us-house"),
     category: "Housing",
     icon: "Home",
     image: "/scenarios/median-us-house.png",
     imageAlternates: ["/scenarios/alternates/median-us-house-card.png"],
-    currentItemPriceUSD: 412300,
     currentBTCPriceUSD: 80000,
     years: 10,
     itemInflationRate: 3.5,
@@ -37,11 +43,10 @@ export const scenarios: Scenario[] = [
   {
     slug: "rent",
     itemName: "Rent",
-    shortDescription: "Median 1BR apartment",
+    ...benchmark("rent"),
     category: "Monthly expense",
     icon: "Building2",
     image: "/scenarios/rent.png",
-    currentItemPriceUSD: 1589,
     currentBTCPriceUSD: 80000,
     years: 5,
     itemInflationRate: 4.5,
@@ -51,12 +56,11 @@ export const scenarios: Scenario[] = [
   {
     slug: "elder-care",
     itemName: "Elder care",
-    shortDescription: "Assisted living national average",
+    ...benchmark("elder-care"),
     category: "Care",
     icon: "Heart",
     image: "/scenarios/elder-care.png",
     imageAlternates: ["/scenarios/alternates/elder-care-room.png"],
-    currentItemPriceUSD: 5419,
     currentBTCPriceUSD: 80000,
     years: 5,
     itemInflationRate: 8.1,
@@ -66,10 +70,9 @@ export const scenarios: Scenario[] = [
   {
     slug: "childcare",
     itemName: "Childcare",
-    shortDescription: "Full-time care estimate",
+    ...benchmark("childcare"),
     category: "Family",
     icon: "Users",
-    currentItemPriceUSD: 1400,
     currentBTCPriceUSD: 80000,
     years: 5,
     itemInflationRate: 5.5,
@@ -79,11 +82,10 @@ export const scenarios: Scenario[] = [
   {
     slug: "college-tuition",
     itemName: "College tuition",
-    shortDescription: "Four years in-state",
+    ...benchmark("college-tuition"),
     category: "Education",
     icon: "GraduationCap",
     image: "/scenarios/college-tuition.png",
-    currentItemPriceUSD: 55530,
     currentBTCPriceUSD: 80000,
     years: 10,
     itemInflationRate: 5,
@@ -93,10 +95,9 @@ export const scenarios: Scenario[] = [
   {
     slug: "wedding",
     itemName: "Wedding",
-    shortDescription: "U.S. average celebration",
+    ...benchmark("wedding"),
     category: "Life event",
     icon: "Sparkles",
-    currentItemPriceUSD: 35000,
     currentBTCPriceUSD: 80000,
     years: 4,
     itemInflationRate: 4.5,

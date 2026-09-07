@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { PriceBenchmark } from "@/components/PriceBenchmark";
+import { getLatestPriceRecord } from "@/lib/price-history";
 import {
   BriefcaseBusiness,
   Building2,
@@ -55,10 +57,11 @@ export function PresetScenarioGrid({
         const currencyCode = normalizeCurrencyCode(scenario.currencyCode);
 
         return (
+          <article key={scenario.slug} className="panel group min-w-0 overflow-hidden rounded-lg transition hover:-translate-y-1 hover:border-[var(--accent-line-strong)]">
           <Link
             key={scenario.slug}
             href={`/examples/${scenario.slug}`}
-            className="panel group overflow-hidden rounded-lg transition hover:-translate-y-1 hover:border-[var(--accent-line-strong)]"
+            className="block"
             onClick={() =>
               trackProductEvent({
                 event: "preset_opened",
@@ -90,7 +93,7 @@ export function PresetScenarioGrid({
               <div className="mt-5 flex items-end justify-between gap-3">
                 <div>
                   <p className="text-sm text-[var(--accent-text)]">
-                    {formatCurrency(scenario.currentItemPriceUSD, currencyCode)} today
+                    {formatCurrency(scenario.currentItemPriceUSD, currencyCode)} {getLatestPriceRecord(scenario.slug)?.unit ?? "budget"}
                   </p>
                   <p className="mt-1 text-xl text-[var(--text-primary)]">
                     {formatBTC(result.currentItemCostBTC)} BTC
@@ -102,6 +105,8 @@ export function PresetScenarioGrid({
               </div>
             </div>
           </Link>
+          {analyticsSurface === "examples" && <div className="px-5 pb-5"><PriceBenchmark slug={scenario.slug} /></div>}
+          </article>
         );
       })}
     </div>

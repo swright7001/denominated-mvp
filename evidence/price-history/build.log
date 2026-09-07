@@ -1,0 +1,62 @@
+
+> denominated-mvp@0.2.0 build
+> next build
+
+▲ Next.js 16.2.10 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.7s
+  Running TypeScript ...
+  Finished TypeScript in 2.0s ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/39) ...
+  Generating static pages using 9 workers (9/39)
+  Generating static pages using 9 workers (19/39)
+  Generating static pages using 9 workers (29/39)
+✓ Generating static pages using 9 workers (39/39) in 491ms
+  Finalizing page optimization ...
+
+Route (app)                       Revalidate  Expire
+┌ ƒ /
+├ ○ /_not-found
+├ ○ /account
+├ ƒ /api/analytics/event
+├ ƒ /api/billing/portal
+├ ƒ /api/checkout/stripe
+├ ƒ /api/email/weekly-report
+├ ƒ /api/health
+├ ƒ /api/monitoring/client-error
+├ ƒ /api/prices/bitcoin
+├ ƒ /api/readiness/paid-preview
+├ ƒ /api/scenarios/save
+├ ƒ /api/share-image
+├ ƒ /api/webhooks/stripe
+├ ○ /apple-icon
+├ ○ /billing
+├ ƒ /calculator
+├ ○ /dashboard
+├ ƒ /examples
+├ ƒ /examples/[slug]
+├ ○ /examples/median-us-house             1m      1y
+├ ○ /examples/price-history
+├ ○ /examples/rent                        1m      1y
+├ ○ /examples/tesla-model-3               1m      1y
+├ ○ /icon
+├ ○ /learn
+├ ○ /legal/privacy
+├ ○ /legal/refunds
+├ ○ /legal/terms
+├ ○ /plans
+├ ○ /robots.txt
+├ ƒ /sign-in/[[...sign-in]]
+├ ƒ /sign-up/[[...sign-up]]
+├ ○ /sitemap.xml
+├ ○ /support
+├ ○ /walkthrough
+└ ○ /watchlist
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

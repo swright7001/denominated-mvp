@@ -1,0 +1,26 @@
+[
+  {
+    "theme": "dark",
+    "size": "desktop",
+    "width": 1440,
+    "checks": "12 routes, 6 benchmarks, history navigation and sources, no nested anchors, no overflow, no page errors: PASS"
+  },
+  {
+    "theme": "dark",
+    "size": "mobile",
+    "width": 390,
+    "checks": "12 routes, 6 benchmarks, history navigation and sources, no nested anchors, no overflow, no page errors: PASS"
+  },
+  {
+    "theme": "light",
+    "size": "desktop",
+    "width": 1440,
+    "checks": "12 routes, 6 benchmarks, history navigation and sources, no nested anchors, no overflow, no page errors: PASS"
+  },
+  {
+    "theme": "light",
+    "size": "mobile",
+    "width": 390,
+    "checks": "12 routes, 6 benchmarks, history navigation and sources, no nested anchors, no overflow, no page errors: PASS"
+  }
+]
