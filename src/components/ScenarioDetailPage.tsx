@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { PriceBenchmark } from "@/components/PriceBenchmark";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { AssumptionsPanel } from "@/components/AssumptionsPanel";
@@ -64,6 +65,7 @@ export async function ScenarioDetailPage({
             {landingContent?.intro ?? liveScenario.shortDescription}
           </p>
           <BTCPriceStatus btcPrice={btcPrice} className="mt-6" />
+          <div className="mt-6"><PriceBenchmark slug={scenario.slug} detail /></div>
 
           {liveScenario.image && (
             <div className="relative mt-8 aspect-[16/7] overflow-hidden rounded-lg border border-[var(--accent-line)] bg-[var(--surface-image)]">

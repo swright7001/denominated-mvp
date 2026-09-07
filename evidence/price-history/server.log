@@ -1,0 +1,9 @@
+
+> denominated-mvp@0.2.0 start
+> next start --port 3217
+
+▲ Next.js 16.2.10
+- Local:         http://localhost:3217
+- Network:       http://192.168.1.156:3217
+✓ Ready in 55ms
+{"event":"server_instance_ready","runtime":"nodejs"}

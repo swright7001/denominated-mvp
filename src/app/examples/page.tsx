@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ExampleLibraryNav } from "@/components/ExampleLibraryNav";
 import { BTCPriceStatus } from "@/components/BTCPriceStatus";
 import { Layout } from "@/components/Layout";
 import { PresetScenarioGrid } from "@/components/PresetScenarioGrid";
@@ -38,11 +39,11 @@ export default async function ExamplesPage() {
           <div>
             <p className="eyebrow">Examples</p>
             <h1 className="mt-3 text-4xl font-medium text-[var(--text-primary)] md:text-6xl">
-              Popular Scenarios
+              Life changes. So do prices.
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
-              See how everyday expenses compare in today&apos;s dollars versus
-              future purchasing power.
+              Explore everyday costs with sourced benchmarks, transparent assumptions,
+              and a record of every price update.
             </p>
           </div>
           <div className="outline-button rounded-md px-4 py-3 text-sm text-[var(--accent-text)]">
@@ -50,6 +51,8 @@ export default async function ExamplesPage() {
           </div>
         </div>
         <BTCPriceStatus btcPrice={btcPrice} className="mb-6" />
+        <ExampleLibraryNav />
+        <p className="mb-6 text-sm text-[var(--text-muted)]">12 examples · Differences compare USD presets, not annual inflation or proven market price changes. National benchmarks are not local quotes.</p>
         <PresetScenarioGrid
           scenarios={pricedScenarios}
           analyticsSurface="examples"
