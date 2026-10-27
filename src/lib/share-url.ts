@@ -1,5 +1,6 @@
 import { ScenarioInput } from "./types";
 import { normalizeCurrencyCode } from "./currency";
+import { normalizeScenario } from "./scenario-validation";
 
 type ScenarioSearchParams =
   | string
@@ -12,6 +13,7 @@ const purchaseTypes = new Set<ScenarioInput["purchaseType"]>([
 ]);
 
 export function scenarioToSearchParams(scenario: ScenarioInput) {
+  scenario = normalizeScenario(scenario);
   const params = new URLSearchParams();
 
   params.set("item", scenario.itemName);
@@ -66,14 +68,14 @@ export function parseScenarioSearchParams(
 
   const purchaseType = params.get("type");
 
-  return {
+  return normalizeScenario({
     itemName: cleanText(params.get("item")) ?? fallback.itemName,
     currencyCode: normalizeCurrencyCode(params.get("currency")),
     currentItemPriceUSD:
-      cleanNumber(params.get("price")) ?? fallback.currentItemPriceUSD,
+      cleanNumber(params.get("price"), 0) ?? fallback.currentItemPriceUSD,
     currentBTCPriceUSD:
-      cleanNumber(params.get("btc")) ?? fallback.currentBTCPriceUSD,
-    years: cleanNumber(params.get("years")) ?? fallback.years,
+      cleanNumber(params.get("btc"), 1) ?? fallback.currentBTCPriceUSD,
+    years: cleanNumber(params.get("years"), 0) ?? fallback.years,
     itemInflationRate:
       cleanNumber(params.get("inflation")) ?? fallback.itemInflationRate,
     btcGrowthRate: cleanNumber(params.get("growth")) ?? fallback.btcGrowthRate,
@@ -81,7 +83,7 @@ export function parseScenarioSearchParams(
       purchaseType && purchaseTypes.has(purchaseType as ScenarioInput["purchaseType"])
         ? (purchaseType as ScenarioInput["purchaseType"])
         : fallback.purchaseType,
-  };
+  });
 }
 
 function toURLSearchParams(search: ScenarioSearchParams) {
@@ -109,9 +111,9 @@ function cleanText(value: string | null) {
   return trimmed ? trimmed.slice(0, 90) : null;
 }
 
-function cleanNumber(value: string | null) {
+function cleanNumber(value: string | null, minimum = -Infinity) {
   if (!value) return null;
 
   const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+  return Number.isFinite(parsed) && parsed >= minimum ? parsed : null;
 }

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { formatCurrency, normalizeCurrencyCode, parseCurrencyInputDraft } from "@/lib/currency";
 import {
-  normalizeNumericInputDraft,
-  parseNumericInputDraft,
-} from "@/lib/numeric-input";
+  formatCurrency,
+  currencyMetadata,
+  normalizeCurrencyCode,
+  parseCurrencyInputDraft,
+} from "@/lib/currency";
+import { parseNumericInputDraft } from "@/lib/numeric-input";
+import { boundScenarioNumber, scenarioLimits } from "@/lib/scenario-validation";
 import type { ScenarioInput } from "@/lib/types";
 import type { BTCPriceLoadState } from "./CalculatorExperience";
 
@@ -29,12 +32,6 @@ type NumericField = Extract<
   | "btcGrowthRate"
 >;
 
-const fieldMinimums: Partial<Record<NumericField, number>> = {
-  currentItemPriceUSD: 0,
-  currentBTCPriceUSD: 1,
-  years: 0,
-};
-
 export function ScenarioForm({
   value,
   btcPriceStatus,
@@ -45,6 +42,7 @@ export function ScenarioForm({
   onBTCPriceManualChange,
   onChange,
 }: ScenarioFormProps) {
+  const [errors, setErrors] = useState<Partial<Record<NumericField, string>>>({});
   const [activeNumericField, setActiveNumericField] =
     useState<NumericField | null>(null);
   const [numericDrafts, setNumericDrafts] = useState<
@@ -56,50 +54,68 @@ export function ScenarioForm({
     nextValue: ScenarioInput[K],
   ) => onChange({ ...value, [key]: nextValue });
 
-  const numberUpdate = (key: NumericField, nextValue: string) => {
-    setNumericDrafts((current) => ({ ...current, [key]: nextValue }));
+  const parseFieldDraft = (key: NumericField, draft: string) =>
+    key === "currentItemPriceUSD" || key === "currentBTCPriceUSD"
+      ? parseCurrencyInputDraft(draft, normalizeCurrencyCode(value.currencyCode))
+      : parseNumericInputDraft(draft);
 
-    const parsed =
-      key === "currentItemPriceUSD" || key === "currentBTCPriceUSD"
-        ? parseCurrencyInputDraft(nextValue, normalizeCurrencyCode(value.currencyCode))
-        : parseNumericInputDraft(nextValue);
-    if (parsed === null) return;
-
-    const minimum = fieldMinimums[key];
-    update(
-      key,
-      (minimum === undefined ? parsed : Math.max(minimum, parsed)) as never,
+  const isValidNumber = (key: NumericField, parsed: number | null) => {
+    const { min, max } = scenarioLimits[key];
+    return (
+      parsed !== null &&
+      Number.isFinite(parsed) &&
+      parsed >= min &&
+      parsed <= max &&
+      (key !== "years" || Number.isInteger(parsed))
     );
   };
 
-  const normalizeNumber = (key: NumericField) => {
-    const normalized = normalizeNumericInputDraft({
-      draft: numericDrafts[key] ?? String(value[key]),
-      fallback: value[key],
-      min: fieldMinimums[key],
-    });
+  const numberUpdate = (key: NumericField, nextValue: string) => {
+    setNumericDrafts((current) => ({ ...current, [key]: nextValue }));
 
-    update(key, normalized as never);
-    setNumericDrafts((current) => {
-      const next = { ...current };
-      delete next[key];
-      return next;
-    });
+    const parsed = parseFieldDraft(key, nextValue);
+    const { min, max } = scenarioLimits[key];
+    const valid = isValidNumber(key, parsed);
+    setErrors((current) => ({
+      ...current,
+      [key]: valid
+        ? ""
+        : `Enter ${key === "years" ? "a whole number" : "a number"} from ${min} to ${max}. Results keep the last valid value.`,
+    }));
+    if (valid && parsed !== null) update(key, parsed);
+  };
+
+  const fieldNumber = (key: NumericField) =>
+    key === "currentItemPriceUSD" || key === "currentBTCPriceUSD"
+      ? new Intl.NumberFormat(currencyMetadata[normalizeCurrencyCode(value.currencyCode)].locale, {
+          useGrouping: false, maximumFractionDigits: 20,
+        }).format(value[key])
+      : String(value[key]);
+
+  const normalizeNumber = (key: NumericField) => {
+    const parsed = parseFieldDraft(key, numericDrafts[key] ?? fieldNumber(key));
+    if (!isValidNumber(key, parsed) || parsed === null) return;
+
+    update(key, boundScenarioNumber(key, parsed));
+    setNumericDrafts((current) => ({ ...current, [key]: undefined }));
     setActiveNumericField(null);
   };
 
   const getNumberValue = (key: NumericField) =>
-    activeNumericField === key
-      ? (numericDrafts[key] ?? String(value[key]))
-      : String(value[key]);
+    activeNumericField === key || Boolean(errors[key])
+      ? (numericDrafts[key] ?? fieldNumber(key))
+      : fieldNumber(key);
 
   const startNumberEdit = (key: NumericField) => {
     setActiveNumericField(key);
-    setNumericDrafts((current) => ({ ...current, [key]: String(value[key]) }));
+    setNumericDrafts((current) => ({
+      ...current,
+      [key]: current[key] ?? fieldNumber(key),
+    }));
   };
 
   return (
-    <section className="panel rounded-lg p-5 sm:p-7">
+    <section className="panel min-w-0 rounded-lg p-5 sm:p-7">
       <div className="space-y-7">
         <div>
           <p className="eyebrow mb-4">1. What are you calculating?</p>
@@ -108,6 +124,7 @@ export function ScenarioForm({
           </label>
           <input
             id="itemName"
+            maxLength={90}
             className="field mt-2"
             value={value.itemName}
             onChange={(event) => update("itemName", event.target.value)}
@@ -156,7 +173,10 @@ export function ScenarioForm({
                 className="field mt-2"
                 inputMode="decimal"
                 type="text"
+                aria-label={`Current item price in ${normalizeCurrencyCode(value.currencyCode)}`}
                 value={getNumberValue("currentItemPriceUSD")}
+                aria-invalid={Boolean(errors.currentItemPriceUSD)}
+                aria-describedby={errors.currentItemPriceUSD ? "currentItemPriceUSD-error" : undefined}
                 onBlur={() => normalizeNumber("currentItemPriceUSD")}
                 onChange={(event) => {
                   onItemPriceManualChange();
@@ -164,6 +184,11 @@ export function ScenarioForm({
                 }}
                 onFocus={() => startNumberEdit("currentItemPriceUSD")}
               />
+              {errors.currentItemPriceUSD && (
+                <span id="currentItemPriceUSD-error" role="alert" className="mt-2 block text-xs leading-5 text-[var(--accent-text)]">
+                  {errors.currentItemPriceUSD}
+                </span>
+              )}
             </div>
             <div className="grid content-start">
               <label
@@ -177,7 +202,10 @@ export function ScenarioForm({
                 className="field mt-2"
                 inputMode="decimal"
                 type="text"
+                aria-label={`Current Bitcoin price in ${normalizeCurrencyCode(value.currencyCode)}`}
                 value={getNumberValue("currentBTCPriceUSD")}
+                aria-invalid={Boolean(errors.currentBTCPriceUSD)}
+                aria-describedby={errors.currentBTCPriceUSD ? "currentBTCPriceUSD-error" : undefined}
                 onBlur={() => normalizeNumber("currentBTCPriceUSD")}
                 onChange={(event) => {
                   onBTCPriceManualChange();
@@ -185,6 +213,11 @@ export function ScenarioForm({
                 }}
                 onFocus={() => startNumberEdit("currentBTCPriceUSD")}
               />
+              {errors.currentBTCPriceUSD && (
+                <span id="currentBTCPriceUSD-error" role="alert" className="mt-2 block text-xs leading-5 text-[var(--accent-text)]">
+                  {errors.currentBTCPriceUSD}
+                </span>
+              )}
               <BTCPriceStatusNote
                 btcPriceStatus={btcPriceStatus}
                 btcPriceWasManuallyEdited={btcPriceWasManuallyEdited}
@@ -202,43 +235,67 @@ export function ScenarioForm({
                 className="field mt-2"
                 inputMode="numeric"
                 type="text"
+                aria-label="Time horizon in years"
                 value={getNumberValue("years")}
+                aria-invalid={Boolean(errors.years)}
+                aria-describedby={errors.years ? "years-error" : undefined}
                 onBlur={() => normalizeNumber("years")}
                 onChange={(event) => numberUpdate("years", event.target.value)}
                 onFocus={() => startNumberEdit("years")}
               />
+              {errors.years && (
+                <span id="years-error" role="alert" className="mt-2 block text-xs leading-5 text-[var(--accent-text)]">
+                  {errors.years}
+                </span>
+              )}
             </label>
             <label className="text-sm text-[var(--text-secondary)]">
-              Annual item inflation rate
+              Annual item inflation rate (%)
               <input
                 className="field mt-2"
                 inputMode="decimal"
                 type="text"
+                aria-label="Annual item inflation rate (%)"
                 value={getNumberValue("itemInflationRate")}
+                aria-invalid={Boolean(errors.itemInflationRate)}
+                aria-describedby={errors.itemInflationRate ? "itemInflationRate-error" : undefined}
                 onBlur={() => normalizeNumber("itemInflationRate")}
                 onChange={(event) =>
                   numberUpdate("itemInflationRate", event.target.value)
                 }
                 onFocus={() => startNumberEdit("itemInflationRate")}
               />
+              {errors.itemInflationRate && (
+                <span id="itemInflationRate-error" role="alert" className="mt-2 block text-xs leading-5 text-[var(--accent-text)]">
+                  {errors.itemInflationRate}
+                </span>
+              )}
             </label>
             <label className="text-sm text-[var(--text-secondary)]">
-              Annual BTC growth assumption
+              Annual BTC growth assumption (%)
               <input
                 className="field mt-2"
                 inputMode="decimal"
                 type="text"
+                aria-label="Annual BTC growth assumption (%)"
                 value={getNumberValue("btcGrowthRate")}
+                aria-invalid={Boolean(errors.btcGrowthRate)}
+                aria-describedby={errors.btcGrowthRate ? "btcGrowthRate-error" : undefined}
                 onBlur={() => normalizeNumber("btcGrowthRate")}
                 onChange={(event) =>
                   numberUpdate("btcGrowthRate", event.target.value)
                 }
                 onFocus={() => startNumberEdit("btcGrowthRate")}
               />
+              {errors.btcGrowthRate && (
+                <span id="btcGrowthRate-error" role="alert" className="mt-2 block text-xs leading-5 text-[var(--accent-text)]">
+                  {errors.btcGrowthRate}
+                </span>
+              )}
             </label>
             <div className="rounded-md border border-[var(--neutral-line)] p-4 text-sm leading-5 text-[var(--text-muted)]">
-              BTC spot price is fetched server-side when available. Item prices
-              and future assumptions remain editable local inputs.
+              Enter rates as percentages: 4 means 4% per year. Negative rates
+              model a decrease. These are assumptions, not predictions.
             </div>
           </div>
         </div>
@@ -252,6 +309,7 @@ export function ScenarioForm({
             ].map(([type, label, description]) => (
               <button
                 key={type}
+                aria-pressed={value.purchaseType === type}
                 type="button"
                 className={`p-4 text-left transition ${
                   value.purchaseType === type
@@ -271,6 +329,15 @@ export function ScenarioForm({
           </div>
         </div>
       </div>
+      <a
+        href="#scenario-results"
+        className="copper-button mt-6 block rounded-md px-4 py-3 text-center font-semibold xl:hidden"
+      >
+        View results
+      </a>
+      <p className="mt-3 text-xs leading-5 text-[var(--text-muted)]">
+        Results update automatically. No Calculate button is needed.
+      </p>
     </section>
   );
 }

@@ -47,3 +47,15 @@ test("formula parity holds when both fiat values use the same cross rate", () =>
   assert.ok(Math.abs(usd.currentItemCostBTC - eur.currentItemCostBTC) < 1e-12);
   assert.ok(Math.abs(usd.futureItemCostBTC - eur.futureItemCostBTC) < 1e-12);
 });
+
+
+test("currency drafts reject junk and scientific notation without stripping meaningful characters", () => {
+  for (const currency of ["USD", "EUR", "GBP", "CHF", "JPY"] as const) {
+    for (const draft of ["abc123", "1e9", "Infinity", "pizza<script>12", "12,34,56"]) {
+      assert.equal(parseCurrencyInputDraft(draft, currency), null, `${currency}: ${draft}`);
+    }
+  }
+  assert.equal(parseCurrencyInputDraft("$1,200.50", "USD"), 1200.5);
+  assert.equal(parseCurrencyInputDraft("1.234,56 €", "EUR"), 1234.56);
+  assert.equal(parseCurrencyInputDraft("100,5", "EUR"), 100.5);
+});

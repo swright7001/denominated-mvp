@@ -70,6 +70,7 @@ export default async function Home() {
               View Examples
             </TrackedLink>
           </div>
+          <p className="mt-4 text-sm text-[var(--text-muted)]">Free calculator. No signup or payment required.</p>
           <div className="mt-10 grid gap-5 sm:grid-cols-3">
             <MiniProof
               icon={<BadgeDollarSign />}

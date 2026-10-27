@@ -1,7 +1,9 @@
 import { formatCurrency, normalizeCurrencyCode } from "./currency";
 import { ScenarioInput, ScenarioResult } from "./types";
+import { normalizeScenario } from "./scenario-validation";
 
 export function calculateScenario(input: ScenarioInput): ScenarioResult {
+  input = normalizeScenario(input);
   const years = Math.max(0, Number(input.years) || 0);
   const itemInflation = (Number(input.itemInflationRate) || 0) / 100;
   const btcGrowth = (Number(input.btcGrowthRate) || 0) / 100;

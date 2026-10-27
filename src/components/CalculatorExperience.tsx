@@ -1,22 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { track } from "@vercel/analytics";
-import {
-  signupEmailKey,
-  signupPromptDismissedKey,
-  signupPromptShownKey,
-} from "@/lib/account";
 import { calculateScenario } from "@/lib/calculations";
 import {
   normalizeCurrencyCode,
   roundCurrencyAmount,
 } from "@/lib/currency";
+import { normalizeScenario } from "@/lib/scenario-validation";
+import { parseScenarioSearchParams, scenarioToSearchParams } from "@/lib/share-url";
 import { defaultScenario } from "@/lib/scenarios";
 import type { BTCPriceResult } from "@/lib/btc-price";
 import type { ScenarioInput } from "@/lib/types";
 import { AssumptionsPanel } from "./AssumptionsPanel";
-import { BTCComparisonChart } from "./BTCComparisonChart";
 import { CopyScenarioLinkButton } from "./CopyScenarioLinkButton";
 import { CopyTweetButton } from "./CopyTweetButton";
 import { DownloadResultImageButton } from "./DownloadResultImageButton";
@@ -25,7 +22,11 @@ import { ResultCards } from "./ResultCards";
 import { SaveScenarioButton } from "./SaveScenarioButton";
 import { ScenarioForm } from "./ScenarioForm";
 import { ShareableResultCard } from "./ShareableResultCard";
-import { SignupPrompt } from "./SignupPrompt";
+const BTCComparisonChart = dynamic(
+  () => import("./BTCComparisonChart").then((module) => module.BTCComparisonChart),
+  { loading: () => <p role="status" className="panel grid h-96 place-items-center rounded-lg text-[var(--text-muted)]">Loading chart. Your results are ready above.</p> },
+);
+const draftKey = "denominated.calculatorDraft.v1";
 
 type CalculatorExperienceProps = {
   initialScenario?: ScenarioInput;
@@ -51,10 +52,13 @@ export function CalculatorExperience({
   });
   const [btcPriceWasManuallyEdited, setBtcPriceWasManuallyEdited] =
     useState(hasSharedScenario);
-  const [isSoftSignupPromptOpen, setIsSoftSignupPromptOpen] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const btcPriceWasEdited = useRef(hasSharedScenario);
   const itemPriceWasEdited = useRef(hasSharedScenario);
-  const result = useMemo(() => calculateScenario(scenario), [scenario]);
+  const { currentItemPriceUSD, currentBTCPriceUSD, years, itemInflationRate, btcGrowthRate } = scenario;
+  const result = useMemo(() => calculateScenario({
+    ...defaultScenario, currentItemPriceUSD, currentBTCPriceUSD, years, itemInflationRate, btcGrowthRate,
+  }), [currentItemPriceUSD, currentBTCPriceUSD, years, itemInflationRate, btcGrowthRate]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -166,37 +170,53 @@ export function CalculatorExperience({
   }
 
   useEffect(() => {
-    if (isSignedIn) return;
+    const frame = window.requestAnimationFrame(() => {
+      if (!hasSharedScenario) {
+        try {
+          const draft = window.sessionStorage.getItem(draftKey);
+          const restored = draft ? parseScenarioSearchParams(draft, initialScenario) : null;
+          if (restored) {
+            btcPriceWasEdited.current = true;
+            itemPriceWasEdited.current = true;
+            setBtcPriceWasManuallyEdited(true);
+            setScenario(restored);
+          }
+        } catch { /* The calculator also works when browser storage is blocked. */ }
+      }
+      setIsReady(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [hasSharedScenario, initialScenario]);
 
-    const hasSignupEmail = window.localStorage.getItem(signupEmailKey);
-    const hasDismissedPrompt = window.localStorage.getItem(
-      signupPromptDismissedKey,
-    );
-    const hasShownPrompt = window.localStorage.getItem(signupPromptShownKey);
+  useEffect(() => {
+    if (!isReady) return;
+    try {
+      window.sessionStorage.setItem(draftKey, scenarioToSearchParams(scenario).toString());
+    } catch { /* Sharing remains available without browser storage. */ }
+  }, [scenario, isReady]);
 
-    if (hasSignupEmail || hasDismissedPrompt || hasShownPrompt) return;
-
-    const promptTimer = window.setTimeout(() => {
-      window.localStorage.setItem(signupPromptShownKey, "true");
-      setIsSoftSignupPromptOpen(true);
-    }, 1400);
-
-    return () => window.clearTimeout(promptTimer);
-  }, [isSignedIn]);
+  function updateScenario(next: ScenarioInput) {
+    setScenario({ ...normalizeScenario(next), itemName: next.itemName.slice(0, 90) });
+  }
 
   return (
-    <div className="container py-10">
+    <div className="container py-10" data-calculator-ready={isReady}>
       <div className="mb-8">
         <p className="eyebrow">Calculator</p>
         <h1 className="mt-3 text-4xl font-medium text-[var(--text-primary)] md:text-6xl">
           Run a purchasing-power scenario
         </h1>
         <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
-          Change the price, timeline, and assumptions to see whether an expense
-          gets more expensive in dollars but cheaper in Bitcoin terms.
+          Compare an expense in dollars and Bitcoin. Results update automatically
+          as you change the inputs. Free, with no signup required.
         </p>
+        <p className="mt-3 text-sm text-[var(--text-accent)]" role="status">
+          {isReady ? "Ready. Start with your expense and today’s price." : "Loading calculator. Inputs will be ready shortly."}
+        </p>
+        <noscript><p>Enable JavaScript to edit this calculator. You can still read the example comparison below.</p></noscript>
       </div>
 
+      <fieldset disabled={!isReady} className="min-w-0 border-0 p-0">
       <div className="grid min-w-0 gap-6 xl:grid-cols-[420px_1fr]">
         <ScenarioForm
           value={scenario}
@@ -211,9 +231,9 @@ export function CalculatorExperience({
             btcPriceWasEdited.current = true;
             setBtcPriceWasManuallyEdited(true);
           }}
-          onChange={setScenario}
+          onChange={updateScenario}
         />
-        <div className="min-w-0 space-y-6">
+        <div id="scenario-results" className="min-w-0 scroll-mt-24 space-y-6">
           <ResultCards scenario={scenario} result={result} />
           <BTCComparisonChart scenario={scenario} result={result} />
           <div className="grid min-w-0 gap-6 lg:grid-cols-[1fr_1fr]">
@@ -244,12 +264,7 @@ export function CalculatorExperience({
           </section>
         </div>
       </div>
-      <SignupPrompt
-        isOpen={isSoftSignupPromptOpen}
-        scenario={scenario}
-        realAccountsEnabled={realAccountsEnabled}
-        onClose={() => setIsSoftSignupPromptOpen(false)}
-      />
+      </fieldset>
     </div>
   );
 }

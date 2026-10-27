@@ -61,32 +61,39 @@ export function parseCurrencyInputDraft(
   draft: string,
   currencyCode: CurrencyCode = defaultCurrencyCode,
 ) {
-  const value = draft.trim();
+  let value = draft.trim();
   if (!value) return null;
 
-  const parts = new Intl.NumberFormat(currencyMetadata[currencyCode].locale)
-    .formatToParts(12345.6);
+  const metadata = currencyMetadata[currencyCode];
+  const parts = new Intl.NumberFormat(metadata.locale).formatToParts(12345.6);
   const decimal = parts.find((part) => part.type === "decimal")?.value ?? ".";
-  const groups = new Set(
-    parts.filter((part) => part.type === "group").map((part) => part.value),
-  );
+  const currencySymbol = new Intl.NumberFormat(metadata.locale, {
+    style: "currency", currency: currencyCode,
+  }).formatToParts(1).find((part) => part.type === "currency")?.value;
+  const affixes = [...new Set([currencyCode, currencySymbol, ...(currencyCode === "JPY" ? ["¥", "￥"] : [])].filter((part): part is string => Boolean(part)))];
+  for (const affix of affixes) {
+    if (value.toUpperCase().startsWith(affix.toUpperCase())) value = value.slice(affix.length).trim();
+    if (value.toUpperCase().endsWith(affix.toUpperCase())) value = value.slice(0, -affix.length).trim();
+  }
+
+  const groups = new Set(parts.filter((part) => part.type === "group").map((part) => part.value));
   groups.add(" ");
   groups.add("\u00a0");
   groups.add("\u202f");
-  groups.add("'");
-  groups.add("’");
-
-  let normalized = value;
-  for (const group of groups) {
-    normalized = normalized.split(group).join("");
+  if (currencyCode === "CHF") {
+    groups.add("'");
+    groups.add("’");
   }
-
-  normalized = normalized
-    .replace(new RegExp(`[^0-9+\\-${escapeForCharacterClass(decimal)}]`, "g"), "")
-    .replace(decimal, ".");
-
+  const unsigned = value.replace(/^[+-]/, "");
+  const pieces = unsigned.split(decimal);
+  if (pieces.length > 2 || (pieces[1] !== undefined && !/^\d*$/.test(pieces[1]))) return null;
+  const groupClass = [...groups].map(escapeForCharacterClass).join("");
+  const whole = pieces[0];
+  if (whole && !/^\d+$/.test(whole) && !new RegExp(`^\\d{1,3}(?:[${groupClass}]\\d{3})+$`).test(whole)) return null;
+  let normalized = value;
+  for (const group of groups) normalized = normalized.split(group).join("");
+  normalized = normalized.replace(decimal, ".");
   if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(normalized)) return null;
-
   const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : null;
 }

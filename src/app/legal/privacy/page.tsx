@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: "What Denominated Collects",
-    body: "Denominated may store calculator preferences and unauthenticated scenarios in your browser. If you create an account, Denominated processes account identifiers, saved scenarios, assumptions, email preferences, and billing entitlement records needed to provide account features.",
+    body: "The free calculator does not require your email. Calculator drafts and scenarios saved on this device stay in your browser. A copied scenario link includes the inputs you choose to share. If you create an account, Denominated processes account identifiers, saved scenarios, assumptions, email preferences, and billing entitlement records needed to provide account features.",
   },
   {
     title: "How Data Is Used",

@@ -4,7 +4,11 @@ export function parseNumericInputDraft(draft: string) {
     return null;
   }
 
-  const parsed = Number(trimmed);
+  const plain = trimmed.replace(/^\$\s*/, "");
+  if (!/^-?(?:(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d*)?|\.\d+)$/.test(plain)) {
+    return null;
+  }
+  const parsed = Number(plain.replaceAll(",", ""));
   return Number.isFinite(parsed) ? parsed : null;
 }
 

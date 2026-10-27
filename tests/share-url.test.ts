@@ -80,3 +80,19 @@ test("parseScenarioSearchParams falls back on invalid values", () => {
 test("parseScenarioSearchParams returns null without scenario params", () => {
   assert.equal(parseScenarioSearchParams("", defaultScenario), null);
 });
+
+test("shared scenarios preserve negative assumptions and bound extreme inputs", () => {
+  const scenario = parseScenarioSearchParams("?growth=-10&inflation=-2&years=10000", defaultScenario);
+  assert.equal(scenario?.btcGrowthRate, -10);
+  assert.equal(scenario?.itemInflationRate, -2);
+  assert.equal(scenario?.years, 100);
+});
+
+test("negative-rate scenarios survive copying and reopening their link", () => {
+  const scenario = { ...defaultScenario, btcGrowthRate: -10, itemInflationRate: -2 };
+  const url = scenarioToShareUrl(scenario, "https://denominated.test");
+  const restored = parseScenarioSearchParams(new URL(url).searchParams, defaultScenario);
+  assert.equal(restored?.btcGrowthRate, -10);
+  assert.equal(restored?.itemInflationRate, -2);
+  assert.equal(scenarioToShareUrl(restored!, "https://denominated.test"), url);
+});

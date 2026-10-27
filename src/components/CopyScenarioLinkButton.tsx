@@ -1,5 +1,6 @@
 "use client";
 
+import { copyText } from "@/lib/clipboard";
 import { useState } from "react";
 import { Link2 } from "lucide-react";
 import { scenarioToShareUrl } from "@/lib/share-url";
@@ -12,21 +13,17 @@ export function CopyScenarioLinkButton({
   scenario: ScenarioInput;
 }) {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState("");
 
   async function copyScenarioLink() {
     const link = scenarioToShareUrl(scenario, window.location.origin);
 
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(link);
-    } else {
-      const textArea = document.createElement("textarea");
-      textArea.value = link;
-      textArea.style.position = "fixed";
-      textArea.style.opacity = "0";
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
+    try {
+      await copyText(link);
+      setCopyError("");
+    } catch {
+      setCopyError("Copy is unavailable in this browser. Select and copy the text below.");
+      return;
     }
 
     setCopied(true);
@@ -35,6 +32,7 @@ export function CopyScenarioLinkButton({
   }
 
   return (
+    <>
     <button
       type="button"
       className="outline-button inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-[var(--accent-text)] transition hover:bg-[var(--accent-surface)] sm:w-auto"
@@ -43,5 +41,10 @@ export function CopyScenarioLinkButton({
       <Link2 size={18} />
       {copied ? "Link Copied" : "Copy Scenario Link"}
     </button>
+    {copyError && <div className="basis-full" role="alert">
+      <p className="text-sm text-[var(--accent-text)]">{copyError}</p>
+      <textarea aria-label="Scenario link to copy" readOnly className="field mt-2" value={scenarioToShareUrl(scenario, window.location.origin)} onFocus={(event) => event.target.select()} />
+    </div>}
+    </>
   );
 }

@@ -34,7 +34,7 @@ export default function TermsPage() {
         intro={
           policy
             ? `Effective ${policy.effectiveDate}. These terms govern your use of Denominated, operated by ${policy.operatorName}.`
-            : "These terms govern the free Denominated calculator. Paid checkout remains unavailable until the operator, effective date, jurisdiction, and refund policy are approved and published."
+            : "These terms govern the free Denominated calculator. You can calculate and share results without signing up or paying. Paid checkout is not currently available."
         }
         sections={[
           {
@@ -70,10 +70,10 @@ export default function TermsPage() {
             body: "Denominated may improve, change, pause, or remove features over time. We will try to avoid disrupting paid access, but no online service can be guaranteed to be uninterrupted.",
           },
           {
-            title: "Governing Terms",
+            title: policy ? "Governing Terms" : "Free Access",
             body: policy
               ? `These terms are governed by the laws applicable in ${policy.governingJurisdiction}, without overriding consumer protections that cannot legally be waived.`
-              : "A governing jurisdiction must be approved and published before paid checkout is enabled.",
+              : "The calculator and sharing are free. Paid terms will be published before paid checkout becomes available.",
           },
           {
             title: "Contact",

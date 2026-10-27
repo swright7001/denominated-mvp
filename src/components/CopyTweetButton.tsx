@@ -1,5 +1,6 @@
 "use client";
 
+import { copyText } from "@/lib/clipboard";
 import { useState } from "react";
 import { Share2 } from "lucide-react";
 import { buildTweet } from "@/lib/calculations";
@@ -14,21 +15,17 @@ export function CopyTweetButton({
   result: ScenarioResult;
 }) {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState("");
 
   async function copyTweet() {
     const tweet = buildTweet(scenario, result);
 
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(tweet);
-    } else {
-      const textArea = document.createElement("textarea");
-      textArea.value = tweet;
-      textArea.style.position = "fixed";
-      textArea.style.opacity = "0";
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
+    try {
+      await copyText(tweet);
+      setCopyError("");
+    } catch {
+      setCopyError("Copy is unavailable in this browser. Select and copy the text below.");
+      return;
     }
 
     setCopied(true);
@@ -37,6 +34,7 @@ export function CopyTweetButton({
   }
 
   return (
+    <>
     <button
       type="button"
       className="outline-button inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-[var(--accent-text)] transition hover:bg-[var(--accent-surface)] sm:w-auto"
@@ -45,5 +43,10 @@ export function CopyTweetButton({
       <Share2 size={18} />
       {copied ? "Copied" : "Copy Tweet"}
     </button>
+    {copyError && <div className="basis-full" role="alert">
+      <p className="text-sm text-[var(--accent-text)]">{copyError}</p>
+      <textarea aria-label="Tweet text to copy" readOnly className="field mt-2" value={buildTweet(scenario, result)} onFocus={(event) => event.target.select()} />
+    </div>}
+    </>
   );
 }

@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { BookmarkPlus, Check, Lock, LogIn } from "lucide-react";
-import { signupEmailKey } from "@/lib/account";
 import {
   canSaveScenario,
   getMockPlanTierFromStorage,
@@ -17,7 +16,7 @@ import {
   watchlistChangedEvent,
 } from "@/lib/watchlist";
 import type { ScenarioInput } from "@/lib/types";
-import { SignupPrompt } from "./SignupPrompt";
+import { scenarioToSearchParams } from "@/lib/share-url";
 
 export function SaveScenarioButton({
   scenario,
@@ -33,39 +32,44 @@ export function SaveScenarioButton({
   const [accountRequired, setAccountRequired] = useState(false);
   const [syncError, setSyncError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [isSignupPromptOpen, setIsSignupPromptOpen] = useState(false);
+  const saving = useRef(false);
   const saveLimitCopy = getProConversionCopy("saveLimitReached");
 
   async function saveScenario() {
+    if (saving.current) return;
+    saving.current = true;
     setAccountRequired(false);
     setSyncError("");
     setLimitReached(false);
-
-    if (realAccountsEnabled) {
-      if (!isSignedIn) {
-        setAccountRequired(true);
-        return;
+    try {
+      if (realAccountsEnabled) {
+        if (!isSignedIn) {
+          setAccountRequired(true);
+          return;
+        }
+        await saveScenarioToAccount();
+      } else {
+        saveScenarioLocally();
       }
-
-      await saveScenarioToAccount();
-      return;
+    } catch {
+      setSyncError("This browser could not save your scenario. Use Copy Scenario Link to keep it instead.");
+    } finally {
+      saving.current = false;
     }
-
-    saveScenarioLocally();
   }
 
   function saveScenarioLocally() {
-    const hasSignupEmail = window.localStorage.getItem(signupEmailKey);
-    const planTier = getMockPlanTierFromStorage(window.localStorage);
-
-    if (!hasSignupEmail) {
-      setIsSignupPromptOpen(true);
-      return;
-    }
+    const storedTier = getMockPlanTierFromStorage(window.localStorage);
+    const planTier = storedTier === "noAccount" ? "freeAccount" : storedTier;
 
     const current = parseSavedScenarios(
       window.localStorage.getItem(WATCHLIST_STORAGE_KEY),
     );
+    const fingerprint = scenarioToSearchParams(scenario).toString();
+    if (current.some((saved) => scenarioToSearchParams(saved.scenario).toString() === fingerprint)) {
+      showSavedState();
+      return;
+    }
     const decision = canSaveScenario(planTier, current.length);
 
     if (!decision.allowed) {
@@ -114,7 +118,10 @@ export function SaveScenarioButton({
           return;
         }
 
-        setSyncError(payload?.error ?? "Saved scenario storage is temporarily unavailable. Please try again.");
+        setSyncError(
+          payload?.error ??
+            "Saved scenario storage is temporarily unavailable. Please try again.",
+        );
         return;
       }
 
@@ -136,7 +143,7 @@ export function SaveScenarioButton({
       <button
         type="button"
         className="copper-button inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 font-semibold transition hover:brightness-110 sm:w-auto"
-        disabled={isSaving}
+        disabled={isSaving || saved}
         onClick={saveScenario}
       >
         {saved ? <Check size={18} /> : <BookmarkPlus size={18} />}
@@ -145,7 +152,7 @@ export function SaveScenarioButton({
           : saved
             ? realAccountsEnabled
               ? "Saved to Account"
-              : "Saved to Watchlist"
+              : "Saved on this device"
             : "Save Scenario"}
       </button>
 
@@ -180,14 +187,14 @@ export function SaveScenarioButton({
             <Lock className="mt-0.5 shrink-0 text-[var(--accent-text)]" size={16} />
             <span>
               <span className="block font-medium text-[var(--text-primary)]">
-                {saveLimitCopy.title}
+                {realAccountsEnabled ? saveLimitCopy.title : "This browser already has a saved scenario."}
               </span>
-              <span className="mt-1 block">{saveLimitCopy.body}</span>
+              <span className="mt-1 block">{realAccountsEnabled ? saveLimitCopy.body : "Open your saved scenario to manage it, or copy this scenario’s link to keep both."}</span>
             </span>
           </p>
           <div className="mt-3 flex flex-wrap gap-3">
-            <Link className="text-[var(--accent-text)]" href="/plans">
-              {saveLimitCopy.primaryCta}
+            <Link className="text-[var(--accent-text)]" href={realAccountsEnabled ? "/plans" : "/watchlist"}>
+              {realAccountsEnabled ? saveLimitCopy.primaryCta : "View saved scenario"}
             </Link>
             <Link className="text-[var(--text-secondary)]" href="/calculator">
               {saveLimitCopy.secondaryCta}
@@ -204,14 +211,13 @@ export function SaveScenarioButton({
           {syncError}
         </p>
       ) : null}
-      <SignupPrompt
-        isOpen={isSignupPromptOpen}
-        scenario={scenario}
-        realAccountsEnabled={realAccountsEnabled}
-        onClose={() => setIsSignupPromptOpen(false)}
-        onSaved={showSavedState}
-        persistDismissalOnContinue={false}
-      />
+
+      {!realAccountsEnabled && (
+        <p className="basis-full text-xs leading-5 text-[var(--text-muted)]" role="status">
+          {saved ? "Saved only in this browser. " : "Save one scenario in this browser. No email needed. "}
+          <Link href="/watchlist" className="text-[var(--accent-text)] underline">View saved scenario</Link>
+        </p>
+      )}
     </>
   );
 }

@@ -8,16 +8,32 @@ import {
   shareImageSize,
 } from "@/lib/share-image";
 import { parseScenarioSearchParams } from "@/lib/share-url";
+import { scenarioLimits } from "@/lib/scenario-validation";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
+  const params = new URL(request.url).searchParams;
+  // Reject excessive render requests before calculator URL normalization clamps them.
+  const invalidInput = [
+    ["price", "currentItemPriceUSD"],
+    ["btc", "currentBTCPriceUSD"],
+    ["years", "years"],
+    ["inflation", "itemInflationRate"],
+    ["growth", "btcGrowthRate"],
+  ].some(([param, key]) => {
+    if (!params.has(param)) return false;
+    const value = Number(params.get(param));
+    const { min, max } = scenarioLimits[key as keyof typeof scenarioLimits];
+    return !Number.isFinite(value) || value < min || value > max ||
+      (key === "years" && !Number.isInteger(value));
+  });
   const scenario = parseScenarioSearchParams(
-    new URL(request.url).searchParams,
+    params,
     defaultScenario,
   );
 
-  if (!scenario || !isShareImageScenarioSafe(scenario)) {
+  if (invalidInput || !scenario || !isShareImageScenarioSafe(scenario)) {
     return Response.json(
       { error: "Provide public calculator scenario parameters." },
       { status: 400 },

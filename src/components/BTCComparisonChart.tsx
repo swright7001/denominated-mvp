@@ -54,12 +54,14 @@ export function BTCComparisonChart({
               tickLine={false}
               axisLine={false}
               tickFormatter={(value) =>
-                formatCurrency(Number(value), currencyCode, true)
+                new Intl.NumberFormat(undefined, {
+                  style: "currency", currency: currencyCode, notation: "compact", maximumFractionDigits: 1,
+                }).format(Number(value))
               }
             />
             <YAxis
               yAxisId="btc"
-              width={56}
+              width={66}
               orientation="right"
               stroke="var(--chart-axis)"
               tickLine={false}
@@ -83,6 +85,7 @@ export function BTCComparisonChart({
             />
             <Legend wrapperStyle={{ color: "var(--text-muted)" }} />
             <Bar
+              isAnimationActive={false}
               yAxisId="usd"
               dataKey="usdCost"
               name={`${currencyCode} cost`}
@@ -90,6 +93,7 @@ export function BTCComparisonChart({
               radius={[4, 4, 0, 0]}
             />
             <Area
+              isAnimationActive={false}
               yAxisId="btc"
               type="monotone"
               dataKey="btcCost"
