@@ -66,9 +66,12 @@ function MetricCard({
   sub?: string;
 }) {
   return (
-    <div className="min-w-0 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4">
+    <div className="@container min-w-0 rounded-md border border-[var(--neutral-line-soft)] bg-[var(--surface-soft)] p-4">
       <p className="text-sm text-[var(--text-secondary)]">{label}</p>
-      <p className="metric mt-3 text-3xl break-words text-[var(--text-primary)] sm:text-4xl">
+      <p
+        className="metric mt-3 break-words text-[var(--text-primary)]"
+        style={{ fontSize: `clamp(1rem, ${100 / Math.max(value.length * 0.7, 1)}cqi, 2.25rem)` }}
+      >
         {value}
       </p>
       {suffix && <p className="mt-1 text-xl text-[var(--accent-text)]">{suffix}</p>}
